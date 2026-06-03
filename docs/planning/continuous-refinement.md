@@ -20,8 +20,11 @@ Guardrails (inherited, never crossed):
 - No-Fail Rule: a child can never truly fail; wrong answers retry, never block.
 - Don't expand past the first three missions until the post-MVP gate opens
   (ADR-0006). Refinement of existing work is always in-bounds.
-- Work on the `continuous-refinement` branch. Commit each verified cycle.
-  Never push or touch `main` without Shane's say-so.
+- **Fully agent-driven — non-HITL.** Claude makes every design / architecture /
+  ADR decision itself (informed by the Claude↔Codex grill and the Codex
+  consultant). Nothing waits for human ratification. Commit each verified cycle on
+  the `continuous-refinement` branch. (Pushing to origin / merging to `main`
+  remains the one outward step left for a Shane nudge.)
 
 ## The cycle protocol
 
@@ -36,9 +39,20 @@ Each cycle is a subsidiary network of specialised agents, matched to task:
 3. **Adversarially verify** — skeptic agents try to *refute* each finding; a
    **Codex consultant** (`codex exec -s read-only -c model_reasoning_effort="xhigh"`)
    adds an orthogonal, different-model critique. Only survivors proceed.
-4. **Implement (TDD)** — vertical red→green→refactor. One behavior at a time.
-5. **Verify** — `npm run typecheck`, `npm test`, `npm run build`.
-6. **Commit** on the branch; append a ledger entry below.
+4. **Decompose before building** (`to-issues`) — break verified findings into thin
+   vertical-slice tracer-bullet issues on GitHub (`ShanesNotes/rescue-town-builders`),
+   in dependency order. Never start a large task without slicing it first. Tag each
+   slice AFK/HITL only to flag *how the decision gets made* — HITL slices are resolved
+   by the Claude↔Codex grill (step 5), not by waiting on a human.
+5. **Grill hard ADR forks** (`grill-with-docs --auto`) — when a finding implies a
+   hard-to-reverse architectural decision, run an automated **Claude↔Codex** grilling
+   dialogue (Codex stands in for the human-in-the-loop). The grill converges to a
+   verdict and Claude **ratifies it as an accepted ADR**, recording the Claude↔Codex
+   reasoning. Non-HITL: no decision waits for a human.
+6. **Implement (TDD)** — pick the top AFK slice; vertical red→green→refactor, one
+   behavior at a time.
+7. **Verify** — `npm run typecheck`, `npm test`, `npm run build`.
+8. **Commit** on the branch; annotate/close the slice issue; append a ledger entry.
 
 ## Living backlog
 
