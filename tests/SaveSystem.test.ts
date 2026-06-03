@@ -172,4 +172,89 @@ describe('SaveSystem', () => {
     expect(warn).toHaveBeenCalledWith('Rescue Town Builders could not clear saved browser progress this time.', expect.any(Error));
     warn.mockRestore();
   });
+
+  it('backs up unreadable save data instead of silently discarding it', () => {
+    const storage = memoryStorage();
+    storage.setItem(SAVE_KEY, '{not-json');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    const saves = new SaveSystem(storage);
+
+    expect(saves.getProfiles()).toEqual([]);
+    expect(storage.getItem(`${SAVE_KEY}.backup`)).toBe('{not-json');
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('backs up an unrecognized-version save before starting fresh', () => {
+    const storage = memoryStorage();
+    const raw = JSON.stringify({ version: 999, profiles: [], selectedProfileId: null });
+    storage.setItem(SAVE_KEY, raw);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    new SaveSystem(storage);
+
+    expect(storage.getItem(`${SAVE_KEY}.backup`)).toBe(raw);
+    warn.mockRestore();
+  });
+
+  it('normalizes a profile that is missing its progress shape without crashing', () => {
+    const storage = memoryStorage();
+    storage.setItem(
+      SAVE_KEY,
+      JSON.stringify({
+        version: 1,
+        profiles: [
+          {
+            id: 'p1',
+            name: 'Willem',
+            avatarId: 'rivet',
+            createdAt: 'x',
+            settings: { difficulty: 'easy', musicVolume: 0.2, sfxVolume: 0.5, audioMuted: false },
+          },
+        ],
+        selectedProfileId: 'p1',
+      }),
+    );
+
+    const saves = new SaveSystem(storage);
+    const profile = saves.getSelectedProfile();
+
+    expect(profile?.name).toBe('Willem');
+    expect(profile?.progress.missions).toEqual({});
+    expect(profile?.progress.stickers).toEqual([]);
+    expect(profile?.progress.totalStars).toBe(0);
+  });
+
+  it('preserves existing stars and stickers through load normalization', () => {
+    const storage = memoryStorage();
+    storage.setItem(
+      SAVE_KEY,
+      JSON.stringify({
+        version: 1,
+        profiles: [
+          {
+            id: 'p1',
+            name: 'Willem',
+            avatarId: 'rivet',
+            createdAt: 'x',
+            settings: { difficulty: 'easy', musicVolume: 0.2, sfxVolume: 0.5, audioMuted: false },
+            progress: {
+              missions: { 'recycling-run': { completed: true, bestStars: 3, attempts: 2, lastPlayedAt: 'x' } },
+              stickers: ['recycling-hero'],
+              totalStars: 3,
+            },
+          },
+        ],
+        selectedProfileId: 'p1',
+      }),
+    );
+
+    const saves = new SaveSystem(storage);
+    const progress = saves.getSelectedProfile()?.progress;
+
+    expect(progress?.missions['recycling-run']?.bestStars).toBe(3);
+    expect(progress?.stickers).toContain('recycling-hero');
+    expect(progress?.totalStars).toBe(3);
+  });
 });

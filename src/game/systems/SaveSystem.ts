@@ -75,6 +75,32 @@ function createId(): string {
   return `profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function normalizeProgress(progress: PlayerProfile['progress'] | undefined): PlayerProfile['progress'] {
+  const stickers = progress?.stickers;
+  const totalStars = progress?.totalStars;
+  return {
+    missions: progress?.missions ?? {},
+    stickers: Array.isArray(stickers) ? stickers : [],
+    totalStars: typeof totalStars === 'number' ? totalStars : 0,
+  };
+}
+
+function normalizeProfile(profile: PlayerProfile): PlayerProfile {
+  // A loaded save may be partial (old shape, hand-edited, corrupted mid-write).
+  // Fill in every field downstream readers assume so a returning child's town
+  // can never crash on load (No-Fail), while keeping any real progress intact.
+  return {
+    ...profile,
+    settings: {
+      ...defaultSettings(),
+      ...profile.settings,
+      musicVolume: clampVolume(profile.settings?.musicVolume ?? defaultSettings().musicVolume),
+      sfxVolume: clampVolume(profile.settings?.sfxVolume ?? defaultSettings().sfxVolume),
+    },
+    progress: normalizeProgress(profile.progress),
+  };
+}
+
 export class SaveSystem {
   private data: SaveData;
 
@@ -201,30 +227,45 @@ export class SaveSystem {
 
     try {
       const parsed = JSON.parse(raw) as SaveData;
-      if (!Array.isArray(parsed.profiles)) return emptySave();
+      if (!Array.isArray(parsed.profiles)) {
+        return this.discardWithBackup(raw, 'Rescue Town Builders save shape not recognized; starting fresh.');
+      }
       if (parsed.version !== SAVE_VERSION) {
         // Save-version upgrade point: when SAVE_VERSION changes, migrate older
-        // shapes here instead of discarding. Today only v1 exists; an
-        // unrecognized version starts fresh — but loudly, never silently, so a
-        // child's lost progress is at least traceable.
-        console.warn(`Rescue Town Builders save version ${parsed.version} not recognized; starting fresh.`);
-        return emptySave();
+        // shapes here instead of discarding. Today only v1 exists, so an
+        // unrecognized version starts fresh — but the raw save is backed up
+        // first (never silently lost), so a child's town stays recoverable.
+        return this.discardWithBackup(
+          raw,
+          `Rescue Town Builders save version ${parsed.version} not recognized; starting fresh.`,
+        );
       }
       return {
-        ...parsed,
-        profiles: parsed.profiles.map((profile) => ({
-          ...profile,
-          settings: {
-            ...defaultSettings(),
-            ...profile.settings,
-            musicVolume: clampVolume(profile.settings?.musicVolume ?? defaultSettings().musicVolume),
-            sfxVolume: clampVolume(profile.settings?.sfxVolume ?? defaultSettings().sfxVolume),
-          },
-        })),
+        version: SAVE_VERSION,
+        selectedProfileId: parsed.selectedProfileId ?? null,
+        profiles: parsed.profiles.map((profile) => normalizeProfile(profile)),
       };
-    } catch {
-      return emptySave();
+    } catch (error) {
+      return this.discardWithBackup(
+        raw,
+        'Rescue Town Builders could not read saved browser progress this time.',
+        error,
+      );
     }
+  }
+
+  private discardWithBackup(raw: string, message: string, error?: unknown): SaveData {
+    try {
+      this.storage.setItem(`${SAVE_KEY}.backup`, raw);
+    } catch {
+      // Backing up is best-effort; a blocked or full store must not crash startup.
+    }
+    if (error === undefined) {
+      console.warn(message);
+    } else {
+      console.warn(message, error);
+    }
+    return emptySave();
   }
 
   private persist(): void {
