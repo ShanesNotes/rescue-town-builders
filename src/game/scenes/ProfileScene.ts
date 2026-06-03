@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
+import { SCENE_KEYS, startParentSettingsGate, startScene } from '../systems/SceneNavigation';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { getSaveSystem } from '../systems/GameServices';
 import { addButton } from '../ui/Button';
@@ -108,7 +109,7 @@ export class ProfileScene extends Phaser.Scene {
     const saves = getSaveSystem();
     if (action.type === 'select') {
       saves.selectProfile(action.profileId);
-      this.scene.start('TownMapScene');
+      startScene(this, SCENE_KEYS.townMap);
       return;
     }
     if (action.type === 'create') {
@@ -117,13 +118,13 @@ export class ProfileScene extends Phaser.Scene {
         name: `Player ${nextNumber}`,
         avatarId: AVATARS[(nextNumber - 1) % AVATARS.length] ?? 'rivet',
       });
-      this.scene.start('TownMapScene');
+      startScene(this, SCENE_KEYS.townMap);
       return;
     }
     if (action.type === 'settings') {
-      this.scene.start('ParentSettingsGateScene', { returnScene: 'ProfileScene' });
+      startParentSettingsGate(this, SCENE_KEYS.profile);
       return;
     }
-    this.scene.start('StartScene');
+    startScene(this, SCENE_KEYS.start);
   }
 }

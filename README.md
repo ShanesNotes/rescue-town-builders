@@ -10,6 +10,7 @@ Browser-first 2D kids mini-game anthology based on the PRD in `docs/prd/prd-v0.1
 - MVP missions: Rivet's Recycling Run, Brick's House Builder, Ember's Fire Fix.
 - Safety rule: no accounts, chat, ads, purchases, child-facing external links, or third-party character likenesses.
 - Development rule: do not build all missions at once. Work PRD section by section through durable goals, GitHub issues, tracer-bullet slices, and TDD.
+- Expansion gate: after the first three MVP missions, pause new missions until `docs/reviews/post-mvp-expansion-gate.md` and play-test notes are satisfied.
 
 ## Agent workflow
 
@@ -33,6 +34,14 @@ npm test
 npm run build
 ```
 
-Slice 0 uses runtime-drawn placeholder shapes only. Theme music exists as four generated segments outside the repo; keep it out until the audio system and license/source notes are ready.
+The current MVP uses runtime-drawn placeholder shapes/text/emoji only. Theme music exists as four generated segments outside the repo; keep it out until it is spliced and the license/source notes are ready.
 
-Gamepad baseline is included through the Input Intent module: A/0 confirms, B/1 goes back, D-pad maps to movement.
+Gamepad baseline is included through the Input Intent module: A/0 confirms, B/1 goes back, X/2 performs actions, and D-pad maps to movement. Use `docs/playtesting/mvp-playtest-guide.md` for the first physical gamepad smoke session.
+
+The local/CI post-MVP gate check is:
+
+```sh
+npm run check:post-mvp-gate
+```
+
+It allows the current three MVP missions, but blocks newly registered roadmap missions unless play-test, mobile, gamepad, asset-intake, and expansion verdict evidence is recorded.

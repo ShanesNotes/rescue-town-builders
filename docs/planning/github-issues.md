@@ -13,5 +13,6 @@ Milestone: MVP v0.1.0
 | [#6](https://github.com/ShanesNotes/rescue-town-builders/issues/6) | Slice 3: Brick's House Builder TDD mini-game | Second real mission |
 | [#7](https://github.com/ShanesNotes/rescue-town-builders/issues/7) | Slice 4: Ember's Fire Fix TDD mini-game | Third real mission |
 | [#8](https://github.com/ShanesNotes/rescue-town-builders/issues/8) | Slice 5: Toy-feel polish, accessibility, audio, and static deploy | MVP polish/deploy |
+| [#9](https://github.com/ShanesNotes/rescue-town-builders/issues/9) | MVP stabilization: play-test, gamepad smoke, and asset intake | Post-MVP gate follow-up; human play-test and asset intake |
 
-All issues are initially labeled `needs-triage` so the triage skill can route them through the normal state machine.
+Issues #1-#8 were created for the initial PRD-to-MVP implementation plan. Issue #9 is the post-MVP gate follow-up and intentionally needs human play-test evidence before roadmap expansion.

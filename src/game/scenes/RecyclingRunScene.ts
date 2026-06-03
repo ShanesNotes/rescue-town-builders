@@ -3,6 +3,7 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import { recyclingCategoryIcons, recyclingCategoryLabels, recyclingItems } from '../data/recyclingItems';
 import { getSaveSystem } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import {
   chooseRecyclingItems,
   createRecyclingRunState,
@@ -85,7 +86,7 @@ export class RecyclingRunScene extends Phaser.Scene {
       height: 52,
       label: 'Back to Map',
       fill: 0xffffff,
-      onPress: () => this.scene.start('TownMapScene'),
+      onPress: () => returnToTownMap(this),
     });
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
@@ -94,7 +95,7 @@ export class RecyclingRunScene extends Phaser.Scene {
       if (intent?.type === 'confirm' || intent?.type === 'action') {
         this.chooseCategory(state.activeCategories[this.selectedCategoryIndex] ?? state.activeCategories[0], this.selectedCategoryIndex);
       }
-      if (intent?.type === 'back') this.scene.start('TownMapScene');
+      if (intent?.type === 'back') returnToTownMap(this);
     });
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
@@ -103,7 +104,7 @@ export class RecyclingRunScene extends Phaser.Scene {
       if (intent?.type === 'confirm' || intent?.type === 'action') {
         this.chooseCategory(state.activeCategories[this.selectedCategoryIndex] ?? state.activeCategories[0], this.selectedCategoryIndex);
       }
-      if (intent?.type === 'back') this.scene.start('TownMapScene');
+      if (intent?.type === 'back') returnToTownMap(this);
     });
   }
 
@@ -129,6 +130,6 @@ export class RecyclingRunScene extends Phaser.Scene {
 
   private completeMission(): void {
     if (!this.state) return;
-    this.scene.start('MissionCompleteScene', { result: getRecyclingRunResult(this.state) });
+    completeMission(this, getRecyclingRunResult(this.state));
   }
 }

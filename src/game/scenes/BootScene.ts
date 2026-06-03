@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { SCENE_KEYS, startScene } from '../systems/SceneNavigation';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -6,6 +7,6 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.scene.start('PreloadScene');
+    startScene(this, SCENE_KEYS.preload);
   }
 }

@@ -70,3 +70,37 @@ None. These candidates align with ADR-0001 through ADR-0004.
 ## Next exploration
 
 When code exists, rerun architecture review against real modules and apply the deletion test to any suspected shallow module.
+
+## Post-MVP real-code review — 2026-06-03
+
+The first three real missions now exist, so the deletion test can be applied to actual modules.
+
+### Findings
+
+1. **Mission logic modules are earning their keep**
+   - **Files**: `src/game/systems/RecyclingRun.ts`, `HouseBuilder.ts`, `FireFix.ts`, related tests.
+   - **Problem**: None blocking. These modules hide scoring, no-fail hints, state transitions, and result creation behind small interfaces.
+   - **Solution**: Keep this shape for future missions: data + pure mission state module + scene adapter.
+   - **Benefits**: Good locality for mission bugs and high leverage for TDD.
+
+2. **Scene Navigation was deepened just enough for the gate**
+   - **Files**: `src/game/systems/SceneNavigation.ts`, `src/game/scenes/*`, `src/game/systems/SceneTransitions.ts`.
+   - **Problem**: Direct route starts were acceptable during MVP build-out, but they made the post-MVP gate easier to bypass as future missions grow.
+   - **Solution**: Added `SceneNavigation` as the route-key and mission-route seam. Keep it small; add fade-out or richer payload handling only when a new feature proves the need.
+   - **Benefits**: More locality for flow bugs and better leverage for route smoke tests without hiding mission-specific play loops.
+
+3. **Mission Scene Shell should wait for play-test evidence**
+   - **Files**: `src/game/scenes/RecyclingRunScene.ts`, `HouseBuilderScene.ts`, `FireFixScene.ts`, `src/game/ui/*`.
+   - **Problem**: Scenes repeat title/body/back-button/input binding patterns.
+   - **Solution**: Keep repetition until a child play-test shows which controls and prompts should be standardized. Extract only durable mission chrome after that.
+   - **Benefits**: Avoids a shallow wrapper while preserving the option for a deeper UI seam.
+
+4. **Asset Catalog remains a policy seam until assets are imported**
+   - **Files**: `src/game/systems/AssetCatalog.ts`, `docs/assets/ASSET_BACKLOG.md`.
+   - **Problem**: No imported production assets exist, so additional asset code would be hypothetical.
+   - **Solution**: Use the backlog and license ledger first; deepen the runtime catalog when imported assets need preload and replacement behavior.
+   - **Benefits**: Keeps IP safety local without over-building.
+
+### Agent decision
+
+Hold roadmap mission expansion. The next issue should be MVP stabilization: play-test notes, physical gamepad smoke, asset intake, and only the architecture cleanup directly proven by those observations.

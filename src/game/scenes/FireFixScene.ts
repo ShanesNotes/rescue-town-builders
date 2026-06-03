@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { picnicFires } from '../data/picnicFires';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import {
   createFireFixState,
   getFireFixResult,
@@ -85,7 +86,7 @@ export class FireFixScene extends Phaser.Scene {
     addButton(this, { x: 170, y: 415, width: 90, height: 52, label: '↑', fill: 0xffffff, onPress: () => this.move({ x: 0, y: -1 }) });
     addButton(this, { x: 170, y: 525, width: 90, height: 52, label: '↓', fill: 0xffffff, onPress: () => this.move({ x: 0, y: 1 }) });
     addButton(this, { x: 480, y: 500, width: 250, height: 74, label: 'Spray Water', fill: 0xb7e6ff, onPress: () => this.spray() });
-    addButton(this, { x: 800, y: 515, width: 210, height: 52, label: 'Back to Map', fill: 0xffffff, onPress: () => this.scene.start('TownMapScene') });
+    addButton(this, { x: 800, y: 515, width: 210, height: 52, label: 'Back to Map', fill: 0xffffff, onPress: () => returnToTownMap(this) });
   }
 
   private bindInput(): void {
@@ -93,14 +94,14 @@ export class FireFixScene extends Phaser.Scene {
       const intent = inputIntentFromKeyboard(event.key);
       if (intent?.type === 'move') this.move(intent);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.spray();
-      if (intent?.type === 'back') this.scene.start('TownMapScene');
+      if (intent?.type === 'back') returnToTownMap(this);
     });
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
       const intent = inputIntentFromGamepadButton(button.index);
       if (intent?.type === 'move') this.move(intent);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.spray();
-      if (intent?.type === 'back') this.scene.start('TownMapScene');
+      if (intent?.type === 'back') returnToTownMap(this);
     });
   }
 
@@ -113,7 +114,7 @@ export class FireFixScene extends Phaser.Scene {
     if (!this.state) return;
     const outcome = sprayWater(this.state);
     if (outcome.completed) {
-      this.scene.start('MissionCompleteScene', { result: getFireFixResult(outcome.state) });
+      completeMission(this, getFireFixResult(outcome.state));
       return;
     }
     this.scene.restart({ state: outcome.state });

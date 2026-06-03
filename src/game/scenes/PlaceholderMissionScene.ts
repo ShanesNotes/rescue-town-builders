@@ -3,6 +3,7 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionId, MissionResult } from '../types';
 import { missionRegistry } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { clampStars } from '../systems/StarScoring';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
@@ -48,19 +49,19 @@ export class PlaceholderMissionScene extends Phaser.Scene {
       height: 58,
       label: 'Back',
       fill: 0xffffff,
-      onPress: () => this.scene.start('TownMapScene'),
+      onPress: () => returnToTownMap(this),
     });
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       const intent = inputIntentFromKeyboard(event.key);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.completeWithStars(3);
-      if (intent?.type === 'back') this.scene.start('TownMapScene');
+      if (intent?.type === 'back') returnToTownMap(this);
     });
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
       const intent = inputIntentFromGamepadButton(button.index);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.completeWithStars(3);
-      if (intent?.type === 'back') this.scene.start('TownMapScene');
+      if (intent?.type === 'back') returnToTownMap(this);
     });
   }
 
@@ -76,6 +77,6 @@ export class PlaceholderMissionScene extends Phaser.Scene {
         selectedStars: stars,
       },
     };
-    this.scene.start('MissionCompleteScene', { result });
+    completeMission(this, result);
   }
 }

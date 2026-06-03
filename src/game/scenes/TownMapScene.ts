@@ -3,6 +3,7 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionId } from '../types';
 import { getSaveSystem, missionRegistry } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { SCENE_KEYS, sceneKeyForMission, startParentSettingsGate, startScene } from '../systems/SceneNavigation';
 import { projectTownMapNodes } from '../systems/TownMapProgress';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
@@ -19,7 +20,7 @@ export class TownMapScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#dff8d8');
     const profile = getSaveSystem().getSelectedProfile();
     if (!profile) {
-      this.scene.start('ProfileScene');
+      startScene(this, SCENE_KEYS.profile);
       return;
     }
 
@@ -47,7 +48,7 @@ export class TownMapScene extends Phaser.Scene {
       height: 58,
       label: 'Parent Settings',
       fill: 0xffffff,
-      onPress: () => this.scene.start('ParentSettingsGateScene', { returnScene: 'TownMapScene' }),
+      onPress: () => startParentSettingsGate(this, SCENE_KEYS.townMap),
     });
     addButton(this, {
       x: 145,
@@ -56,7 +57,7 @@ export class TownMapScene extends Phaser.Scene {
       height: 58,
       label: 'Profiles',
       fill: 0xffffff,
-      onPress: () => this.scene.start('ProfileScene'),
+      onPress: () => startScene(this, SCENE_KEYS.profile),
     });
     addBody(this, 458, 'Gamepad: D-pad chooses • A starts mission • B returns to profiles');
 
@@ -66,7 +67,7 @@ export class TownMapScene extends Phaser.Scene {
       if (intent?.type === 'confirm' || intent?.type === 'action') {
         this.startMission(nodes[this.selectedIndex]?.missionId ?? 'recycling-run');
       }
-      if (intent?.type === 'back') this.scene.start('ProfileScene');
+      if (intent?.type === 'back') startScene(this, SCENE_KEYS.profile);
     });
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
@@ -75,7 +76,7 @@ export class TownMapScene extends Phaser.Scene {
       if (intent?.type === 'confirm' || intent?.type === 'action') {
         this.startMission(nodes[this.selectedIndex]?.missionId ?? 'recycling-run');
       }
-      if (intent?.type === 'back') this.scene.start('ProfileScene');
+      if (intent?.type === 'back') startScene(this, SCENE_KEYS.profile);
     });
   }
 
@@ -86,18 +87,6 @@ export class TownMapScene extends Phaser.Scene {
   }
 
   private startMission(missionId: MissionId): void {
-    if (missionId === 'recycling-run') {
-      this.scene.start('RecyclingRunScene');
-      return;
-    }
-    if (missionId === 'house-builder') {
-      this.scene.start('HouseBuilderScene');
-      return;
-    }
-    if (missionId === 'fire-fix') {
-      this.scene.start('FireFixScene');
-      return;
-    }
-    this.scene.start('PlaceholderMissionScene', { missionId });
+    startScene(this, sceneKeyForMission(missionId));
   }
 }

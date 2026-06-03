@@ -4,20 +4,21 @@ import type { Difficulty, PlayerProfile } from '../systems/SaveSystem';
 import { getEffectiveAudioLevels, getThemeLoopStatus } from '../systems/AudioSystem';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { getSaveSystem } from '../systems/GameServices';
+import { SCENE_KEYS, returnToParentScene, startScene, type ParentSettingsReturnScene } from '../systems/SceneNavigation';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
 
 const DIFFICULTY_ORDER: Difficulty[] = ['helper', 'easy', 'normal'];
 
 export class ParentSettingsScene extends Phaser.Scene {
-  private returnScene = 'ProfileScene';
+  private returnScene: ParentSettingsReturnScene = SCENE_KEYS.profile;
 
   constructor() {
     super('ParentSettingsScene');
   }
 
-  init(data: { returnScene?: string }): void {
-    this.returnScene = data.returnScene ?? 'ProfileScene';
+  init(data: { returnScene?: ParentSettingsReturnScene }): void {
+    this.returnScene = data.returnScene ?? SCENE_KEYS.profile;
   }
 
   create(): void {
@@ -36,7 +37,7 @@ export class ParentSettingsScene extends Phaser.Scene {
         height: 78,
         label: 'Back to Profiles',
         fill: 0xffffff,
-        onPress: () => this.scene.start('ProfileScene'),
+        onPress: () => startScene(this, SCENE_KEYS.profile),
       });
       this.bindBackOnly();
       return;
@@ -105,7 +106,7 @@ export class ParentSettingsScene extends Phaser.Scene {
       fill: 0xffb3c6,
       onPress: () => {
         saves.reset();
-        this.scene.start('ProfileScene');
+        startScene(this, SCENE_KEYS.profile);
       },
     });
     addButton(this, {
@@ -115,7 +116,7 @@ export class ParentSettingsScene extends Phaser.Scene {
       height: 58,
       label: 'Done',
       fill: 0xffffff,
-      onPress: () => this.scene.start(this.returnScene),
+      onPress: () => returnToParentScene(this, this.returnScene),
     });
 
     this.bindBackOnly();
@@ -134,11 +135,11 @@ export class ParentSettingsScene extends Phaser.Scene {
   private bindBackOnly(): void {
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       const intent = inputIntentFromKeyboard(event.key);
-      if (intent?.type === 'back') this.scene.start(this.returnScene);
+      if (intent?.type === 'back') returnToParentScene(this, this.returnScene);
     });
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
       const intent = inputIntentFromGamepadButton(button.index);
-      if (intent?.type === 'back') this.scene.start(this.returnScene);
+      if (intent?.type === 'back') returnToParentScene(this, this.returnScene);
     });
   }
 }

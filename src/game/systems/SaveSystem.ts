@@ -177,16 +177,37 @@ export class SaveSystem {
 
   reset(): void {
     this.data = emptySave();
-    this.storage.removeItem(SAVE_KEY);
+    try {
+      this.storage.removeItem(SAVE_KEY);
+    } catch (error) {
+      // No-Fail Rule: reset should still clear the in-memory session even when
+      // browser storage is unavailable or blocked.
+      console.warn('Rescue Town Builders could not clear saved browser progress this time.', error);
+    }
   }
 
   private load(): SaveData {
-    const raw = this.storage.getItem(SAVE_KEY);
+    let raw: string | null;
+    try {
+      raw = this.storage.getItem(SAVE_KEY);
+    } catch (error) {
+      // No-Fail Rule: blocked storage must not crash startup. Start fresh in
+      // memory and let later persist attempts report their own failures.
+      console.warn('Rescue Town Builders could not read saved browser progress this time.', error);
+      return emptySave();
+    }
+
     if (!raw) return emptySave();
 
     try {
       const parsed = JSON.parse(raw) as SaveData;
-      if (parsed.version !== SAVE_VERSION || !Array.isArray(parsed.profiles)) {
+      if (!Array.isArray(parsed.profiles)) return emptySave();
+      if (parsed.version !== SAVE_VERSION) {
+        // Save-version upgrade point: when SAVE_VERSION changes, migrate older
+        // shapes here instead of discarding. Today only v1 exists; an
+        // unrecognized version starts fresh — but loudly, never silently, so a
+        // child's lost progress is at least traceable.
+        console.warn(`Rescue Town Builders save version ${parsed.version} not recognized; starting fresh.`);
         return emptySave();
       }
       return {
@@ -207,6 +228,12 @@ export class SaveSystem {
   }
 
   private persist(): void {
-    this.storage.setItem(SAVE_KEY, JSON.stringify(this.data));
+    try {
+      this.storage.setItem(SAVE_KEY, JSON.stringify(this.data));
+    } catch (error) {
+      // No-Fail Rule: a full or blocked quota (private browsing, storage off)
+      // must never crash a mission. Keep progress in memory for this session.
+      console.warn('Rescue Town Builders could not save progress this time.', error);
+    }
   }
 }

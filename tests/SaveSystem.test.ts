@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { SaveSystem, type StorageLike } from '../src/game/systems/SaveSystem';
+
+const SAVE_KEY = 'rescue-town-builders.save.v1';
 
 function memoryStorage(): StorageLike {
   const values = new Map<string, string>();
@@ -90,5 +92,84 @@ describe('SaveSystem', () => {
 
     expect(saves.getProfiles()).toEqual([]);
     expect(saves.getSelectedProfile()).toBeNull();
+  });
+
+  it('starts safely from an empty save when local storage contains invalid JSON', () => {
+    const storage = memoryStorage();
+    storage.setItem(SAVE_KEY, '{not-json');
+
+    const saves = new SaveSystem(storage);
+
+    expect(saves.getProfiles()).toEqual([]);
+    expect(saves.getSelectedProfile()).toBeNull();
+  });
+
+  it('starts safely from an empty save when local storage has an unsupported version', () => {
+    const storage = memoryStorage();
+    storage.setItem(SAVE_KEY, JSON.stringify({ version: 999, profiles: [], selectedProfileId: null }));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    const saves = new SaveSystem(storage);
+
+    expect(saves.getProfiles()).toEqual([]);
+    expect(saves.getSelectedProfile()).toBeNull();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('save version 999 not recognized'));
+    warn.mockRestore();
+  });
+
+  it('keeps the in-memory session playable when browser persistence is blocked', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const storage: StorageLike = {
+      getItem: () => null,
+      setItem: () => {
+        throw new Error('quota blocked');
+      },
+      removeItem: () => undefined,
+    };
+    const saves = new SaveSystem(storage);
+
+    const profile = saves.createProfile({ name: 'Player 1', avatarId: 'rivet' });
+
+    expect(saves.getSelectedProfile()?.id).toBe(profile.id);
+    expect(warn).toHaveBeenCalledWith('Rescue Town Builders could not save progress this time.', expect.any(Error));
+    warn.mockRestore();
+  });
+
+  it('starts safely from an empty in-memory save when browser reads are blocked', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const storage: StorageLike = {
+      getItem: () => {
+        throw new Error('read blocked');
+      },
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    };
+
+    const saves = new SaveSystem(storage);
+
+    expect(saves.getProfiles()).toEqual([]);
+    expect(saves.getSelectedProfile()).toBeNull();
+    expect(warn).toHaveBeenCalledWith('Rescue Town Builders could not read saved browser progress this time.', expect.any(Error));
+    warn.mockRestore();
+  });
+
+  it('clears the in-memory reset path even when browser remove is blocked', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const storage = memoryStorage();
+    const saves = new SaveSystem({
+      getItem: storage.getItem,
+      setItem: storage.setItem,
+      removeItem: () => {
+        throw new Error('remove blocked');
+      },
+    });
+    saves.createProfile({ name: 'Player 1', avatarId: 'rivet' });
+
+    saves.reset();
+
+    expect(saves.getProfiles()).toEqual([]);
+    expect(saves.getSelectedProfile()).toBeNull();
+    expect(warn).toHaveBeenCalledWith('Rescue Town Builders could not clear saved browser progress this time.', expect.any(Error));
+    warn.mockRestore();
   });
 });

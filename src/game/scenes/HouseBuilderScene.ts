@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { houseBlueprints } from '../data/houseBlueprints';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import {
   createHouseBuilderState,
   getHouseBuilderResult,
@@ -65,7 +66,7 @@ export class HouseBuilderScene extends Phaser.Scene {
       height: 52,
       label: 'Back to Map',
       fill: 0xffffff,
-      onPress: () => this.scene.start('TownMapScene'),
+      onPress: () => returnToTownMap(this),
     });
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
@@ -74,7 +75,7 @@ export class HouseBuilderScene extends Phaser.Scene {
       if (intent?.type === 'confirm' || intent?.type === 'action') {
         this.choosePart(housePartTray[this.selectedPartIndex]?.id ?? 'foundation', this.selectedPartIndex);
       }
-      if (intent?.type === 'back') this.scene.start('TownMapScene');
+      if (intent?.type === 'back') returnToTownMap(this);
     });
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
@@ -83,7 +84,7 @@ export class HouseBuilderScene extends Phaser.Scene {
       if (intent?.type === 'confirm' || intent?.type === 'action') {
         this.choosePart(housePartTray[this.selectedPartIndex]?.id ?? 'foundation', this.selectedPartIndex);
       }
-      if (intent?.type === 'back') this.scene.start('TownMapScene');
+      if (intent?.type === 'back') returnToTownMap(this);
     });
   }
 
@@ -133,6 +134,6 @@ export class HouseBuilderScene extends Phaser.Scene {
 
   private completeMission(): void {
     if (!this.state) return;
-    this.scene.start('MissionCompleteScene', { result: getHouseBuilderResult(this.state) });
+    completeMission(this, getHouseBuilderResult(this.state));
   }
 }

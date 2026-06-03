@@ -1,7 +1,7 @@
 {
   "version": 1,
   "createdAt": "2026-06-03T02:45:59.336Z",
-  "updatedAt": "2026-06-03T03:48:14.197Z",
+  "updatedAt": "2026-06-03T04:33:28.776Z",
   "briefPath": ".omx/ultragoal/brief.md",
   "goalsPath": ".omx/ultragoal/goals.json",
   "ledgerPath": ".omx/ultragoal/ledger.jsonl",
@@ -119,10 +119,13 @@
       "id": "G010-post-mvp-expansion-gate",
       "title": "Post-MVP expansion gate",
       "objective": "Post-MVP expansion gate\nObjective: Reassess code architecture, play-test evidence, asset state, and fun before adding roadmap missions after the first three are solid.",
-      "status": "pending",
-      "attempt": 0,
+      "status": "complete",
+      "attempt": 1,
       "createdAt": "2026-06-03T02:45:59.336Z",
-      "updatedAt": "2026-06-03T02:45:59.336Z"
+      "updatedAt": "2026-06-03T04:33:28.776Z",
+      "startedAt": "2026-06-03T03:48:53.257Z",
+      "evidence": "Post-MVP expansion gate completed: ADR-0006, post-MVP gate review, play-test guide, issue #9, asset intake updates, SceneNavigation seam, CI post-MVP gate, pure gate validator with negative tests, local-storage read/write/remove fail-safes, final cleanup report, and final independent reviews. Verified npm run check:post-mvp-gate, npm test (16 files, 55 tests), npm run typecheck, npm run build, GITHUB_PAGES=true npm run build, npm run dev HTTP 200, git diff --check, npm audit --audit-level=high 0 vulnerabilities. Quality gate clean: ai-slop-cleaner passed, code-reviewer APPROVE, architect CLEAR with independentReview evidence.",
+      "completedAt": "2026-06-03T04:33:28.776Z"
     }
   ],
   "codexObjective": "Complete the durable ultragoal plan in .omx/ultragoal/goals.json, including later accepted/appended stories, under the original brief constraints; use .omx/ultragoal/ledger.jsonl as the audit trail."

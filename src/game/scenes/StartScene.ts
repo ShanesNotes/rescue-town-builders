@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
+import { SCENE_KEYS, startScene } from '../systems/SceneNavigation';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
@@ -25,18 +26,18 @@ export class StartScene extends Phaser.Scene {
       height: 86,
       label: 'Play',
       fill: 0x9be7c4,
-      onPress: () => this.scene.start('ProfileScene'),
+      onPress: () => startScene(this, SCENE_KEYS.profile),
     });
     addBody(this, 430, 'Controls: Enter/A = choose • Esc/B = back • D-pad/arrows = move later');
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       const intent = inputIntentFromKeyboard(event.key);
-      if (intent?.type === 'confirm' || intent?.type === 'action') this.scene.start('ProfileScene');
+      if (intent?.type === 'confirm' || intent?.type === 'action') startScene(this, SCENE_KEYS.profile);
     });
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
       const intent = inputIntentFromGamepadButton(button.index);
-      if (intent?.type === 'confirm' || intent?.type === 'action') this.scene.start('ProfileScene');
+      if (intent?.type === 'confirm' || intent?.type === 'action') startScene(this, SCENE_KEYS.profile);
     });
   }
 }

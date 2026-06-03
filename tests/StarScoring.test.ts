@@ -14,6 +14,11 @@ describe('StarScoring', () => {
     expect(starsFromAccuracy(0.9)).toBe(3);
   });
 
+  it('locks the star thresholds just below each boundary', () => {
+    expect(starsFromAccuracy(0.6999)).toBe(1);
+    expect(starsFromAccuracy(0.8999)).toBe(2);
+  });
+
   it('keeps the better star result', () => {
     expect(bestStars(3, 1)).toBe(3);
     expect(bestStars(0, 2)).toBe(2);

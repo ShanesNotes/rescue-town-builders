@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
+import { SCENE_KEYS, returnToParentScene, startScene, type ParentSettingsReturnScene } from '../systems/SceneNavigation';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
 
 export class ParentSettingsGateScene extends Phaser.Scene {
-  private returnScene = 'ProfileScene';
+  private returnScene: ParentSettingsReturnScene = SCENE_KEYS.profile;
   private holdTimer: Phaser.Time.TimerEvent | null = null;
   private statusText: Phaser.GameObjects.Text | null = null;
 
@@ -13,8 +14,8 @@ export class ParentSettingsGateScene extends Phaser.Scene {
     super('ParentSettingsGateScene');
   }
 
-  init(data: { returnScene?: string }): void {
-    this.returnScene = data.returnScene ?? 'ProfileScene';
+  init(data: { returnScene?: ParentSettingsReturnScene }): void {
+    this.returnScene = data.returnScene ?? SCENE_KEYS.profile;
   }
 
   create(): void {
@@ -44,20 +45,20 @@ export class ParentSettingsGateScene extends Phaser.Scene {
       height: 58,
       label: 'Back',
       fill: 0xffffff,
-      onPress: () => this.scene.start(this.returnScene),
+      onPress: () => returnToParentScene(this, this.returnScene),
     });
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       const intent = inputIntentFromKeyboard(event.key);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.startHold();
-      if (intent?.type === 'back') this.scene.start(this.returnScene);
+      if (intent?.type === 'back') returnToParentScene(this, this.returnScene);
     });
     this.input.keyboard?.on('keyup', () => this.cancelHold());
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
       const intent = inputIntentFromGamepadButton(button.index);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.startHold();
-      if (intent?.type === 'back') this.scene.start(this.returnScene);
+      if (intent?.type === 'back') returnToParentScene(this, this.returnScene);
     });
     this.input.gamepad?.on('up', () => this.cancelHold());
   }
@@ -67,7 +68,7 @@ export class ParentSettingsGateScene extends Phaser.Scene {
     this.statusText?.setText('Holding... keep going.');
     this.holdTimer = this.time.delayedCall(3000, () => {
       this.holdTimer = null;
-      this.scene.start('ParentSettingsScene', { returnScene: this.returnScene });
+      startScene(this, SCENE_KEYS.parentSettings, { returnScene: this.returnScene });
     });
   }
 
