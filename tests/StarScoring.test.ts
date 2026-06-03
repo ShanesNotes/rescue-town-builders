@@ -1,0 +1,21 @@
+import { describe, expect, it } from 'vitest';
+import { bestStars, clampStars, starsFromAccuracy } from '../src/game/systems/StarScoring';
+
+describe('StarScoring', () => {
+  it('always returns mission-complete stars between one and three', () => {
+    expect(clampStars(0)).toBe(1);
+    expect(clampStars(2)).toBe(2);
+    expect(clampStars(99)).toBe(3);
+  });
+
+  it('scores recycling-style accuracy with generous completion floor', () => {
+    expect(starsFromAccuracy(0.5)).toBe(1);
+    expect(starsFromAccuracy(0.7)).toBe(2);
+    expect(starsFromAccuracy(0.9)).toBe(3);
+  });
+
+  it('keeps the better star result', () => {
+    expect(bestStars(3, 1)).toBe(3);
+    expect(bestStars(0, 2)).toBe(2);
+  });
+});

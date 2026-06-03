@@ -37,7 +37,7 @@ Purpose: keep game development moving with safe placeholders while tracking prod
 | P1 | Rewards | Stars and stickers | Basic star/sticker shapes | Sticker-book reward art | Needed |
 | P1 | FX | Sparkle, water spray, smoke puff | Particle placeholders | Soft non-flashing FX sprites | Needed |
 | P1 | Audio | Button pop, chime, boop, star, fanfare | Muted placeholder or approved royalty-free SFX | Cohesive short non-annoying SFX pack | Needed |
-| P2 | Audio | Music loop | No music until volume/mute system exists | Cheerful short loop with license record | Needed |
+| P2 | Audio | Theme music loop | No music until volume/mute system exists | Human-generated loop exists in 4 segments; splice later, then record source/license notes before import | Backlog |
 | P2 | Fonts | Child-friendly readable font | System font | Licensed/open font with strong readability | Needed |
 
 ## License ledger
@@ -45,3 +45,7 @@ Purpose: keep game development moving with safe placeholders while tracking prod
 | Asset | Source URL | Source/author | License | Attribution required | Date checked | Imported path | Notes |
 | ----- | ---------- | ------------- | ------- | -------------------- | ------------ | ------------- | ----- |
 | _None yet_ | | | | | | | |
+
+## Audio intake note
+
+The theme music currently exists outside the repo as four generated segments. Do not import these into the prototype yet. Slice 0 stays silent/minimal; audio work begins after volume/mute settings and source/license notes are ready.

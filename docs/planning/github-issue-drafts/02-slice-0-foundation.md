@@ -15,6 +15,7 @@ Create the Phaser + TypeScript + Vite foundation and a fake mission loop. This s
 - [ ] Starting a placeholder mission can reach MissionComplete and save 1-3 stars.
 - [ ] Refreshing the browser preserves a test profile and best-star result.
 - [ ] SaveSystem and StarScoring have Vitest coverage.
+- [ ] Baseline Input Intent supports keyboard, touch, and gamepad confirm/back/movement mapping.
 
 ## Blocked by
 

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "createdAt": "2026-06-03T02:45:59.336Z",
-  "updatedAt": "2026-06-03T02:45:59.336Z",
+  "updatedAt": "2026-06-03T03:20:55.928Z",
   "briefPath": ".omx/ultragoal/brief.md",
   "goalsPath": ".omx/ultragoal/goals.json",
   "ledgerPath": ".omx/ultragoal/ledger.jsonl",
@@ -11,37 +11,49 @@
       "id": "G001-prd-intake-and-repo-foundation",
       "title": "PRD intake and repo foundation",
       "objective": "PRD intake and repo foundation\nObjective: Preserve PRD v0.1.0 in the repo, analyze its sections, record setup decisions, initialize GitHub remote, and document the agent operating model.",
-      "status": "pending",
-      "attempt": 0,
+      "status": "complete",
+      "attempt": 1,
       "createdAt": "2026-06-03T02:45:59.336Z",
-      "updatedAt": "2026-06-03T02:45:59.336Z"
+      "updatedAt": "2026-06-03T03:11:20.289Z",
+      "startedAt": "2026-06-03T03:10:48.336Z",
+      "completedAt": "2026-06-03T03:11:20.289Z",
+      "evidence": "PRD preserved in docs/prd/prd-v0.1.0.md; repo initialized on main with origin git@github.com:ShanesNotes/rescue-town-builders.git; AGENTS.md, README.md, and docs/analysis/prd-v0.1.0-analysis.md created; GitHub repo default branch main verified."
     },
     {
       "id": "G002-agent-engineering-and-domain-setup",
       "title": "Agent engineering and domain setup",
       "objective": "Agent engineering and domain setup\nObjective: Configure issue tracker docs, triage labels, domain context, ADRs, architecture deepening candidates, and human guidance so skills can safely operate in the repo.",
-      "status": "pending",
-      "attempt": 0,
+      "status": "complete",
+      "attempt": 1,
       "createdAt": "2026-06-03T02:45:59.336Z",
-      "updatedAt": "2026-06-03T02:45:59.336Z"
+      "updatedAt": "2026-06-03T03:11:43.656Z",
+      "startedAt": "2026-06-03T03:11:20.685Z",
+      "completedAt": "2026-06-03T03:11:43.656Z",
+      "evidence": "Agent engineering setup completed: docs/agents/issue-tracker.md, docs/agents/triage-labels.md, docs/agents/domain.md, CONTEXT.md, ADRs 0001-0004, docs/architecture/deepening-opportunities.md, docs/planning/human-game-dev-guide.md, and AGENTS.md agent-skill block are present."
     },
     {
       "id": "G003-issue-and-asset-backlog-conversion",
       "title": "Issue and asset backlog conversion",
       "objective": "Issue and asset backlog conversion\nObjective: Convert the PRD into a parent GitHub issue, phased vertical-slice issues, and a separate asset backlog with licensing/source rules.",
-      "status": "pending",
-      "attempt": 0,
+      "status": "complete",
+      "attempt": 1,
       "createdAt": "2026-06-03T02:45:59.336Z",
-      "updatedAt": "2026-06-03T02:45:59.336Z"
+      "updatedAt": "2026-06-03T03:12:03.306Z",
+      "startedAt": "2026-06-03T03:11:44.191Z",
+      "completedAt": "2026-06-03T03:12:03.306Z",
+      "evidence": "GitHub milestone MVP v0.1.0, labels, parent PRD issue #1, asset pipeline issue #2, implementation slice issues #3-#8, docs/planning/github-issues.md, docs/planning/issue-slices.md, docs/planning/github-issue-drafts/*, and docs/assets/ASSET_BACKLOG.md are complete."
     },
     {
       "id": "G004-slice-0-tdd-project-foundation",
       "title": "Slice 0 TDD project foundation",
       "objective": "Slice 0 TDD project foundation\nObjective: Build only the Phaser/Vite/TypeScript foundation, scene flow, save/profile basics, mission registry, fake mission completion, and initial tests.",
-      "status": "pending",
-      "attempt": 0,
+      "status": "complete",
+      "attempt": 1,
       "createdAt": "2026-06-03T02:45:59.336Z",
-      "updatedAt": "2026-06-03T02:45:59.336Z"
+      "updatedAt": "2026-06-03T03:20:55.928Z",
+      "startedAt": "2026-06-03T03:12:03.819Z",
+      "completedAt": "2026-06-03T03:20:55.928Z",
+      "evidence": "Slice 0 foundation implemented: Phaser/Vite/TypeScript app, Boot->Preload->Start->Profile->TownMap->PlaceholderMission->MissionComplete flow, local profile save persistence, 3 placeholder missions, star save flow, baseline gamepad Input Intent, placeholder asset catalog. Verified npm test (13/13), npm run typecheck, npm run build, npm run dev HTTP 200, vite preview HTTP 200."
     },
     {
       "id": "G005-slice-1-tdd-profile-and-town-map-loo",

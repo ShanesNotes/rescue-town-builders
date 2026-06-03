@@ -17,3 +17,6 @@ coverage/
 .omx/state/
 .omx/logs/
 .omx/tmp/
+
+# OMX runtime metrics
+.omx/metrics.json

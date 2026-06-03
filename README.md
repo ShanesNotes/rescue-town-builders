@@ -23,3 +23,16 @@ Browser-first 2D kids mini-game anthology based on the PRD in `docs/prd/prd-v0.1
 ## Human guidance
 
 The human does not need game-development knowledge to drive architecture. Agents choose technical and design defaults from the PRD and ADRs. Human input is only needed for taste checks, child play-test observations, and any asset/license decision that cannot be resolved from approved sources.
+
+## Local development
+
+```sh
+npm install
+npm run dev
+npm test
+npm run build
+```
+
+Slice 0 uses runtime-drawn placeholder shapes only. Theme music exists as four generated segments outside the repo; keep it out until the audio system and license/source notes are ready.
+
+Gamepad baseline is included through the Input Intent module: A/0 confirms, B/1 goes back, D-pad maps to movement.

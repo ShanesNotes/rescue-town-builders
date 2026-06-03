@@ -21,3 +21,7 @@ None - can start immediately.
 ## TDD notes
 
 Not a code-first slice. If asset manifest code starts here, test duplicate keys, missing source metadata, and preload manifest validation.
+
+## Audio note
+
+A generated theme loop exists outside the repo in four segments. Keep it backlog-only until splicing, source/license notes, and the audio settings module are ready.
