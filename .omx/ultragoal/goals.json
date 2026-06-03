@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "createdAt": "2026-06-03T02:45:59.336Z",
+  "updatedAt": "2026-06-03T02:45:59.336Z",
+  "briefPath": ".omx/ultragoal/brief.md",
+  "goalsPath": ".omx/ultragoal/goals.json",
+  "ledgerPath": ".omx/ultragoal/ledger.jsonl",
+  "codexGoalMode": "aggregate",
+  "goals": [
+    {
+      "id": "G001-prd-intake-and-repo-foundation",
+      "title": "PRD intake and repo foundation",
+      "objective": "PRD intake and repo foundation\nObjective: Preserve PRD v0.1.0 in the repo, analyze its sections, record setup decisions, initialize GitHub remote, and document the agent operating model.",
+      "status": "pending",
+      "attempt": 0,
+      "createdAt": "2026-06-03T02:45:59.336Z",
+      "updatedAt": "2026-06-03T02:45:59.336Z"
+    },
+    {
+      "id": "G002-agent-engineering-and-domain-setup",
+      "title": "Agent engineering and domain setup",
+      "objective": "Agent engineering and domain setup\nObjective: Configure issue tracker docs, triage labels, domain context, ADRs, architecture deepening candidates, and human guidance so skills can safely operate in the repo.",
+      "status": "pending",
+      "attempt": 0,
+      "createdAt": "2026-06-03T02:45:59.336Z",
+      "updatedAt": "2026-06-03T02:45:59.336Z"
+    },
+    {
+      "id": "G003-issue-and-asset-backlog-conversion",
+      "title": "Issue and asset backlog conversion",
+      "objective": "Issue and asset backlog conversion\nObjective: Convert the PRD into a parent GitHub issue, phased vertical-slice issues, and a separate asset backlog with licensing/source rules.",
+      "status": "pending",
+      "attempt": 0,
+      "createdAt": "2026-06-03T02:45:59.336Z",
+      "updatedAt": "2026-06-03T02:45:59.336Z"
+    },
+    {
+      "id": "G004-slice-0-tdd-project-foundation",
+      "title": "Slice 0 TDD project foundation",
+      "objective": "Slice 0 TDD project foundation\nObjective: Build only the Phaser/Vite/TypeScript foundation, scene flow, save/profile basics, mission registry, fake mission completion, and initial tests.",
+      "status": "pending",
+      "attempt": 0,
+      "createdAt": "2026-06-03T02:45:59.336Z",
+      "updatedAt": "2026-06-03T02:45:59.336Z"
+    },
+    {
+      "id": "G005-slice-1-tdd-profile-and-town-map-loo",
+      "title": "Slice 1 TDD profile and town map loop",
+      "objective": "Slice 1 TDD profile and town map loop\nObjective: Build profile selection, parent settings, static town map, registry-driven mission nodes, and persisted fake completion progress.",
+      "status": "pending",
+      "attempt": 0,
+      "createdAt": "2026-06-03T02:45:59.336Z",
+      "updatedAt": "2026-06-03T02:45:59.336Z"
+    },
+    {
+      "id": "G006-slice-2-tdd-rivet-s-recycling-run",
+      "title": "Slice 2 TDD Rivet's Recycling Run",
+      "objective": "Slice 2 TDD Rivet's Recycling Run\nObjective: Build the first real mini-game through tested item/category data, bin interaction, hints, scoring, and saved stars.",
+      "status": "pending",
+      "attempt": 0,
+      "createdAt": "2026-06-03T02:45:59.336Z",
+      "updatedAt": "2026-06-03T02:45:59.336Z"
+    },
+    {
+      "id": "G007-slice-3-tdd-brick-s-house-builder",
+      "title": "Slice 3 TDD Brick's House Builder",
+      "objective": "Slice 3 TDD Brick's House Builder\nObjective: Build the construction sequence mini-game through tested blueprint data, part placement, hints, scoring, and sticker unlock.",
+      "status": "pending",
+      "attempt": 0,
+      "createdAt": "2026-06-03T02:45:59.336Z",
+      "updatedAt": "2026-06-03T02:45:59.336Z"
+    },
+    {
+      "id": "G008-slice-4-tdd-ember-s-fire-fix",
+      "title": "Slice 4 TDD Ember's Fire Fix",
+      "objective": "Slice 4 TDD Ember's Fire Fix\nObjective: Build the movement/action mini-game through tested input intent, cartoon fire health, hose spray collision, helper assistance, and saved stars.",
+      "status": "pending",
+      "attempt": 0,
+      "createdAt": "2026-06-03T02:45:59.336Z",
+      "updatedAt": "2026-06-03T02:45:59.336Z"
+    },
+    {
+      "id": "G009-slice-5-polish-accessibility-audio-a",
+      "title": "Slice 5 polish, accessibility, audio, and deploy",
+      "objective": "Slice 5 polish, accessibility, audio, and deploy\nObjective: Add toy-feel polish, audio/mute, celebration FX, accessibility pass, mobile layout smoke checks, and static deployment.",
+      "status": "pending",
+      "attempt": 0,
+      "createdAt": "2026-06-03T02:45:59.336Z",
+      "updatedAt": "2026-06-03T02:45:59.336Z"
+    },
+    {
+      "id": "G010-post-mvp-expansion-gate",
+      "title": "Post-MVP expansion gate",
+      "objective": "Post-MVP expansion gate\nObjective: Reassess code architecture, play-test evidence, asset state, and fun before adding roadmap missions after the first three are solid.",
+      "status": "pending",
+      "attempt": 0,
+      "createdAt": "2026-06-03T02:45:59.336Z",
+      "updatedAt": "2026-06-03T02:45:59.336Z"
+    }
+  ],
+  "codexObjective": "Complete the durable ultragoal plan in .omx/ultragoal/goals.json, including later accepted/appended stories, under the original brief constraints; use .omx/ultragoal/ledger.jsonl as the audit trail."
+}

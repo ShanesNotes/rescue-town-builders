@@ -1,0 +1,19 @@
+# Dependencies and builds
+node_modules/
+dist/
+build/
+coverage/
+.playwright/
+
+# Local env and editor state
+.env
+.env.*
+!.env.example
+.DS_Store
+.vscode/
+.idea/
+
+# Runtime-only OMX state; keep durable plans under .omx/ultragoal tracked
+.omx/state/
+.omx/logs/
+.omx/tmp/
