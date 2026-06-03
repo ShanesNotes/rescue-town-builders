@@ -74,3 +74,19 @@ tree each cycle (the audit was written before Codex's G010 refactor).
   (prior uncommitted work was wiped by Codex's G010 cleanup).
 - Restored the wiped easter-egg core: `Secrets.ts` + 8 tests + design doc.
 - Wrote this charter. Baseline at branch point: typecheck clean, 55 tests green.
+
+### Cycle 0.1 — 2026-06-03 — Define the full process
+- Folded in decompose-first (`to-issues`) + `grill-with-docs --auto`; marked the
+  effort non-HITL (Claude makes and ratifies every decision).
+
+### Cycle 1 — 2026-06-03 — First refinement pass
+- **Two parallel audits**: Claude subsidiary network (54 agents → 32 verified
+  findings) + independent Codex `xhigh` audit (different model). Both converged on
+  the same architectural fork. Artifacts in `docs/reviews/`.
+- **Critical No-Fail fix shipped** (`764109a`): Fire Fix could hard-block a
+  spray-only child forever; the drone is now a true No-Fail floor. 64 tests green.
+- **Decomposed** the backlog into 9 GitHub issues (#10–#18), dependency-tagged.
+- **ADR-0007 ratified** via an automated Claude↔Codex grill: lightweight `bindIntents`
+  seam + `confirmMissionExit` guard now; defer the heavyweight mission runtime. Codex
+  conceded the listener-leak claim with Phaser source evidence.
+- Next: non-destructive save (#17, TDD logic slice), then the ADR-0007 seams.
