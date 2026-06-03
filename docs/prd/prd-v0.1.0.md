@@ -607,4 +607,3 @@ This is enough to begin engineering without overbuilding. The key is to make the
 [4]: https://kenney.nl/support "Support · Kenney"
 [5]: https://pixabay.com/service/faq/ "FAQ"
 [6]: https://phaser.io/tutorials/making-your-first-phaser-3-game/part1 "Making your first Phaser 3 game - Part 1 - Introduction | Phaser"
-
