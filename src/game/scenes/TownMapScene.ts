@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionId } from '../types';
 import { getSaveSystem, missionRegistry } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
@@ -14,6 +15,7 @@ export class TownMapScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#dff8d8');
     const profile = getSaveSystem().getSelectedProfile();
     if (!profile) {

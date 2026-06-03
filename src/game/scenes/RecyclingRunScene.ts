@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import { recyclingCategoryIcons, recyclingCategoryLabels, recyclingItems } from '../data/recyclingItems';
 import { getSaveSystem } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
@@ -28,6 +29,7 @@ export class RecyclingRunScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#e7fff2');
     const profile = getSaveSystem().getSelectedProfile();
     const difficulty = profile?.settings.difficulty ?? 'helper';

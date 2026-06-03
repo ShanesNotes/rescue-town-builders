@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
@@ -9,6 +10,7 @@ export class StartScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#d9f5ff');
     addTitle(this, 'Rescue Town Builders');
     addBody(

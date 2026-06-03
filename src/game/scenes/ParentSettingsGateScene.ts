@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
@@ -17,6 +18,7 @@ export class ParentSettingsGateScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#eaf7ff');
     addTitle(this, 'Parent Settings Gate');
     addBody(this, 145, 'Grown-ups: hold the big button for 3 seconds to change settings.');

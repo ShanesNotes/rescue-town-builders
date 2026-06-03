@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionResult } from '../types';
+import { createCelebrationPlan } from '../systems/Celebration';
 import { getSaveSystem, missionRegistry } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { addButton } from '../ui/Button';
@@ -17,6 +19,7 @@ export class MissionCompleteScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#fff0f6');
     const saves = getSaveSystem();
     const profile = saves.getSelectedProfile();
@@ -27,13 +30,15 @@ export class MissionCompleteScene extends Phaser.Scene {
 
     const updated = saves.recordMissionResult(profile.id, this.result);
     const mission = missionRegistry.get(this.result.missionId);
+    const celebration = createCelebrationPlan(this.result);
     addTitle(this, 'Mission Complete!');
     addBody(
       this,
       160,
       `${mission?.title ?? 'Mission'} finished with ${'⭐'.repeat(this.result.stars)}. Sticker unlocked: ${this.result.stickersUnlocked.join(', ')}.`,
     );
-    addBody(this, 250, `${updated.name}'s saved total: ${updated.progress.totalStars} ⭐`);
+    addBody(this, 250, `${celebration.message} ${updated.name}'s saved total: ${updated.progress.totalStars} ⭐`);
+    this.drawCelebration(celebration.confettiBursts, celebration.starCount);
     addButton(this, {
       x: 480,
       y: 380,
@@ -57,5 +62,19 @@ export class MissionCompleteScene extends Phaser.Scene {
         this.scene.start('TownMapScene');
       }
     });
+  }
+
+  private drawCelebration(confettiBursts: number, starCount: number): void {
+    for (let index = 0; index < confettiBursts; index += 1) {
+      const x = 190 + index * 72;
+      const y = 310 + (index % 2) * 34;
+      this.add.circle(x, y, 12, [0xffc857, 0x9be7c4, 0xb7e6ff, 0xffb3c6][index % 4] ?? 0xffffff);
+    }
+    this.add.text(480, 315, '⭐'.repeat(starCount), {
+      fontFamily: 'Trebuchet MS, Arial, sans-serif',
+      fontSize: '52px',
+      color: '#203247',
+      align: 'center',
+    }).setOrigin(0.5);
   }
 }

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "createdAt": "2026-06-03T02:45:59.336Z",
-  "updatedAt": "2026-06-03T03:40:56.371Z",
+  "updatedAt": "2026-06-03T03:48:14.197Z",
   "briefPath": ".omx/ultragoal/brief.md",
   "goalsPath": ".omx/ultragoal/goals.json",
   "ledgerPath": ".omx/ultragoal/ledger.jsonl",
@@ -107,10 +107,13 @@
       "id": "G009-slice-5-polish-accessibility-audio-a",
       "title": "Slice 5 polish, accessibility, audio, and deploy",
       "objective": "Slice 5 polish, accessibility, audio, and deploy\nObjective: Add toy-feel polish, audio/mute, celebration FX, accessibility pass, mobile layout smoke checks, and static deployment.",
-      "status": "pending",
-      "attempt": 0,
+      "status": "complete",
+      "attempt": 1,
       "createdAt": "2026-06-03T02:45:59.336Z",
-      "updatedAt": "2026-06-03T02:45:59.336Z"
+      "updatedAt": "2026-06-03T03:48:14.197Z",
+      "startedAt": "2026-06-03T03:42:12.263Z",
+      "completedAt": "2026-06-03T03:48:14.197Z",
+      "evidence": "Slice 5 polish implemented: AudioSystem effective mute/volume settings and theme-loop backlog status; accessibility rules for target size/no harsh failure/helper-mode; non-flashing celebration plan and MissionComplete confetti/stars; fade-in scene transitions; manual GitHub Pages workflow and docs; mobile landscape smoke checklist. Verified npm test (14 files, 37 tests), npm run typecheck, npm run build, GITHUB_PAGES=true npm run build, npm run dev HTTP 200, git diff --check."
     },
     {
       "id": "G010-post-mvp-expansion-gate",

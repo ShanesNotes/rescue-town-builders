@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import { picnicFires } from '../data/picnicFires';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import {
@@ -24,6 +25,7 @@ export class FireFixScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#eaf7ff');
     this.state ??= createFireFixState(picnicFires);
     const state = this.state;

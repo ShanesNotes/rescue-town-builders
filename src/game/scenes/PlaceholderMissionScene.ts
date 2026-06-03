@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionId, MissionResult } from '../types';
 import { missionRegistry } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
@@ -18,6 +19,7 @@ export class PlaceholderMissionScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#e7e5ff');
     const mission = missionRegistry.get(this.missionId);
     addTitle(this, mission?.title ?? 'Placeholder Mission');

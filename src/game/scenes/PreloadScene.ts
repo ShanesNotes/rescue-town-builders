@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import { addBody, addTitle } from '../ui/SceneText';
 
 export class PreloadScene extends Phaser.Scene {
@@ -7,6 +8,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#d9f5ff');
     addTitle(this, 'Rescue Town Builders');
     addBody(this, 190, 'Loading friendly placeholder shapes...');

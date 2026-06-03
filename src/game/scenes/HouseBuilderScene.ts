@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import { houseBlueprints } from '../data/houseBlueprints';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import {
@@ -26,6 +27,7 @@ export class HouseBuilderScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#fff8e6');
     this.state ??= createHouseBuilderState(houseBlueprints);
     const state = this.state;

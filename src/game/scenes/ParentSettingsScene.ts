@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import type { Difficulty, PlayerProfile } from '../systems/SaveSystem';
+import { getEffectiveAudioLevels, getThemeLoopStatus } from '../systems/AudioSystem';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { getSaveSystem } from '../systems/GameServices';
 import { addButton } from '../ui/Button';
@@ -19,6 +21,7 @@ export class ParentSettingsScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#f4f0ff');
     const saves = getSaveSystem();
     const profile = saves.getSelectedProfile();
@@ -39,15 +42,18 @@ export class ParentSettingsScene extends Phaser.Scene {
       return;
     }
 
+    const levels = getEffectiveAudioLevels(profile.settings);
+    const themeLoop = getThemeLoopStatus();
     addBody(
       this,
-      125,
-      `${profile.name}: difficulty ${profile.settings.difficulty} • music ${Math.round(profile.settings.musicVolume * 100)}% • SFX ${Math.round(profile.settings.sfxVolume * 100)}% • muted ${profile.settings.audioMuted ? 'yes' : 'no'}`,
+      120,
+      `${profile.name}: difficulty ${profile.settings.difficulty} • effective music ${Math.round(levels.music * 100)}% • effective SFX ${Math.round(levels.sfx * 100)}% • muted ${profile.settings.audioMuted ? 'yes' : 'no'}`,
     );
+    addBody(this, 158, `Theme loop: ${themeLoop.segmentCount} generated segments waiting for splice/import.`);
 
     addButton(this, {
       x: 250,
-      y: 210,
+      y: 230,
       width: 350,
       height: 62,
       label: `Mute All: ${profile.settings.audioMuted ? 'On' : 'Off'}`,
@@ -56,7 +62,7 @@ export class ParentSettingsScene extends Phaser.Scene {
     });
     addButton(this, {
       x: 640,
-      y: 210,
+      y: 230,
       width: 350,
       height: 62,
       label: `Difficulty: ${profile.settings.difficulty}`,
@@ -65,7 +71,7 @@ export class ParentSettingsScene extends Phaser.Scene {
     });
     addButton(this, {
       x: 250,
-      y: 295,
+      y: 312,
       width: 350,
       height: 62,
       label: 'Music +25%',
@@ -74,7 +80,7 @@ export class ParentSettingsScene extends Phaser.Scene {
     });
     addButton(this, {
       x: 640,
-      y: 295,
+      y: 312,
       width: 350,
       height: 62,
       label: 'SFX +25%',
@@ -83,7 +89,7 @@ export class ParentSettingsScene extends Phaser.Scene {
     });
     addButton(this, {
       x: 250,
-      y: 380,
+      y: 394,
       width: 350,
       height: 62,
       label: 'Quiet Defaults',
@@ -92,7 +98,7 @@ export class ParentSettingsScene extends Phaser.Scene {
     });
     addButton(this, {
       x: 640,
-      y: 380,
+      y: 394,
       width: 350,
       height: 62,
       label: 'Reset Local Save',

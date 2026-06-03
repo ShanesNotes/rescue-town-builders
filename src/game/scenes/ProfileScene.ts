@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { fadeInScene } from '../systems/SceneTransitions';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { getSaveSystem } from '../systems/GameServices';
 import { addButton } from '../ui/Button';
@@ -17,6 +18,7 @@ export class ProfileScene extends Phaser.Scene {
   }
 
   create(): void {
+    fadeInScene(this);
     this.cameras.main.setBackgroundColor('#fff7dc');
     const saves = getSaveSystem();
     const profiles = saves.getProfiles();
