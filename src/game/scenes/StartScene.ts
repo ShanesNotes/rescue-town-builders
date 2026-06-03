@@ -5,10 +5,12 @@ import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../system
 import { getMusic } from '../systems/GameServices';
 import { addButton } from '../ui/Button';
 
+// Drawn in-engine as crisp sticker-book badges (palette from design.md) so the very first
+// screen is reliable and never depends on async art loading.
 const HELPERS = [
-  { key: 'character.rivet', name: 'Rivet', x: 300 },
-  { key: 'character.brick', name: 'Brick', x: 480 },
-  { key: 'character.ember', name: 'Ember', x: 660 },
+  { name: 'Rivet', x: 300, color: 0x5ec8b5 },
+  { name: 'Brick', x: 480, color: 0xf4a261 },
+  { name: 'Ember', x: 660, color: 0xf48a9e },
 ] as const;
 
 export class StartScene extends Phaser.Scene {
@@ -47,9 +49,9 @@ export class StartScene extends Phaser.Scene {
     // Big, friendly Play button with a gentle pulse so a pre-reader knows where to go.
     const play = addButton(this, {
       x: 480,
-      y: 432,
+      y: 448,
       width: 360,
-      height: 92,
+      height: 88,
       label: '▶  Play',
       fill: 0x9be7c4,
       onPress: () => this.begin(),
@@ -65,7 +67,7 @@ export class StartScene extends Phaser.Scene {
     });
 
     this.add
-      .text(480, 506, 'Grown-ups: tap Play. Arrow keys, touch, or a gamepad all work.', {
+      .text(480, 514, 'Grown-ups: tap Play. Arrow keys, touch, or a gamepad all work.', {
         fontFamily: 'Trebuchet MS, Arial, sans-serif',
         fontSize: '18px',
         color: '#42637a',
@@ -103,30 +105,35 @@ export class StartScene extends Phaser.Scene {
   }
 
   private paintHelpers(): void {
+    const cy = 292;
     HELPERS.forEach((helper, index) => {
-      const y = 312;
-      let display: Phaser.GameObjects.GameObject;
-      if (this.textures.exists(helper.key)) {
-        const img = this.add.image(helper.x, y, helper.key).setDisplaySize(128, 128);
-        display = img;
-      } else {
-        // No-Fail fallback: a friendly badge if art is missing.
-        const fallback = this.add.circle(helper.x, y, 56, [0x8ed0ff, 0xffd29b, 0xffb3b3][index] ?? 0xffffff, 1);
-        fallback.setStrokeStyle(4, 0x203247, 1);
-        display = fallback;
-      }
-      this.add
-        .text(helper.x, y + 84, helper.name, {
+      const c = this.add.container(helper.x, cy);
+      const body = this.add.graphics();
+      body.fillStyle(helper.color, 1);
+      body.fillRoundedRect(-44, -42, 88, 88, 22);
+      body.lineStyle(4, 0x203247, 1);
+      body.strokeRoundedRect(-44, -42, 88, 88, 22);
+      const face = this.add.circle(0, -8, 24, 0xfff8e7).setStrokeStyle(4, 0x203247, 1);
+      const eyeL = this.add.circle(-9, -12, 4, 0x203247);
+      const eyeR = this.add.circle(9, -12, 4, 0x203247);
+      const smile = this.add.graphics();
+      smile.lineStyle(4, 0x203247, 1);
+      smile.beginPath();
+      smile.arc(0, -6, 12, Phaser.Math.DegToRad(20), Phaser.Math.DegToRad(160));
+      smile.strokePath();
+      const name = this.add
+        .text(0, 60, helper.name, {
           fontFamily: 'Trebuchet MS, Arial, sans-serif',
           fontSize: '22px',
           color: '#203247',
           fontStyle: 'bold',
         })
         .setOrigin(0.5);
+      c.add([body, face, eyeL, eyeR, smile, name]);
       // Staggered idle bob — a little sign of life.
       this.tweens.add({
-        targets: display,
-        y: y - 10,
+        targets: c,
+        y: cy - 10,
         duration: 1000 + index * 120,
         yoyo: true,
         repeat: -1,
