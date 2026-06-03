@@ -48,6 +48,7 @@ export class MissionCompleteScene extends Phaser.Scene {
       label: 'Back to Map',
       fill: 0x9be7c4,
       onPress: () => returnToTownMap(this),
+      testId: 'mission.complete.back-to-map',
     });
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {

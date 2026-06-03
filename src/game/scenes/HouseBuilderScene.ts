@@ -56,6 +56,7 @@ export class HouseBuilderScene extends Phaser.Scene {
         label: `${selected}${trayPart.icon}\n${trayPart.label}`,
         fill: index === this.selectedPartIndex ? 0xfff4bf : 0xffffff,
         onPress: () => this.choosePart(trayPart.id, index),
+        testId: `house.part.${trayPart.id}`,
       });
     });
 
@@ -67,6 +68,7 @@ export class HouseBuilderScene extends Phaser.Scene {
       label: 'Back to Map',
       fill: 0xffffff,
       onPress: () => returnToTownMap(this),
+      testId: 'house.back-to-map',
     });
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {

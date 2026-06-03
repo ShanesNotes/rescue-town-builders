@@ -38,6 +38,7 @@ export class TownMapScene extends Phaser.Scene {
         label: `${selected}${node.title}\n${node.mapNodeId} • ${node.starsLabel}`,
         fill: index === this.selectedIndex ? 0xfff4bf : ([0xb7e6ff, 0xffd6a5, 0xffb3c6][index] ?? 0xffffff),
         onPress: () => this.startMission(node.missionId),
+        testId: `townmap.mission.${node.missionId}`,
       });
     });
 
@@ -49,6 +50,7 @@ export class TownMapScene extends Phaser.Scene {
       label: 'Parent Settings',
       fill: 0xffffff,
       onPress: () => startParentSettingsGate(this, SCENE_KEYS.townMap),
+      testId: 'townmap.parent-settings',
     });
     addButton(this, {
       x: 145,
@@ -58,6 +60,7 @@ export class TownMapScene extends Phaser.Scene {
       label: 'Profiles',
       fill: 0xffffff,
       onPress: () => startScene(this, SCENE_KEYS.profile),
+      testId: 'townmap.profiles',
     });
     addBody(this, 458, 'Gamepad: D-pad chooses • A starts mission • B returns to profiles');
 

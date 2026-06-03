@@ -1,5 +1,14 @@
 export type AssetStatus = 'placeholder' | 'backlog' | 'production';
 export type AssetKind = 'character' | 'tile' | 'prop' | 'ui' | 'fx' | 'audio' | 'font';
+export type AssetLoadType = 'image' | 'audio' | 'spritesheet';
+
+export type AssetSource = {
+  name: string;
+  url: string;
+  license: 'CC0-1.0';
+  author: string;
+  notes: string;
+};
 
 export type AssetNeed = {
   key: string;
@@ -7,58 +16,166 @@ export type AssetNeed = {
   status: AssetStatus;
   description: string;
   path?: string;
+  loadType?: AssetLoadType;
+  source?: AssetSource;
   notes: string;
 };
 
-export const assetCatalog: AssetNeed[] = [
+const originalCc0Source: AssetSource = {
+  name: 'Rescue Town Builders original placeholder asset set',
+  url: 'public/assets/',
+  license: 'CC0-1.0',
+  author: 'Rescue Town Builders project',
+  notes: 'Original geometric SVGs created for this repository; no third-party IP, names, logos, likenesses, or fan art.',
+};
+
+export const assetCatalog = [
   {
     key: 'ui.placeholder-shapes',
     kind: 'ui',
     status: 'placeholder',
     description: 'Runtime-drawn rounded rectangles, stars, panels, and large buttons.',
-    notes: 'No imported art needed for Slice 0.',
+    notes: 'No imported art is required for No-Fail fallback rendering.',
   },
   {
     key: 'character.rivet',
     kind: 'character',
-    status: 'backlog',
-    description: 'Original recycle helper character art.',
-    notes: 'Use simple text/emoji marker until production-safe art is selected.',
+    status: 'production',
+    description: 'Original recycle helper character badge art.',
+    path: 'assets/characters/rivet.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Simple original badge, safe fallback to text/emoji if missing.',
   },
   {
     key: 'character.brick',
     kind: 'character',
-    status: 'backlog',
-    description: 'Original builder helper character art.',
-    notes: 'Use simple text/emoji marker until production-safe art is selected.',
+    status: 'production',
+    description: 'Original builder helper character badge art.',
+    path: 'assets/characters/brick.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Simple original badge, safe fallback to text/emoji if missing.',
   },
   {
     key: 'character.ember',
     kind: 'character',
-    status: 'backlog',
-    description: 'Original fire helper character art.',
-    notes: 'Use simple text/emoji marker until production-safe art is selected.',
+    status: 'production',
+    description: 'Original fire helper character badge art.',
+    path: 'assets/characters/ember.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Simple original badge, safe fallback to text/emoji if missing.',
   },
   {
-    key: 'props.recycling-bins-items',
-    kind: 'prop',
-    status: 'placeholder',
-    description: 'Runtime emoji/text placeholders for Recycling Run bins and sortable items.',
-    notes: 'Implemented in code for Slice 2; production icon-first art remains in the asset backlog.',
+    key: 'town.map-node',
+    kind: 'tile',
+    status: 'production',
+    description: 'Friendly town-map mission node marker.',
+    path: 'assets/props/town-map-node.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Supports town map polish while scene keeps runtime rectangles as fallback.',
   },
   {
-    key: 'props.house-parts',
+    key: 'props.recycling-bin',
     kind: 'prop',
-    status: 'placeholder',
-    description: 'Runtime shape/text placeholders for House Builder foundation, walls, roof, door, and decoration parts.',
-    notes: 'Implemented in code for Slice 3; production icon-first house-part art remains in the asset backlog.',
+    status: 'production',
+    description: 'Generic recycling bin icon for bin buttons.',
+    path: 'assets/props/recycling-bin.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Does not depict branded municipal marks.',
   },
   {
-    key: 'props.fire-fix-placeholders',
+    key: 'props.recycling-paper',
     kind: 'prop',
-    status: 'placeholder',
-    description: 'Runtime circles/labels and blue aim line for Fire Fix fires and water feedback.',
-    notes: 'Implemented in code for Slice 4; production hydrant, fire, water spray, and smoke puff assets remain in the backlog.',
+    status: 'production',
+    description: 'Paper recycling item icon.',
+    path: 'assets/props/recycling-paper.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Used by manifest coverage; gameplay can fall back to emoji labels.',
+  },
+  {
+    key: 'props.recycling-trash',
+    kind: 'prop',
+    status: 'production',
+    description: 'Trash item icon.',
+    path: 'assets/props/recycling-trash.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Used by manifest coverage; gameplay can fall back to emoji labels.',
+  },
+  ...(['foundation', 'walls', 'roof', 'door', 'decoration'] as const).map((part) => ({
+    key: `props.house-${part}`,
+    kind: 'prop' as const,
+    status: 'production' as const,
+    description: `House Builder ${part} icon.`,
+    path: `assets/props/house-${part}.svg`,
+    loadType: 'image' as const,
+    source: originalCc0Source,
+    notes: 'Original simple SVG; runtime ghost house remains the fallback.',
+  })),
+  {
+    key: 'props.fire',
+    kind: 'prop',
+    status: 'production',
+    description: 'Cartoon fire icon for Fire Fix.',
+    path: 'assets/props/fire.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Friendly non-scary badge; scene circles remain fallback.',
+  },
+  {
+    key: 'props.water-spray',
+    kind: 'fx',
+    status: 'production',
+    description: 'Water spray feedback icon.',
+    path: 'assets/props/water-spray.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Scene line remains fallback.',
+  },
+  {
+    key: 'props.hydrant',
+    kind: 'prop',
+    status: 'production',
+    description: 'Friendly hydrant prop icon.',
+    path: 'assets/props/hydrant.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Generic original hydrant marker.',
+  },
+  {
+    key: 'ui.sticker-star',
+    kind: 'ui',
+    status: 'production',
+    description: 'Sticker/star reward badge.',
+    path: 'assets/ui/sticker-star.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Supports celebration polish with text-star fallback.',
+  },
+  {
+    key: 'ui.button-panel',
+    kind: 'ui',
+    status: 'production',
+    description: 'Reusable button/panel badge.',
+    path: 'assets/ui/button-panel.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Runtime button rectangles remain authoritative fallback.',
+  },
+  {
+    key: 'fx.confetti',
+    kind: 'fx',
+    status: 'production',
+    description: 'Celebration confetti sparkle badge.',
+    path: 'assets/fx/confetti.svg',
+    loadType: 'image',
+    source: originalCc0Source,
+    notes: 'Runtime circles remain fallback.',
   },
   {
     key: 'audio.theme-loop',
@@ -67,12 +184,26 @@ export const assetCatalog: AssetNeed[] = [
     description: 'Generated theme music loop currently in four segments that need splicing.',
     notes: 'Do not import yet. Keep Slice 0 silent/minimal until audio settings and license/source notes exist.',
   },
-];
+] satisfies AssetNeed[];
 
-export function ensureUniqueAssetKeys(assets: AssetNeed[]): boolean {
+export function ensureUniqueAssetKeys(assets: readonly AssetNeed[]): boolean {
   return new Set(assets.map((asset) => asset.key)).size === assets.length;
 }
 
-export function listAssetNeedsByStatus(assets: AssetNeed[], status: AssetStatus): AssetNeed[] {
+export function listAssetNeedsByStatus(assets: readonly AssetNeed[], status: AssetStatus): AssetNeed[] {
   return assets.filter((asset) => asset.status === status);
+}
+
+export function listLoadableAssets(assets: readonly AssetNeed[] = assetCatalog): AssetNeed[] {
+  return assets.filter((asset) => asset.status === 'production' && Boolean(asset.path && asset.loadType));
+}
+
+export function assetHasVerifiedCc0Source(asset: AssetNeed): boolean {
+  return asset.status !== 'production' || asset.source?.license === 'CC0-1.0';
+}
+
+export function resolveAssetPath(asset: AssetNeed, baseUrl = '/'): string | null {
+  if (!asset.path) return null;
+  const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  return new URL(asset.path, `http://rescue-town-builders.local${normalizedBase}`).pathname;
 }

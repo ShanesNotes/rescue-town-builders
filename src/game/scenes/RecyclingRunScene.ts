@@ -76,6 +76,7 @@ export class RecyclingRunScene extends Phaser.Scene {
         label: `${selected}${recyclingCategoryIcons[category]}\n${recyclingCategoryLabels[category]}`,
         fill: index === this.selectedCategoryIndex ? 0xfff4bf : 0xffffff,
         onPress: () => this.chooseCategory(category, index),
+        testId: `recycling.bin.${category}`,
       });
     });
 
@@ -87,6 +88,7 @@ export class RecyclingRunScene extends Phaser.Scene {
       label: 'Back to Map',
       fill: 0xffffff,
       onPress: () => returnToTownMap(this),
+      testId: 'recycling.back-to-map',
     });
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {

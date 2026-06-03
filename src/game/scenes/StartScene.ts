@@ -27,6 +27,7 @@ export class StartScene extends Phaser.Scene {
       label: 'Play',
       fill: 0x9be7c4,
       onPress: () => startScene(this, SCENE_KEYS.profile),
+      testId: 'start.play',
     });
     addBody(this, 430, 'Controls: Enter/A = choose • Esc/B = back • D-pad/arrows = move later');
 
