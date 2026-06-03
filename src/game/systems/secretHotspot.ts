@@ -59,8 +59,58 @@ export function addSecretHotspot(scene: Phaser.Scene, secrets: Secrets, id: Secr
     .setInteractive()
     .on('pointerdown', () => {
       const message = touchSecret(secrets, id);
-      if (message) showSecretReveal(scene, message);
+      if (!message) return;
+      // Cluckle's Dream embodies the microcosm: the whole town, small enough to hold,
+      // glows inside the hotspot for one breath before the words arrive.
+      if (id === 'cluckle-dream') {
+        playMiniatureTown(scene, x, y, () => showSecretReveal(scene, message));
+      } else {
+        showSecretReveal(scene, message);
+      }
     });
+}
+
+/** A tiny glowing town (two little houses, a path, a tree) that blooms then fades. */
+function playMiniatureTown(scene: Phaser.Scene, x: number, y: number, onDone: () => void): void {
+  const depth = 999;
+  const town = scene.add.container(x, y).setDepth(depth).setAlpha(0);
+  const glow = scene.add.circle(0, 0, 42, 0xfff1a8, 0.3);
+  const path = scene.add.rectangle(0, 16, 66, 6, 0xe8d2a0);
+  const wallA = scene.add.rectangle(-15, 5, 17, 15, 0xffd6a5).setStrokeStyle(1, 0x203247, 0.6);
+  const roofA = scene.add.triangle(-15, -6, -11, 7, 11, 7, 0, -8, 0xff8fab).setStrokeStyle(1, 0x203247, 0.6);
+  const wallB = scene.add.rectangle(9, 7, 15, 13, 0xb7e6ff).setStrokeStyle(1, 0x203247, 0.6);
+  const roofB = scene.add.triangle(9, -2, -10, 7, 10, 7, 0, -7, 0xffd86b).setStrokeStyle(1, 0x203247, 0.6);
+  const trunk = scene.add.rectangle(26, 8, 3, 11, 0x8d6e63);
+  const leaves = scene.add.circle(26, 0, 7, 0x9be7c4).setStrokeStyle(1, 0x203247, 0.6);
+  town.add([glow, path, wallA, roofA, wallB, roofB, trunk, leaves]);
+
+  if (!motionAllowed()) {
+    town.setAlpha(0.85);
+    scene.time.delayedCall(800, () => {
+      town.destroy();
+      onDone();
+    });
+    return;
+  }
+  scene.tweens.add({
+    targets: town,
+    alpha: 0.9,
+    scale: 1.2,
+    duration: 650,
+    ease: 'Sine.easeOut',
+    onComplete: () =>
+      scene.tweens.add({
+        targets: town,
+        alpha: 0,
+        duration: 700,
+        delay: 550,
+        ease: 'Sine.easeIn',
+        onComplete: () => {
+          town.destroy();
+          onDone();
+        },
+      }),
+  });
 }
 
 /** A soft, dismissable overlay for the moment a secret steps into the light. */

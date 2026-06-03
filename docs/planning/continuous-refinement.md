@@ -218,5 +218,10 @@ tree each cycle (the audit was written before Codex's G010 refactor).
   - **P1 — reduced-motion:** StartScene's pulse + idle bob now honor `motionAllowed()`.
 - Bumped the Playwright timeout to 60s (the brute-force playthroughs flaked under parallel CPU
   contention; pass cleanly serially). **95 unit + 4 e2e green; every screen re-reviewed by image.**
+- **Then shipped the soul centerpiece (P1):** Cluckle's Dream now blooms a **miniature glowing
+  town** (two roofs, a path, a tree) inside the hotspot for one breath before the words —
+  the microcosm pattern, the whole town small enough to hold in a hen's dream. New
+  `tests/e2e/secret-discovery.spec.ts` finds the secret via mapped canvas taps and proves the
+  sticker persists across refresh. **95 unit + 5 e2e green.**
 - Deferred (logged, next cycle): ParentSettings keyboard/gamepad nav (#11, behind the parent
-  gate), per-secret custom reveals + Cluckle's miniature-town animation, arrow-symbol playtest.
+  gate), custom reveals for the other two secrets, arrow-symbol pre-reader playtest.

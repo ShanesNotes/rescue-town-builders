@@ -5,9 +5,12 @@ declare module '@playwright/test' {
     waitForFunction(fn: () => boolean): Promise<unknown>;
     setViewportSize(size: { width: number; height: number }): Promise<void>;
     reload(): Promise<void>;
-    locator(selector: string): { boundingBox(): Promise<{ width: number; height: number } | null> };
+    locator(selector: string): {
+      boundingBox(): Promise<{ x: number; y: number; width: number; height: number } | null>;
+    };
     waitForTimeout(ms: number): Promise<void>;
     screenshot(options: { path: string }): Promise<unknown>;
+    mouse: { click(x: number, y: number): Promise<void> };
     on(event: 'pageerror', listener: (error: { message: string }) => void): void;
     on(event: 'console', listener: (message: { type(): string; text(): string }) => void): void;
     on(event: 'response', listener: (response: { status(): number; url(): string }) => void): void;
