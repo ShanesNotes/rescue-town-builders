@@ -21,22 +21,25 @@ export type MusicTheme = {
   barLength: number;
 };
 
-// A warm C-major pentatonic motif: rises like a sunrise over the town, settles home.
-// Authored to be swappable — Grok's creative-direction motif can replace these arrays.
-const C4 = 261.63;
+// Grok's creative-direction motif, synthesized here (docs/design/creative-direction.md):
+// G major, 76 BPM, a gentle singable loop that feels like "sunlight on closed eyelids —
+// the town's own quiet voice." Bass walks the I–IV–V–vi pads (G–C–D–Em). Authored as data
+// so the recorded theme can later replace it behind the same MusicSink seam.
 const D4 = 293.66;
 const E4 = 329.63;
 const G4 = 392.0;
 const A4 = 440.0;
-const C5 = 523.25;
-const C3 = 130.81;
-const A2 = 110.0;
+const B4 = 493.88;
+const D5 = 587.33;
 const G2 = 98.0;
+const C3 = 130.81;
+const D3 = 146.83;
+const E3 = 164.81;
 
 export const MUSIC_THEME: MusicTheme = {
-  noteDuration: 0.42,
-  melody: [E4, G4, A4, G4, E4, D4, C4, 0, E4, G4, C5, A4, G4, E4, D4, 0],
-  bass: [C3, C3, A2, G2],
+  noteDuration: 0.395, // 76 BPM eighth-notes — unhurried, dreamy.
+  melody: [G4, E4, G4, A4, B4, D5, B4, A4, G4, E4, G4, A4, B4, G4, E4, D4],
+  bass: [G2, C3, D3, E3], // I–IV–V–vi
   barLength: 4,
 };
 
