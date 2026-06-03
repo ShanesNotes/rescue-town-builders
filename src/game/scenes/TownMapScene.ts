@@ -92,6 +92,10 @@ export class TownMapScene extends Phaser.Scene {
       this.scene.start('HouseBuilderScene');
       return;
     }
+    if (missionId === 'fire-fix') {
+      this.scene.start('FireFixScene');
+      return;
+    }
     this.scene.start('PlaceholderMissionScene', { missionId });
   }
 }

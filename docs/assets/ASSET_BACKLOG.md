@@ -31,11 +31,11 @@ Purpose: keep game development moving with safe placeholders while tracking prod
 | P0 | Tiles | House lot, park, picnic area | Approved CC0 tile pack or simple shapes | Cohesive mission-specific environments | Needed |
 | P0 | Props | Recycling bins and trash items | Runtime emoji/text buttons in `RecyclingRunScene` | Clear icon-first bin and object set | Placeholder in code; production needed |
 | P0 | Props | House parts | Runtime shape/text placeholders in `HouseBuilderScene` | Foundation, wall, roof, door, decoration set | Placeholder in code; production needed |
-| P0 | Props | Hydrant and cartoon fires | Simple hydrant/fire shapes | Friendly low-intensity fire visuals | Needed |
+| P0 | Props | Hydrant and cartoon fires | Runtime circles/labels in `FireFixScene`; hydrant deferred | Friendly low-intensity fire visuals plus hydrant art | Placeholder in code; production needed |
 | P0 | UI | Buttons, panels, progress bar | Shape-based UI | Large touch-friendly UI kit | Needed |
 | P1 | UI | Profile icons | Simple symbols | Original child-safe avatar icons | Needed |
 | P1 | Rewards | Stars and stickers | Basic star/sticker shapes | Sticker-book reward art | Needed |
-| P1 | FX | Sparkle, water spray, smoke puff | Particle placeholders | Soft non-flashing FX sprites | Needed |
+| P1 | FX | Sparkle, water spray, smoke puff | Runtime blue aim line in `FireFixScene`; other FX deferred | Soft non-flashing FX sprites | Placeholder in code; production needed |
 | P1 | Audio | Button pop, chime, boop, star, fanfare | Muted placeholder or approved royalty-free SFX | Cohesive short non-annoying SFX pack | Needed |
 | P2 | Audio | Theme music loop | No music until volume/mute system exists | Human-generated loop exists in 4 segments; splice later, then record source/license notes before import | Backlog |
 | P2 | Fonts | Child-friendly readable font | System font | Licensed/open font with strong readability | Needed |
@@ -57,3 +57,7 @@ Slice 2 uses runtime text/emoji placeholders for bins and items. No imported art
 ## House Builder placeholder note
 
 Slice 3 uses runtime shape/text placeholders for foundations, walls, roofs, doors, and decorations. No imported art assets were added. Production house-part art is still needed before polish.
+
+## Fire Fix placeholder note
+
+Slice 4 uses runtime circles, labels, and a blue aim line for fires/water feedback. No imported art or audio assets were added. Production hydrant, fire, water spray, and smoke puff art remains needed before polish.

@@ -54,6 +54,13 @@ export const assetCatalog: AssetNeed[] = [
     notes: 'Implemented in code for Slice 3; production icon-first house-part art remains in the asset backlog.',
   },
   {
+    key: 'props.fire-fix-placeholders',
+    kind: 'prop',
+    status: 'placeholder',
+    description: 'Runtime circles/labels and blue aim line for Fire Fix fires and water feedback.',
+    notes: 'Implemented in code for Slice 4; production hydrant, fire, water spray, and smoke puff assets remain in the backlog.',
+  },
+  {
     key: 'audio.theme-loop',
     kind: 'audio',
     status: 'backlog',

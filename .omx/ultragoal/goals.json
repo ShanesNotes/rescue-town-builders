@@ -1,7 +1,7 @@
 {
   "version": 1,
   "createdAt": "2026-06-03T02:45:59.336Z",
-  "updatedAt": "2026-06-03T03:36:58.572Z",
+  "updatedAt": "2026-06-03T03:40:56.371Z",
   "briefPath": ".omx/ultragoal/brief.md",
   "goalsPath": ".omx/ultragoal/goals.json",
   "ledgerPath": ".omx/ultragoal/ledger.jsonl",
@@ -95,10 +95,13 @@
       "id": "G008-slice-4-tdd-ember-s-fire-fix",
       "title": "Slice 4 TDD Ember's Fire Fix",
       "objective": "Slice 4 TDD Ember's Fire Fix\nObjective: Build the movement/action mini-game through tested input intent, cartoon fire health, hose spray collision, helper assistance, and saved stars.",
-      "status": "pending",
-      "attempt": 0,
+      "status": "complete",
+      "attempt": 1,
       "createdAt": "2026-06-03T02:45:59.336Z",
-      "updatedAt": "2026-06-03T02:45:59.336Z"
+      "updatedAt": "2026-06-03T03:40:56.371Z",
+      "startedAt": "2026-06-03T03:37:55.606Z",
+      "completedAt": "2026-06-03T03:40:56.371Z",
+      "evidence": "Ember's Fire Fix implemented: picnicFires data defines 5 cartoon fires; FireFix module covers player movement, aim direction, spray collision, fire health shrink, helper drone assist, completion, and star result; FireFixScene provides touch movement buttons, Spray button, keyboard/gamepad movement/action/back, visual fire health and aim line; TownMap routes fire-fix to real scene; MissionComplete persists stars/sticker; asset backlog records runtime placeholder fire/water/hydrant needs. Verified npm test (29/29), npm run typecheck, npm run build, npm run dev HTTP 200."
     },
     {
       "id": "G009-slice-5-polish-accessibility-audio-a",

@@ -8,6 +8,7 @@ export const SCENE_KEYS = {
   parentSettings: 'ParentSettingsScene',
   recyclingRun: 'RecyclingRunScene',
   houseBuilder: 'HouseBuilderScene',
+  fireFix: 'FireFixScene',
   placeholderMission: 'PlaceholderMissionScene',
   missionComplete: 'MissionCompleteScene',
 } as const;
@@ -22,6 +23,7 @@ export const SLICE_1_SCENE_FLOW = [
   SCENE_KEYS.parentSettings,
   SCENE_KEYS.recyclingRun,
   SCENE_KEYS.houseBuilder,
+  SCENE_KEYS.fireFix,
   SCENE_KEYS.placeholderMission,
   SCENE_KEYS.missionComplete,
 ] as const;

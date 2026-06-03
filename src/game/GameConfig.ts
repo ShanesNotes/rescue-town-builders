@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
+import { FireFixScene } from './scenes/FireFixScene';
 import { HouseBuilderScene } from './scenes/HouseBuilderScene';
 import { MissionCompleteScene } from './scenes/MissionCompleteScene';
 import { ParentSettingsGateScene } from './scenes/ParentSettingsGateScene';
@@ -37,6 +38,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     ParentSettingsScene,
     RecyclingRunScene,
     HouseBuilderScene,
+    FireFixScene,
     PlaceholderMissionScene,
     MissionCompleteScene,
   ],
