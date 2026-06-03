@@ -16,7 +16,11 @@ import { TownMapScene } from './scenes/TownMapScene';
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'game',
-  backgroundColor: '#d9f5ff',
+  // Hearthlight (ADR-0008): pixel-art rendering kills the bilinear blur; navy letterbox reads
+  // as intentional night. Logical canvas stays 960×540; art is authored 2× from a 480×270 grid.
+  backgroundColor: '#1B2A41',
+  pixelArt: true,
+  roundPixels: true,
   width: 960,
   height: 540,
   scale: {
