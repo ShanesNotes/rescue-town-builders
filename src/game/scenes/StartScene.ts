@@ -4,6 +4,7 @@ import { SCENE_KEYS, startScene } from '../systems/SceneNavigation';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { getMusic } from '../systems/GameServices';
 import { addButton } from '../ui/Button';
+import { motionAllowed } from '../ui/Sprite';
 
 // Drawn in-engine as crisp sticker-book badges (palette from design.md) so the very first
 // screen is reliable and never depends on async art loading.
@@ -57,14 +58,16 @@ export class StartScene extends Phaser.Scene {
       onPress: () => this.begin(),
       testId: 'start.play',
     });
-    this.tweens.add({
-      targets: play,
-      scale: 1.05,
-      duration: 760,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    });
+    if (motionAllowed()) {
+      this.tweens.add({
+        targets: play,
+        scale: 1.05,
+        duration: 760,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
 
     this.add
       .text(480, 514, 'Grown-ups: tap Play. Arrow keys, touch, or a gamepad all work.', {
@@ -130,16 +133,18 @@ export class StartScene extends Phaser.Scene {
         })
         .setOrigin(0.5);
       c.add([body, face, eyeL, eyeR, smile, name]);
-      // Staggered idle bob — a little sign of life.
-      this.tweens.add({
-        targets: c,
-        y: cy - 10,
-        duration: 1000 + index * 120,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-        delay: index * 160,
-      });
+      // Staggered idle bob — a little sign of life (skipped when reduced-motion is set).
+      if (motionAllowed()) {
+        this.tweens.add({
+          targets: c,
+          y: cy - 10,
+          duration: 1000 + index * 120,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+          delay: index * 160,
+        });
+      }
     });
   }
 

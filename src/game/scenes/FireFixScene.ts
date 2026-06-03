@@ -4,7 +4,7 @@ import { picnicFires } from '../data/picnicFires';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { getSfx } from '../systems/GameServices';
-import { createSecretsForProfile, touchSecret, showSecretReveal } from '../systems/secretHotspot';
+import { createSecretsForProfile, addSecretHotspot } from '../systems/secretHotspot';
 import {
   createFireFixState,
   getFireFixResult,
@@ -15,6 +15,7 @@ import {
 } from '../systems/FireFix';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
+import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
 import { addHelperAvatar, addSprite, shrinkAndFade } from '../ui/Sprite';
 
 export class FireFixScene extends Phaser.Scene {
@@ -43,17 +44,15 @@ export class FireFixScene extends Phaser.Scene {
     this.bindInput();
 
     // Secret Friend: a tiny shy creature that appears for a child who keeps looking
-    // (3 touches). Placed outside the fire playfield, so it never affects the spray.
+    // (3 touches). Tucked near the hydrant landmark, outside the fire playfield so it never
+    // affects the spray, where a lingering child will notice its gentle glimmer.
     const secrets = createSecretsForProfile();
-    this.add.circle(880, 110, 16, 0xfff4bf, 0.18).setInteractive().on('pointerdown', () => {
-      const message = touchSecret(secrets, 'secret-friend');
-      if (message) showSecretReveal(this, message);
-    });
+    addSecretHotspot(this, secrets, 'secret-friend', 815, 470);
   }
 
   private drawPlayfield(state: FireFixState): void {
     this.add.rectangle(480, 286, 760, 270, 0xdff8d8).setStrokeStyle(4, 0x203247);
-    addSprite(this, { key: 'props.hydrant', x: 170, y: 360, width: 64, height: 64, pop: true });
+    addSprite(this, { key: 'props.hydrant', x: 170, y: 338, width: 64, height: 64, pop: true });
     this.add.circle(state.player.x, state.player.y, 28, 0xffffff, 0.78).setStrokeStyle(4, 0x203247);
     addHelperAvatar(this, 'ember', state.player.x, state.player.y - 5, 64, { pop: true });
     this.add.text(state.player.x, state.player.y - 45, 'Ember', {
@@ -113,28 +112,36 @@ export class FireFixScene extends Phaser.Scene {
   }
 
   private addControls(): void {
-    addButton(this, { x: 120, y: 470, width: 90, height: 52, label: '←', fill: 0xffffff, onPress: () => this.move({ x: -1, y: 0 }), testId: 'fire.move.left' });
-    addButton(this, { x: 220, y: 470, width: 90, height: 52, label: '→', fill: 0xffffff, onPress: () => this.move({ x: 1, y: 0 }), testId: 'fire.move.right' });
-    addButton(this, { x: 170, y: 415, width: 90, height: 52, label: '↑', fill: 0xffffff, onPress: () => this.move({ x: 0, y: -1 }), testId: 'fire.move.up' });
-    addButton(this, { x: 170, y: 525, width: 90, height: 52, label: '↓', fill: 0xffffff, onPress: () => this.move({ x: 0, y: 1 }), testId: 'fire.move.down' });
-    addButton(this, { x: 480, y: 500, width: 250, height: 74, label: 'Spray Water', fill: 0xb7e6ff, onPress: () => this.spray(), testId: 'fire.spray' });
-    addButton(this, { x: 800, y: 515, width: 210, height: 52, label: 'Back to Map', fill: 0xffffff, onPress: () => returnToTownMap(this), testId: 'fire.back-to-map' });
+    // Cross fits within the 540px canvas (down-arrow no longer clipped); hydrant moved up
+    // so the up-arrow clears it.
+    addButton(this, { x: 120, y: 460, width: 90, height: 52, label: '←', fill: 0xffffff, onPress: () => this.move({ x: -1, y: 0 }), testId: 'fire.move.left' });
+    addButton(this, { x: 220, y: 460, width: 90, height: 52, label: '→', fill: 0xffffff, onPress: () => this.move({ x: 1, y: 0 }), testId: 'fire.move.right' });
+    addButton(this, { x: 170, y: 408, width: 90, height: 52, label: '↑', fill: 0xffffff, onPress: () => this.move({ x: 0, y: -1 }), testId: 'fire.move.up' });
+    addButton(this, { x: 170, y: 512, width: 90, height: 52, label: '↓', fill: 0xffffff, onPress: () => this.move({ x: 0, y: 1 }), testId: 'fire.move.down' });
+    addButton(this, { x: 480, y: 498, width: 250, height: 74, label: 'Spray Water', fill: 0xb7e6ff, onPress: () => this.spray(), testId: 'fire.spray' });
+    addButton(this, { x: 800, y: 508, width: 210, height: 52, label: 'Back to Map', fill: 0xffffff, onPress: () => this.requestExit(), testId: 'fire.back-to-map' });
   }
 
   private bindInput(): void {
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
+      if (isMissionExitOpen(this)) return;
       const intent = inputIntentFromKeyboard(event.key);
       if (intent?.type === 'move') this.move(intent);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.spray();
-      if (intent?.type === 'back') returnToTownMap(this);
+      if (intent?.type === 'back') this.requestExit();
     });
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
+      if (isMissionExitOpen(this)) return;
       const intent = inputIntentFromGamepadButton(button.index);
       if (intent?.type === 'move') this.move(intent);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.spray();
-      if (intent?.type === 'back') returnToTownMap(this);
+      if (intent?.type === 'back') this.requestExit();
     });
+  }
+
+  private requestExit(): void {
+    confirmMissionExit(this, () => returnToTownMap(this));
   }
 
   private move(direction: Direction): void {

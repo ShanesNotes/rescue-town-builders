@@ -7,7 +7,7 @@ import { SCENE_KEYS, sceneKeyForMission, startParentSettingsGate, startScene, st
 import { projectTownMapNodes } from '../systems/TownMapProgress';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
-import { createSecretsForProfile, touchSecret, showSecretReveal } from '../systems/secretHotspot';
+import { createSecretsForProfile, addSecretHotspot } from '../systems/secretHotspot';
 import { addHelperAvatar, addSprite, hasTexture, type HelperCharacterId } from '../ui/Sprite';
 
 export class TownMapScene extends Phaser.Scene {
@@ -100,10 +100,7 @@ export class TownMapScene extends Phaser.Scene {
 
     // Cluckle's Dream: a sleepy hen who dreams the whole town in miniature (3 touches).
     const secrets = createSecretsForProfile();
-    this.add.circle(70, 150, 16, 0xfff4bf, 0.18).setInteractive().on('pointerdown', () => {
-      const message = touchSecret(secrets, 'cluckle-dream');
-      if (message) showSecretReveal(this, message);
-    });
+    addSecretHotspot(this, secrets, 'cluckle-dream', 70, 150);
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       const intent = inputIntentFromKeyboard(event.key);

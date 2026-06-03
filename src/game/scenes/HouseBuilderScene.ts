@@ -3,8 +3,9 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import { houseBlueprints } from '../data/houseBlueprints';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
+import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
 import { getSfx } from '../systems/GameServices';
-import { createSecretsForProfile, touchSecret, showSecretReveal } from '../systems/secretHotspot';
+import { createSecretsForProfile, addSecretHotspot } from '../systems/secretHotspot';
 import {
   createHouseBuilderState,
   getHouseBuilderResult,
@@ -89,34 +90,38 @@ export class HouseBuilderScene extends Phaser.Scene {
       height: 52,
       label: 'Back to Map',
       fill: 0xffffff,
-      onPress: () => returnToTownMap(this),
+      onPress: () => this.requestExit(),
       testId: 'house.back-to-map',
     });
 
-    // Hidden Light: a quiet glimmer that holds a loved one's words (1 touch).
+    // Hidden Light: a quiet glimmer that holds a loved one's words (1 touch). Placed in a
+    // calm spot away from Brick so it's found by patience, not by reaching for the helper.
     const secrets = createSecretsForProfile();
-    this.add.circle(840, 150, 16, 0xfff4bf, 0.18).setInteractive().on('pointerdown', () => {
-      const message = touchSecret(secrets, 'hidden-light');
-      if (message) showSecretReveal(this, message);
-    });
+    addSecretHotspot(this, secrets, 'hidden-light', 888, 268);
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
+      if (isMissionExitOpen(this)) return;
       const intent = inputIntentFromKeyboard(event.key);
       if (intent?.type === 'move') this.moveSelection(intent.x || intent.y, housePartTray.length);
       if (intent?.type === 'confirm' || intent?.type === 'action') {
         this.choosePart(housePartTray[this.selectedPartIndex]?.id ?? 'foundation', this.selectedPartIndex);
       }
-      if (intent?.type === 'back') returnToTownMap(this);
+      if (intent?.type === 'back') this.requestExit();
     });
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
+      if (isMissionExitOpen(this)) return;
       const intent = inputIntentFromGamepadButton(button.index);
       if (intent?.type === 'move') this.moveSelection(intent.x || intent.y, housePartTray.length);
       if (intent?.type === 'confirm' || intent?.type === 'action') {
         this.choosePart(housePartTray[this.selectedPartIndex]?.id ?? 'foundation', this.selectedPartIndex);
       }
-      if (intent?.type === 'back') returnToTownMap(this);
+      if (intent?.type === 'back') this.requestExit();
     });
+  }
+
+  private requestExit(): void {
+    confirmMissionExit(this, () => returnToTownMap(this));
   }
 
   private drawHouseGhost(state: HouseBuilderState): void {

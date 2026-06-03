@@ -4,6 +4,7 @@ import { recyclingCategoryIcons, recyclingCategoryLabels, recyclingItems } from 
 import { getSaveSystem, getSfx } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
+import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
 import {
   chooseRecyclingItems,
   createRecyclingRunState,
@@ -117,27 +118,33 @@ export class RecyclingRunScene extends Phaser.Scene {
       height: 52,
       label: 'Back to Map',
       fill: 0xffffff,
-      onPress: () => returnToTownMap(this),
+      onPress: () => this.requestExit(),
       testId: 'recycling.back-to-map',
     });
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
+      if (isMissionExitOpen(this)) return;
       const intent = inputIntentFromKeyboard(event.key);
       if (intent?.type === 'move') this.moveSelection(intent.x || intent.y, state.activeCategories.length);
       if (intent?.type === 'confirm' || intent?.type === 'action') {
         this.chooseCategory(state.activeCategories[this.selectedCategoryIndex] ?? state.activeCategories[0], this.selectedCategoryIndex);
       }
-      if (intent?.type === 'back') returnToTownMap(this);
+      if (intent?.type === 'back') this.requestExit();
     });
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
+      if (isMissionExitOpen(this)) return;
       const intent = inputIntentFromGamepadButton(button.index);
       if (intent?.type === 'move') this.moveSelection(intent.x || intent.y, state.activeCategories.length);
       if (intent?.type === 'confirm' || intent?.type === 'action') {
         this.chooseCategory(state.activeCategories[this.selectedCategoryIndex] ?? state.activeCategories[0], this.selectedCategoryIndex);
       }
-      if (intent?.type === 'back') returnToTownMap(this);
+      if (intent?.type === 'back') this.requestExit();
     });
+  }
+
+  private requestExit(): void {
+    confirmMissionExit(this, () => returnToTownMap(this));
   }
 
   private moveSelection(delta: number, count: number): void {

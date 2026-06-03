@@ -199,3 +199,24 @@ tree each cycle (the audit was written before Codex's G010 refactor).
   real art, no black squares, no clipped text. **95 unit + 3 e2e green; zero page errors or
   4xx across a full playthrough.** Codex is producing a bonus PNG batch in its worktree
   (optional; the `load.svg` fix already makes everything render).
+
+### Cycle 13 — 2026-06-03 — Adversarial review + fixes (the gift, hardened)
+- Ran a 6-dimension **ultracode review Workflow** (No-Fail, kid-UX, IP-safety, accessibility,
+  visual-polish, soul) with adversarial verification (31 agents). **IP-safety: zero findings.**
+  16 confirmed; fixed the ones that matter for a 6-year-old:
+  - **P0 — `confirmMissionExit` (#18):** the Back button silently discarded mission progress.
+    New `src/game/systems/confirmMissionExit.ts` — a gentle, stack-safe guard that defaults to
+    keep-playing; wired into all three missions' back button + keyboard/gamepad back intents,
+    with an `isMissionExitOpen` guard so stray input is ignored while it's open. New
+    `tests/e2e/no-fail-exit.spec.ts` proves the behavior end-to-end. **ADR-0007 satisfied; #18 closed.**
+  - **P1 — secrets were invisible** (18% cream-on-cream): new shared `addSecretHotspot` draws a
+    soft golden glimmer that gently breathes (reduced-motion aware), so a patient child can
+    actually find them. Repositioned Hidden Light clear of Brick and Secret Friend out of the
+    dead corner.
+  - **P1 — Fire control row clipped the canvas:** moved the hydrant up and refit the D-pad so the
+    down-arrow + Back button sit fully on-screen.
+  - **P1 — reduced-motion:** StartScene's pulse + idle bob now honor `motionAllowed()`.
+- Bumped the Playwright timeout to 60s (the brute-force playthroughs flaked under parallel CPU
+  contention; pass cleanly serially). **95 unit + 4 e2e green; every screen re-reviewed by image.**
+- Deferred (logged, next cycle): ParentSettings keyboard/gamepad nav (#11, behind the parent
+  gate), per-secret custom reveals + Cluckle's miniature-town animation, arrow-symbol playtest.
