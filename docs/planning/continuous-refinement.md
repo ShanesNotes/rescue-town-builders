@@ -117,3 +117,8 @@ tree each cycle (the audit was written before Codex's G010 refactor).
   "you failed/lost", "loser", "try harder") that no longer false-flags the reassuring
   "There is no fail state." copy. Added a corpus test over the mission intro panels.
   76 tests green.
+
+### Cycle 6 — 2026-06-03 — Warmer, star-scaled celebration
+- `createCelebrationPlan` now always celebrates (1★ → "You did it!", never a lesser
+  message — No-Fail), scales confetti with stars, and its message is asserted
+  non-harsh via the Cycle-5 guard. 78 tests green.
