@@ -5,6 +5,7 @@ import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../system
 import { getSaveSystem } from '../systems/GameServices';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
+import { addHelperAvatar, addSprite, type HelperCharacterId } from '../ui/Sprite';
 
 type ProfileAction = { type: 'select'; profileId: string } | { type: 'create' } | { type: 'settings' } | { type: 'back' };
 
@@ -36,9 +37,22 @@ export class ProfileScene extends Phaser.Scene {
       this.actions.push({ type: 'select', profileId: profile.id });
       const selected = index === this.selectedIndex ? '▶ ' : '';
       const avatar = profile.avatarId.charAt(0).toUpperCase() + profile.avatarId.slice(1);
+      const y = 175 + index * 62;
+      addHelperAvatar(this, helperForAvatar(profile.avatarId), 180, y, 46, {
+        idle: index === this.selectedIndex,
+        pop: index === this.selectedIndex,
+      });
+      addSprite(this, {
+        key: 'kenney.ui.star-yellow',
+        x: 750,
+        y,
+        width: 30,
+        height: 30,
+        alpha: profile.progress.totalStars > 0 ? 1 : 0.36,
+      });
       addButton(this, {
         x: 480,
-        y: 175 + index * 62,
+        y,
         width: 520,
         height: 54,
         label: `${selected}${profile.name} • ${avatar} • ${profile.progress.totalStars} ⭐`,
@@ -47,6 +61,12 @@ export class ProfileScene extends Phaser.Scene {
         testId: `profile.select.${profile.id}`,
       });
     });
+
+    if (profiles.length === 0) {
+      AVATARS.forEach((avatar, index) => {
+        addHelperAvatar(this, helperForAvatar(avatar), 390 + index * 90, 310, 64, { idle: true, pop: true });
+      });
+    }
 
     if (profiles.length < 5) {
       const actionIndex = this.actions.length;
@@ -134,4 +154,9 @@ export class ProfileScene extends Phaser.Scene {
     }
     startScene(this, SCENE_KEYS.start);
   }
+}
+
+function helperForAvatar(avatarId: string): HelperCharacterId {
+  if (avatarId === 'brick' || avatarId === 'ember' || avatarId === 'rivet') return avatarId;
+  return 'rivet';
 }
