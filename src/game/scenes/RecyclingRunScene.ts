@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { recyclingCategoryIcons, recyclingCategoryLabels, recyclingItems } from '../data/recyclingItems';
-import { getSaveSystem } from '../systems/GameServices';
+import { getSaveSystem, getSfx } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import {
@@ -117,6 +117,7 @@ export class RecyclingRunScene extends Phaser.Scene {
   private chooseCategory(category: RecyclingCategory | undefined, selectedCategoryIndex: number): void {
     if (!this.state || !category) return;
     const outcome = sortCurrentRecyclingItem(this.state, category);
+    if (outcome.correct) getSfx().play('correct');
     if (outcome.completed) {
       this.state = outcome.state;
       this.completeMission();

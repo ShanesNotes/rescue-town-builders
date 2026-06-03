@@ -3,6 +3,7 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import { picnicFires } from '../data/picnicFires';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
+import { getSfx } from '../systems/GameServices';
 import {
   createFireFixState,
   getFireFixResult,
@@ -113,6 +114,7 @@ export class FireFixScene extends Phaser.Scene {
   private spray(): void {
     if (!this.state) return;
     const outcome = sprayWater(this.state);
+    if (outcome.hit) getSfx().play('spray-hit');
     if (outcome.completed) {
       completeMission(this, getFireFixResult(outcome.state));
       return;

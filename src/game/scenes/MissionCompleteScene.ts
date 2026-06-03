@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionResult } from '../types';
 import { createCelebrationPlan } from '../systems/Celebration';
-import { getSaveSystem, missionRegistry } from '../systems/GameServices';
+import { getSaveSystem, missionRegistry, getSfx } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { returnToTownMap } from '../systems/SceneNavigation';
 import { addButton } from '../ui/Button';
@@ -40,6 +40,7 @@ export class MissionCompleteScene extends Phaser.Scene {
     );
     addBody(this, 250, `${celebration.message} ${updated.name}'s saved total: ${updated.progress.totalStars} ⭐`);
     this.drawCelebration(celebration.confettiBursts, celebration.starCount);
+    getSfx().play('fanfare');
     addButton(this, {
       x: 480,
       y: 380,

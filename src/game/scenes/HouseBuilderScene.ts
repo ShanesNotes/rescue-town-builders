@@ -3,6 +3,7 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import { houseBlueprints } from '../data/houseBlueprints';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
+import { getSfx } from '../systems/GameServices';
 import {
   createHouseBuilderState,
   getHouseBuilderResult,
@@ -121,6 +122,7 @@ export class HouseBuilderScene extends Phaser.Scene {
   private choosePart(partId: HousePartId, selectedPartIndex: number): void {
     if (!this.state) return;
     const outcome = placeHousePart(this.state, partId);
+    if (outcome.correct) getSfx().play('place');
     if (outcome.completed) {
       this.state = outcome.state;
       this.completeMission();
