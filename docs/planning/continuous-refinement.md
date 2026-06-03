@@ -165,3 +165,22 @@ tree each cycle (the audit was written before Codex's G010 refactor).
   three missions (Fire Fix via spray-only, exercising the Cycle 1 No-Fail floor) → stickers
   unlock → save persists across refresh; and the mobile-landscape canvas fits. `npm run
   test:e2e` green (2/2); unit suite still 90 green.
+
+### Cycle 11 — 2026-06-03 — The gift sprint: title, music, and a ratified tri-model plan
+- **Pushed to origin + merged to `main`** (the outward step, now authorized): branch and main
+  both on GitHub at `1afa86a`, then this sprint's work on top.
+- **Real title screen** (`StartScene`): replaced the "placeholder art only" text with a sunny
+  title — sky/sun/clouds, the three helpers rendered from their art with staggered idle bob,
+  a pulsing Play button, warm copy. Music starts on the first gesture.
+- **`MusicSystem`** (new, +5 tests): a gentle procedural WebAudio loop mirroring `SfxSystem`'s
+  pluggable-sink pattern, gated live on the music slider (No-Fail). Then **synthesized Grok's
+  motif** into it (G major, 76 BPM, I–IV–V–vi). Real `.aup3` theme swaps in behind `MusicSink`.
+- **Three models live in parallel** (isolated worktrees): Codex (`codex/pro-assets`) rendering
+  the loaded art + Kenney CC0 packs; **Grok (`grok/creative`) merged** — `creative-direction.md`
+  + enriched lore (95 tests still green).
+- **`design.md` (root)** locks the art/audio/UX direction (Kenney sources, Grok palette, the
+  PRD specs). **`docs/planning/long-running-plan.md` ratified** via an automated `grill-with-docs
+  --auto` Claude↔Codex dialogue — Codex's 5×REVISE incorporated (handoff packet, file-ownership
+  manifest, identity-brief schema, real-render verification, long-running infra). **Hard rule:
+  ADR-0006 stays closed until real child/parent play-test evidence — models cannot self-certify
+  fun.** 95 tests green; typecheck + build clean.
