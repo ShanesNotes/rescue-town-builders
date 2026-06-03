@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="P asset"><rect width="128" height="128" rx="24" fill="#f8f1d0"/><circle cx="64" cy="52" r="28" fill="#fff7dc" stroke="#203247" stroke-width="6"/><text x="64" y="104" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="28" fill="#203247">P</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Paper item">
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="#eaf7ff"/>
+  <path d="M40 22h36l18 18v66H40z" fill="#ffffff" stroke="#203247" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M76 22v20h18" fill="#d9f5ff" stroke="#203247" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M52 58h28M52 72h28M52 86h18" stroke="#70a6d6" stroke-width="6" stroke-linecap="round"/>
+</svg>

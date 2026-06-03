@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="T asset"><rect width="128" height="128" rx="24" fill="#b8bdc7"/><circle cx="64" cy="52" r="28" fill="#fff7dc" stroke="#203247" stroke-width="6"/><text x="64" y="104" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="28" fill="#203247">T</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Trash item">
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="#fff7dc"/>
+  <path d="M42 45h44l-5 58H47z" fill="#c7ccd1" stroke="#203247" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M35 45h58M55 31h18l5 14H50z" fill="#d8e2ea" stroke="#203247" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M56 59v29M72 59v29" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+</svg>

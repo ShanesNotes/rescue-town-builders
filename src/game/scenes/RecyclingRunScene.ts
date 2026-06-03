@@ -15,6 +15,15 @@ import {
 } from '../systems/RecyclingRun';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
+import { addHelperAvatar, addSprite } from '../ui/Sprite';
+
+const itemSpriteKeys: Record<RecyclingCategory, string> = {
+  compost: 'props.recycling-compost',
+  metal: 'props.recycling-metal',
+  paper: 'props.recycling-paper',
+  plastic: 'props.recycling-plastic',
+  trash: 'props.recycling-trash',
+};
 
 export class RecyclingRunScene extends Phaser.Scene {
   private state: RecyclingRunState | null = null;
@@ -51,25 +60,46 @@ export class RecyclingRunScene extends Phaser.Scene {
       return;
     }
 
+    this.add.circle(480, 205, 82, 0xffffff, 0.72).setStrokeStyle(5, 0x203247, 0.75);
+    const itemSprite = addSprite(this, {
+      key: itemSpriteKeys[item.category],
+      x: 480,
+      y: 200,
+      width: 124,
+      height: 124,
+      pop: true,
+      idle: true,
+    });
     this.add
-      .text(480, 205, `${item.icon}\n${item.label}`, {
+      .text(480, itemSprite ? 282 : 205, itemSprite ? item.label : `${item.icon}\n${item.label}`, {
         fontFamily: 'Trebuchet MS, Arial, sans-serif',
-        fontSize: '44px',
+        fontSize: itemSprite ? '28px' : '44px',
         color: '#203247',
         align: 'center',
       })
       .setOrigin(0.5);
+    addHelperAvatar(this, 'rivet', 770, 222, 86, { idle: true, pop: true });
 
     if (state.lastHint) {
-      addBody(this, 300, `Hint: ${state.lastHint}`);
+      addBody(this, 318, `Hint: ${state.lastHint}`);
     } else {
-      addBody(this, 300, 'Choose the bin that matches the item. Mistakes just give hints.');
+      addBody(this, 318, 'Choose the bin that matches the item. Mistakes just give hints.');
     }
 
     state.activeCategories.forEach((category, index) => {
       const selected = index === this.selectedCategoryIndex ? '▶ ' : '';
+      const x = 110 + index * 180;
+      addSprite(this, {
+        key: 'props.recycling-bin',
+        x,
+        y: 352,
+        width: 48,
+        height: 48,
+        alpha: index === this.selectedCategoryIndex ? 1 : 0.84,
+        pop: index === this.selectedCategoryIndex,
+      });
       addButton(this, {
-        x: 110 + index * 180,
+        x,
         y: 400,
         width: 165,
         height: 92,

@@ -8,6 +8,7 @@ import { projectTownMapNodes } from '../systems/TownMapProgress';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
 import { createSecretsForProfile, touchSecret, showSecretReveal } from '../systems/secretHotspot';
+import { addHelperAvatar, addSprite, hasTexture, type HelperCharacterId } from '../ui/Sprite';
 
 export class TownMapScene extends Phaser.Scene {
   private selectedIndex = 0;
@@ -26,14 +27,36 @@ export class TownMapScene extends Phaser.Scene {
     }
 
     const nodes = projectTownMapNodes(missionRegistry.list(), profile);
+    this.drawTownBackground();
     addTitle(this, 'Rescue Town Map');
     addBody(this, 110, `${profile.name}, choose a mission. Map nodes are driven by the MissionRegistry.`);
 
     nodes.forEach((node, index) => {
       const selected = index === this.selectedIndex ? '▶ ' : '';
+      const y = 188 + index * 90;
+      addSprite(this, {
+        key: 'town.map-node',
+        x: 120,
+        y,
+        width: selected ? 62 : 54,
+        height: selected ? 62 : 54,
+        pop: Boolean(selected),
+      });
+      addSprite(this, {
+        key: 'kenney.tiny-town.target',
+        x: 120,
+        y,
+        width: selected ? 34 : 28,
+        height: selected ? 34 : 28,
+        pop: Boolean(selected),
+      });
+      addHelperAvatar(this, helperForCharacterId(node.characterId), 835, y, 56, {
+        idle: index === this.selectedIndex,
+        pop: index === this.selectedIndex,
+      });
       addButton(this, {
         x: 480,
-        y: 188 + index * 90,
+        y,
         width: 650,
         height: 74,
         label: `${selected}${node.title}\n${node.mapNodeId} • ${node.starsLabel}`,
@@ -101,6 +124,25 @@ export class TownMapScene extends Phaser.Scene {
     });
   }
 
+  private drawTownBackground(): void {
+    this.add.rectangle(480, 292, 850, 330, 0x9be7c4, 0.24).setStrokeStyle(3, 0x203247, 0.16);
+    if (hasTexture(this, 'kenney.tiny-town.grass')) {
+      this.add.tileSprite(480, 292, 830, 318, 'kenney.tiny-town.grass').setTileScale(2, 2).setAlpha(0.3);
+    }
+    this.add.rectangle(480, 268, 650, 30, 0xffe0a3, 0.45);
+    this.add.rectangle(340, 292, 30, 230, 0xffe0a3, 0.45);
+    this.add.rectangle(650, 292, 30, 230, 0xffe0a3, 0.45);
+    [
+      ['kenney.tiny-town.tree-green', 238, 152],
+      ['kenney.tiny-town.tree-yellow', 718, 150],
+      ['kenney.tiny-town.tree-green', 245, 438],
+      ['kenney.tiny-town.tree-yellow', 720, 436],
+      ['kenney.tiny-town.well', 480, 440],
+    ].forEach(([key, x, y]) => {
+      addSprite(this, { key: String(key), x: Number(x), y: Number(y), width: 44, height: 44, alpha: 0.85 });
+    });
+  }
+
   private moveSelection(delta: number, count: number): void {
     if (delta === 0) return;
     this.selectedIndex = Math.max(0, Math.min(count - 1, this.selectedIndex + delta));
@@ -110,4 +152,9 @@ export class TownMapScene extends Phaser.Scene {
   private startMission(missionId: MissionId): void {
     startScene(this, sceneKeyForMission(missionId));
   }
+}
+
+function helperForCharacterId(characterId: string): HelperCharacterId {
+  if (characterId === 'brick' || characterId === 'ember' || characterId === 'rivet') return characterId;
+  return 'rivet';
 }
