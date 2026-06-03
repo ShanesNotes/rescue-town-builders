@@ -8,7 +8,10 @@ import { addBody, addTitle } from '../ui/SceneText';
 
 type ProfileAction = { type: 'select'; profileId: string } | { type: 'create' } | { type: 'settings' } | { type: 'back' };
 
-const AVATARS = ['rivet', 'brick', 'ember', 'wings', 'scoot'];
+// Only the three live, IP-reviewed MVP helpers ship. Roadmap characters stay out
+// of the bundle until ADR-0006's expansion gate opens. The modulo wrap at the use
+// site means profiles 4-5 simply reuse a vetted avatar — no crash, no new strings.
+const AVATARS = ['rivet', 'brick', 'ember'];
 
 export class ProfileScene extends Phaser.Scene {
   private selectedIndex = 0;

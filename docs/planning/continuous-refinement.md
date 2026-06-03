@@ -90,3 +90,14 @@ tree each cycle (the audit was written before Codex's G010 refactor).
   seam + `confirmMissionExit` guard now; defer the heavyweight mission runtime. Codex
   conceded the listener-leak claim with Phaser source evidence.
 - Next: non-destructive save (#17, TDD logic slice), then the ADR-0007 seams.
+
+### Cycle 2 — 2026-06-03 — Non-destructive save (#17)
+- `SaveSystem.load()` now backs up the raw save before discarding (version mismatch
+  or corrupt JSON), warns on both branches, and normalizes the full profile/progress
+  shape so a partial/old save can't crash downstream readers. `migrate()` deferred
+  until `SAVE_VERSION` first bumps. 68 tests green. Issue #17 closed.
+
+### Cycle 3 — 2026-06-03 — Trim roadmap avatars (#16)
+- `ProfileScene` AVATARS trimmed to the three live IP-reviewed helpers; `wings`/`scoot`
+  no longer ship in the bundle (verified by a clean `dist` grep). The modulo wrap keeps
+  profiles 4–5 crash-free. Issue #16 closed.
