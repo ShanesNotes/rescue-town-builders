@@ -23,10 +23,19 @@ body {
 
 #app-shell {
   display: grid;
+  /* minmax(0, 1fr) stops the track from growing to the 960px canvas's natural
+     size, so #game stays viewport-sized and Phaser's FIT scales the canvas down
+     on small screens instead of overflowing. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   place-items: center;
 }
 
 canvas {
+  /* block removes the inline baseline gap (~5px) that otherwise overflows the
+     viewport height on small landscape screens. */
+  display: block;
   border-radius: 18px;
   box-shadow: 0 14px 40px rgb(32 50 71 / 18%);
+  max-width: 100%;
+  max-height: 100%;
 }

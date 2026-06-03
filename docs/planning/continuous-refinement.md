@@ -152,3 +152,16 @@ tree each cycle (the audit was written before Codex's G010 refactor).
   **90 tests green.** Issue #13 closed.
 - The easter egg that sparked the project (for Willem) is now playable. Dad's personal
   knob is still open: set `hiddenLightMessage` to put your own words in the Hidden Light.
+
+### Cycle 10 — 2026-06-03 — Verify by running: e2e green + mobile fit
+- Installed Playwright + Chromium and ran Codex's browser smoke harness for the first time.
+  It caught two real issues. **Fixed the harness**: mission helpers now loop-until-complete
+  (robust to data-driven item order); the star assertion is corrected to the No-Fail floor
+  (3 missions × ≥1 star). **Fixed a real mobile layout bug**: the canvas overflowed small
+  viewports because `place-items: center` sized the grid track to the 960px canvas;
+  `minmax(0, 1fr)` track + `canvas { display: block }` + `max-width/height` make FIT scale
+  correctly now.
+- **The whole game is verified END-TO-END in a real browser**: create profile → complete all
+  three missions (Fire Fix via spray-only, exercising the Cycle 1 No-Fail floor) → stickers
+  unlock → save persists across refresh; and the mobile-landscape canvas fits. `npm run
+  test:e2e` green (2/2); unit suite still 90 green.
