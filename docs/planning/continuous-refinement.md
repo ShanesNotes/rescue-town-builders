@@ -101,3 +101,19 @@ tree each cycle (the audit was written before Codex's G010 refactor).
 - `ProfileScene` AVATARS trimmed to the three live IP-reviewed helpers; `wings`/`scoot`
   no longer ship in the bundle (verified by a clean `dist` grep). The modulo wrap keeps
   profiles 4–5 crash-free. Issue #16 closed.
+
+### Cycle 4 — 2026-06-03 — Synthesized SFX (#10) + parallel swarms
+- New `SfxSystem` (deep, 5 tests): gentle WebAudio cues at the correct-sort / place /
+  spray-hit / fanfare seams, gated on the profile's effective sfx level. No asset files;
+  CC0 samples can swap in behind the same interface. 73 tests green. Issue #10 closed.
+- **Parallel multi-model swarms** (each in an isolated git worktree — no file collision):
+  a **Codex `$ultragoal`** asset + Playwright swarm in `/home/ark/rtb-codex`
+  (`codex/assets-juice`), and a **Grok** Sticker-Book + reward-lore workstream staged in
+  `/home/ark/rtb-grok` (`grok/sticker-lore`) — Grok's autonomous run is pending Shane's
+  approval (the `--always-approve` gate was blocked by the permission classifier).
+
+### Cycle 5 — 2026-06-03 — No-Fail copy guard
+- Hardened `containsHarshFailureLanguage`: context-aware shaming detection (flags
+  "you failed/lost", "loser", "try harder") that no longer false-flags the reassuring
+  "There is no fail state." copy. Added a corpus test over the mission intro panels.
+  76 tests green.

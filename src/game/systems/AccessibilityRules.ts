@@ -14,7 +14,18 @@ export const polishChecklist = [
   'local-save-only',
 ] as const;
 
-const HARSH_FAILURE_WORDS = [/\blost\b/i, /\bfailed\b/i, /\bfail\b/i, /\bgame over\b/i, /\bbad job\b/i];
+// Detects shaming / hard-fail language. Tuned to flag genuine put-downs
+// ("you failed", "you lost", "loser", "try harder") while allowing reassuring
+// copy such as "there is no fail state" — a bare /\bfail\b/ wrongly flagged that.
+const HARSH_FAILURE_WORDS = [
+  /\bfailed\b/i,
+  /\byou fail\b/i,
+  /\byou (lose|lost)\b/i,
+  /\bgame over\b/i,
+  /\bbad job\b/i,
+  /\b(loser|stupid|dumb)\b/i,
+  /\btry harder\b/i,
+];
 
 export function meetsMinimumTouchTarget(target: TouchTarget): boolean {
   return target.width >= MIN_TOUCH_TARGET && target.height >= MIN_TOUCH_TARGET;
