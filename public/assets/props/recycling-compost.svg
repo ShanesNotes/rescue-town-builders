@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Compost item">
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="#9be7c4"/>
+  <circle cx="64" cy="64" r="44" fill="#fff7dc" stroke="#203247" stroke-width="6"/>
+  <path d="M41 72c22 16 44 7 53-18" fill="none" stroke="#ffcf5c" stroke-width="16" stroke-linecap="round"/>
+  <path d="M43 71c15 8 31 4 42-10" fill="none" stroke="#f59f36" stroke-width="6" stroke-linecap="round"/>
+  <path d="M84 36c9 2 14 8 16 16-9 0-16-4-20-11z" fill="#59c36a" stroke="#203247" stroke-width="4" stroke-linejoin="round"/>
+</svg>

@@ -29,6 +29,30 @@ const originalCc0Source: AssetSource = {
   notes: 'Original geometric SVGs created for this repository; no third-party IP, names, logos, likenesses, or fan art.',
 };
 
+const kenneyUiPackSource: AssetSource = {
+  name: 'Kenney UI Pack',
+  url: 'https://kenney.nl/assets/ui-pack',
+  license: 'CC0-1.0',
+  author: 'Kenney',
+  notes: 'Official Kenney asset page lists Creative Commons CC0; imported only selected PNG button/star assets.',
+};
+
+const kenneyTinyTownSource: AssetSource = {
+  name: 'Kenney Tiny Town',
+  url: 'https://kenney.nl/assets/tiny-town',
+  license: 'CC0-1.0',
+  author: 'Kenney',
+  notes: 'Official Kenney asset page lists Creative Commons CC0; imported only selected map tile/prop PNG assets.',
+};
+
+const kenneyShapeCharactersSource: AssetSource = {
+  name: 'Kenney Shape Characters',
+  url: 'https://kenney.nl/assets/shape-characters',
+  license: 'CC0-1.0',
+  author: 'Kenney',
+  notes: 'Official Kenney asset page lists Creative Commons CC0; imported only selected body, face, hand, and shadow PNG assets.',
+};
+
 export const assetCatalog = [
   {
     key: 'ui.placeholder-shapes',
@@ -107,6 +131,16 @@ export const assetCatalog = [
     source: originalCc0Source,
     notes: 'Used by manifest coverage; gameplay can fall back to emoji labels.',
   },
+  ...(['compost', 'plastic', 'metal'] as const).map((category) => ({
+    key: `props.recycling-${category}`,
+    kind: 'prop' as const,
+    status: 'production' as const,
+    description: `${category} recycling item icon.`,
+    path: `assets/props/recycling-${category}.svg`,
+    loadType: 'image' as const,
+    source: originalCc0Source,
+    notes: 'Original category item art for Recycling Run; emoji/text remain fallback labels.',
+  })),
   ...(['foundation', 'walls', 'roof', 'door', 'decoration'] as const).map((part) => ({
     key: `props.house-${part}`,
     kind: 'prop' as const,
@@ -177,6 +211,63 @@ export const assetCatalog = [
     source: originalCc0Source,
     notes: 'Runtime circles remain fallback.',
   },
+  ...(['blue', 'green', 'yellow', 'red'] as const).map((color) => ({
+    key: `kenney.ui.button-${color}`,
+    kind: 'ui' as const,
+    status: 'production' as const,
+    description: `Kenney UI Pack ${color} rectangle button panel.`,
+    path: `assets/kenney/ui/button-${color}.png`,
+    loadType: 'image' as const,
+    source: kenneyUiPackSource,
+    notes: 'Used as a visual layer under existing accessible button hit targets.',
+  })),
+  {
+    key: 'kenney.ui.star-yellow',
+    kind: 'ui',
+    status: 'production',
+    description: 'Kenney UI Pack yellow star.',
+    path: 'assets/kenney/ui/star-yellow.png',
+    loadType: 'image',
+    source: kenneyUiPackSource,
+    notes: 'Used for profile and town-map reward polish.',
+  },
+  ...([
+    ['grass', 'grass tile'],
+    ['tree-green', 'green tree tile'],
+    ['tree-yellow', 'yellow tree tile'],
+    ['target', 'mission target marker'],
+    ['well', 'town well prop'],
+  ] as const).map(([id, description]) => ({
+    key: `kenney.tiny-town.${id}`,
+    kind: id === 'grass' ? ('tile' as const) : ('prop' as const),
+    status: 'production' as const,
+    description: `Kenney Tiny Town ${description}.`,
+    path: `assets/kenney/tiny-town/${id}.png`,
+    loadType: 'image' as const,
+    source: kenneyTinyTownSource,
+    notes: 'Used to build a lightweight decorative town-map background.',
+  })),
+  ...([
+    ['green-body-circle', 'green circular body'],
+    ['yellow-body-squircle', 'yellow rounded-square body'],
+    ['red-body-circle', 'red circular body'],
+    ['face-happy', 'happy face'],
+    ['face-calm', 'calm face'],
+    ['face-bright', 'bright face'],
+    ['green-hand-open', 'green open hand'],
+    ['yellow-hand-open', 'yellow open hand'],
+    ['red-hand-open', 'red open hand'],
+    ['shadow', 'soft character shadow'],
+  ] as const).map(([id, description]) => ({
+    key: `kenney.shape.${id}`,
+    kind: 'character' as const,
+    status: 'production' as const,
+    description: `Kenney Shape Characters ${description}.`,
+    path: `assets/kenney/shape/${id}.png`,
+    loadType: 'image' as const,
+    source: kenneyShapeCharactersSource,
+    notes: 'Layered into original Rivet, Brick, and Ember helper avatars.',
+  })),
   {
     key: 'audio.theme-loop',
     kind: 'audio',

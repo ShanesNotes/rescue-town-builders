@@ -63,7 +63,10 @@ Use this checklist before importing any asset file:
 
 | Asset | Source URL | Source/author | License | Attribution required | Date checked | Imported path | Notes |
 | ----- | ---------- | ------------- | ------- | -------------------- | ------------ | ------------- | ----- |
-| _None yet_ | | | | | | | |
+| Kenney UI Pack selected button/star PNGs | `https://kenney.nl/assets/ui-pack` | Kenney | CC0-1.0 | No | 2026-06-03 | `public/assets/kenney/ui/*.png` | Official Kenney page lists Creative Commons CC0. Used as visual layer under existing hit targets. |
+| Kenney Tiny Town selected tile/prop PNGs | `https://kenney.nl/assets/tiny-town` | Kenney | CC0-1.0 | No | 2026-06-03 | `public/assets/kenney/tiny-town/*.png` | Official Kenney page lists Creative Commons CC0. Used for a lightweight town map background and node polish. |
+| Kenney Shape Characters selected body/face/hand/shadow PNGs | `https://kenney.nl/assets/shape-characters` | Kenney | CC0-1.0 | No | 2026-06-03 | `public/assets/kenney/shape/*.png` | Official Kenney page lists Creative Commons CC0. Layered into original Rivet, Brick, and Ember helper avatars. |
+| `props.recycling-compost`, `props.recycling-plastic`, `props.recycling-metal` | `public/assets/` | Rescue Town Builders original placeholder asset set | CC0-1.0 | No | 2026-06-03 | `public/assets/props/recycling-compost.svg`, `public/assets/props/recycling-plastic.svg`, `public/assets/props/recycling-metal.svg` | Original category item art; no third-party character likenesses or marks. |
 
 ## Audio intake note
 
