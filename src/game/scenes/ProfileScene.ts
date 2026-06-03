@@ -44,6 +44,7 @@ export class ProfileScene extends Phaser.Scene {
         label: `${selected}${profile.name} • ${avatar} • ${profile.progress.totalStars} ⭐`,
         fill: index === this.selectedIndex ? 0xfff4bf : 0x9be7c4,
         onPress: () => this.choose({ type: 'select', profileId: profile.id }),
+        testId: `profile.select.${profile.id}`,
       });
     });
 
@@ -58,6 +59,7 @@ export class ProfileScene extends Phaser.Scene {
         label: `${actionIndex === this.selectedIndex ? '▶ ' : ''}Add Profile (${profiles.length}/5)`,
         fill: actionIndex === this.selectedIndex ? 0xfff4bf : 0xb7e6ff,
         onPress: () => this.choose({ type: 'create' }),
+        testId: 'profile.add',
       });
     }
 
@@ -70,6 +72,7 @@ export class ProfileScene extends Phaser.Scene {
       label: 'Parent Settings',
       fill: 0xffffff,
       onPress: () => this.choose({ type: 'settings' }),
+      testId: 'profile.parent-settings',
     });
     addButton(this, {
       x: 140,
@@ -79,6 +82,7 @@ export class ProfileScene extends Phaser.Scene {
       label: 'Back',
       fill: 0xffffff,
       onPress: () => this.choose({ type: 'back' }),
+      testId: 'profile.back',
     });
 
     addBody(this, 435, 'Gamepad: D-pad chooses • A selects • B goes back');

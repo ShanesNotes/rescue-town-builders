@@ -122,3 +122,13 @@ tree each cycle (the audit was written before Codex's G010 refactor).
 - `createCelebrationPlan` now always celebrates (1★ → "You did it!", never a lesser
   message — No-Fail), scales confetti with stars, and its message is asserted
   non-harsh via the Cycle-5 guard. 78 tests green.
+
+### Cycle 7 — 2026-06-03 — Integrate the Codex asset pipeline + e2e harness
+- Merged `codex/assets-juice` into `continuous-refinement` (auto-merged, **no conflicts**):
+  original CC0 SVG art (characters / props / fx / ui), an `AssetCatalog` manifest +
+  `PreloadScene` loading with placeholder fallback, and a Playwright e2e smoke harness
+  (`E2EBridge`, `tests/e2e`, `run-e2e`). The Codex swarm's run hit a transient
+  model-capacity error before its final gate; its work was preserved on its branch
+  (`471c4de`), verified green, then merged. **81 tests green**, typecheck + build clean.
+  (Playwright browser binaries not yet installed; `npm run test:e2e` is wired but pending
+  `@playwright/test`.)

@@ -82,12 +82,12 @@ export class FireFixScene extends Phaser.Scene {
   }
 
   private addControls(): void {
-    addButton(this, { x: 120, y: 470, width: 90, height: 52, label: '←', fill: 0xffffff, onPress: () => this.move({ x: -1, y: 0 }) });
-    addButton(this, { x: 220, y: 470, width: 90, height: 52, label: '→', fill: 0xffffff, onPress: () => this.move({ x: 1, y: 0 }) });
-    addButton(this, { x: 170, y: 415, width: 90, height: 52, label: '↑', fill: 0xffffff, onPress: () => this.move({ x: 0, y: -1 }) });
-    addButton(this, { x: 170, y: 525, width: 90, height: 52, label: '↓', fill: 0xffffff, onPress: () => this.move({ x: 0, y: 1 }) });
-    addButton(this, { x: 480, y: 500, width: 250, height: 74, label: 'Spray Water', fill: 0xb7e6ff, onPress: () => this.spray() });
-    addButton(this, { x: 800, y: 515, width: 210, height: 52, label: 'Back to Map', fill: 0xffffff, onPress: () => returnToTownMap(this) });
+    addButton(this, { x: 120, y: 470, width: 90, height: 52, label: '←', fill: 0xffffff, onPress: () => this.move({ x: -1, y: 0 }), testId: 'fire.move.left' });
+    addButton(this, { x: 220, y: 470, width: 90, height: 52, label: '→', fill: 0xffffff, onPress: () => this.move({ x: 1, y: 0 }), testId: 'fire.move.right' });
+    addButton(this, { x: 170, y: 415, width: 90, height: 52, label: '↑', fill: 0xffffff, onPress: () => this.move({ x: 0, y: -1 }), testId: 'fire.move.up' });
+    addButton(this, { x: 170, y: 525, width: 90, height: 52, label: '↓', fill: 0xffffff, onPress: () => this.move({ x: 0, y: 1 }), testId: 'fire.move.down' });
+    addButton(this, { x: 480, y: 500, width: 250, height: 74, label: 'Spray Water', fill: 0xb7e6ff, onPress: () => this.spray(), testId: 'fire.spray' });
+    addButton(this, { x: 800, y: 515, width: 210, height: 52, label: 'Back to Map', fill: 0xffffff, onPress: () => returnToTownMap(this), testId: 'fire.back-to-map' });
   }
 
   private bindInput(): void {

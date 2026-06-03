@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { MIN_TOUCH_TARGET } from '../systems/AccessibilityRules';
+import { registerE2EButton, registerE2EScene } from '../systems/E2EBridge';
 
 export type ButtonOptions = {
   x: number;
@@ -10,9 +11,11 @@ export type ButtonOptions = {
   fill?: number;
   stroke?: number;
   onPress: () => void;
+  testId?: string;
 };
 
 export function addButton(scene: Phaser.Scene, options: ButtonOptions): Phaser.GameObjects.Container {
+  registerE2EScene(scene.scene.key);
   const fill = options.fill ?? 0xffffff;
   const stroke = options.stroke ?? 0x203247;
   const width = Math.max(options.width, MIN_TOUCH_TARGET);
@@ -32,6 +35,14 @@ export function addButton(scene: Phaser.Scene, options: ButtonOptions): Phaser.G
   container.setSize(width, height);
   container.setInteractive({ useHandCursor: true });
   container.on('pointerdown', options.onPress);
+  if (options.testId) {
+    registerE2EButton({
+      testId: options.testId,
+      label: options.label,
+      sceneKey: scene.scene.key,
+      press: options.onPress,
+    });
+  }
   container.on('pointerover', () => panel.setFillStyle(0xfff4bf));
   container.on('pointerout', () => panel.setFillStyle(fill));
   return container;

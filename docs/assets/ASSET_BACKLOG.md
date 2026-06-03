@@ -43,8 +43,8 @@ Purpose: keep game development moving with safe placeholders while tracking prod
 
 ## Post-MVP gate asset status
 
-- Current prototype intentionally uses runtime placeholder shapes, text, and emoji only.
-- No art, font, SFX, or music files are imported yet.
+- Current prototype uses runtime placeholder shapes, text, and emoji as the no-fail primary fallback.
+- Simple original CC0 SVG placeholder assets are now bundled under `public/assets/` and documented in the ledger below. No font, SFX, or music files are imported yet.
 - The generated theme music remains outside the repo in four segments and needs splicing before any implementation work.
 - Physical gamepad smoke may create UI glyph needs; track those as production UI assets, not code-only assumptions.
 
@@ -71,12 +71,25 @@ The theme music currently exists outside the repo as four generated segments. Do
 
 ## Recycling Run placeholder note
 
-Slice 2 uses runtime text/emoji placeholders for bins and items. No imported art assets were added. Production bin/item art is still needed before polish.
+Slice 2 uses runtime text/emoji placeholders for bins and items as the fallback. Simple original CC0 SVG bin/item badges are bundled for manifest coverage. Production bin/item art is still needed before polish.
 
 ## House Builder placeholder note
 
-Slice 3 uses runtime shape/text placeholders for foundations, walls, roofs, doors, and decorations. No imported art assets were added. Production house-part art is still needed before polish.
+Slice 3 uses runtime shape/text placeholders for foundations, walls, roofs, doors, and decorations as the fallback. Simple original CC0 SVG house-part badges are bundled for manifest coverage. Production house-part art is still needed before polish.
 
 ## Fire Fix placeholder note
 
-Slice 4 uses runtime circles, labels, and a blue aim line for fires/water feedback. No imported art or audio assets were added. Production hydrant, fire, water spray, and smoke puff art remains needed before polish.
+Slice 4 uses runtime circles, labels, and a blue aim line for fires/water feedback as the fallback. Simple original CC0 SVG fire, water, and hydrant badges are bundled for manifest coverage. Production hydrant, fire, water spray, and smoke puff art remains needed before polish.
+
+## Bundled MVP CC0 placeholder assets — 2026-06-03
+
+These simple geometric SVG assets are original to Rescue Town Builders and dedicated as CC0-1.0 for this project. They live in `public/assets/` and are loaded through `src/game/systems/AssetCatalog.ts`. Runtime Phaser shapes/text remain the no-fail fallback if any asset is missing.
+
+| Asset | Source URL | Source/author | License | Attribution required | Date checked | Imported path | Notes |
+| ----- | ---------- | ------------- | ------- | -------------------- | ------------ | ------------- | ----- |
+| `character.rivet`, `character.brick`, `character.ember` | `public/assets/` | Rescue Town Builders original placeholder asset set | CC0-1.0 | No | 2026-06-03 | `public/assets/characters/*.svg` | Original helper badges only; no third-party character likenesses. |
+| `town.map-node` | `public/assets/` | Rescue Town Builders original placeholder asset set | CC0-1.0 | No | 2026-06-03 | `public/assets/props/town-map-node.svg` | Generic town map node marker. |
+| `props.recycling-bin`, `props.recycling-paper`, `props.recycling-trash` | `public/assets/` | Rescue Town Builders original placeholder asset set | CC0-1.0 | No | 2026-06-03 | `public/assets/props/recycling-*.svg` | Generic recycling/trash icons for manifest coverage. |
+| `props.house-foundation`, `props.house-walls`, `props.house-roof`, `props.house-door`, `props.house-decoration` | `public/assets/` | Rescue Town Builders original placeholder asset set | CC0-1.0 | No | 2026-06-03 | `public/assets/props/house-*.svg` | Simple House Builder part badges. |
+| `props.fire`, `props.water-spray`, `props.hydrant` | `public/assets/` | Rescue Town Builders original placeholder asset set | CC0-1.0 | No | 2026-06-03 | `public/assets/props/fire.svg`, `public/assets/props/water-spray.svg`, `public/assets/props/hydrant.svg` | Friendly fire/water/hydrant icons. |
+| `ui.sticker-star`, `ui.button-panel`, `fx.confetti` | `public/assets/` | Rescue Town Builders original placeholder asset set | CC0-1.0 | No | 2026-06-03 | `public/assets/ui/*.svg`, `public/assets/fx/confetti.svg` | Stickers, panels, and celebration polish. |
