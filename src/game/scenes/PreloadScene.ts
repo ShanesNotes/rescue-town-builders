@@ -13,7 +13,12 @@ export class PreloadScene extends Phaser.Scene {
     for (const asset of listLoadableAssets(assetCatalog)) {
       const path = resolveAssetPath(asset, import.meta.env.BASE_URL);
       if (!path || !asset.loadType) continue;
-      if (asset.loadType === 'image') this.load.image(asset.key, path);
+      if (asset.loadType === 'image') {
+        // SVGs must rasterize via load.svg; load.image renders them as black squares in
+        // Phaser's WebGL renderer. scale:2 keeps the aspect ratio and stays crisp.
+        if (path.endsWith('.svg')) this.load.svg(asset.key, path, { scale: 2 });
+        else this.load.image(asset.key, path);
+      }
       if (asset.loadType === 'audio') this.load.audio(asset.key, path);
     }
   }

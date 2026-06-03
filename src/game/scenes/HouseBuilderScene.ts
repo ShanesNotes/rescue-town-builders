@@ -55,8 +55,8 @@ export class HouseBuilderScene extends Phaser.Scene {
     }
 
     this.drawHouseGhost(state);
-    addHelperAvatar(this, 'brick', 770, 215, 86, { idle: true, pop: true });
-    addBody(this, 290, state.lastHint ?? `Next snap target: ${part.label}`);
+    addHelperAvatar(this, 'brick', 800, 150, 86, { idle: true, pop: true });
+    addBody(this, 318, `${state.currentHouse?.title ?? 'House'} — ${state.lastHint ?? `next: ${part.label}`}`);
 
     housePartTray.forEach((trayPart, index) => {
       const selected = index === this.selectedPartIndex ? '▶ ' : '';
@@ -121,14 +121,8 @@ export class HouseBuilderScene extends Phaser.Scene {
 
   private drawHouseGhost(state: HouseBuilderState): void {
     const centerX = 480;
-    const y = 170;
+    const y = 210; // below the header so the roof never overlaps the title
     const placed = state.currentPartIndex;
-    this.add.text(centerX, y - 40, state.currentHouse?.title ?? 'House', {
-      fontFamily: 'Trebuchet MS, Arial, sans-serif',
-      fontSize: '26px',
-      color: '#203247',
-      align: 'center',
-    }).setOrigin(0.5);
 
     const foundationColor = placed > 0 ? 0x8d6e63 : 0xffffff;
     const wallColor = placed > 1 ? 0xffd6a5 : 0xffffff;
@@ -140,8 +134,8 @@ export class HouseBuilderScene extends Phaser.Scene {
     this.addHousePartSprite('foundation', centerX - 118, y + 78, placed > 0, placed === 0);
     this.add.rectangle(centerX, y + 18, 185, 94, wallColor).setStrokeStyle(3, 0x203247);
     this.addHousePartSprite('walls', centerX + 118, y + 20, placed > 1, placed === 1);
-    this.add.triangle(centerX, y - 70, -115, 70, 115, 70, 0, -15, roofColor).setStrokeStyle(3, 0x203247);
-    this.addHousePartSprite('roof', centerX, y - 84, placed > 2, placed === 2);
+    this.add.triangle(centerX, y - 44, -115, 70, 115, 70, 0, -15, roofColor).setStrokeStyle(3, 0x203247);
+    this.addHousePartSprite('roof', centerX, y - 52, placed > 2, placed === 2);
     this.add.rectangle(centerX, y + 46, 42, 55, doorColor).setStrokeStyle(3, 0x203247);
     this.addHousePartSprite('door', centerX, y + 46, placed > 3, placed === 3);
     this.add.circle(centerX + 126, y + 75, 18, decorColor).setStrokeStyle(3, 0x203247);

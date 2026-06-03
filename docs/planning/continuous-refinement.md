@@ -184,3 +184,18 @@ tree each cycle (the audit was written before Codex's G010 refactor).
   manifest, identity-brief schema, real-render verification, long-running infra). **Hard rule:
   ADR-0006 stays closed until real child/parent play-test evidence — models cannot self-certify
   fun.** 95 tests green; typecheck + build clean.
+
+### Cycle 12 — 2026-06-03 — Integrate Codex's art + verify by seeing it
+- **Merged `codex/pro-assets`** (clean, no conflicts): real sprites rendered across every
+  gameplay scene + Kenney CC0 packs (UI buttons, tiny-town tiles, character faces, star),
+  a reusable `Sprite.ts` helper, and new recycling-item art.
+- **Fixed the root SVG bug**: `PreloadScene` now loads `.svg` via `load.svg` (scale 2);
+  `load.image` had rasterized SVGs as black squares in WebGL. Mission icons now render.
+- **Layout polish** on the merged scenes: lowered the House ghost so the roof clears the
+  title and connects to the walls (house name folded into the hint line); lowered the Fire
+  Fix play panel so "There is no fail state." is no longer clipped.
+- **Verified by SEEING it**: the screenshot harness captured all 8 screens; I reviewed each
+  PNG — title, profile, town map, all three missions, celebration, sticker book — all show
+  real art, no black squares, no clipped text. **95 unit + 3 e2e green; zero page errors or
+  4xx across a full playthrough.** Codex is producing a bonus PNG batch in its worktree
+  (optional; the `load.svg` fix already makes everything render).

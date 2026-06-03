@@ -36,7 +36,7 @@ export class FireFixScene extends Phaser.Scene {
 
     addTitle(this, "Ember's Fire Fix");
     addBody(this, 95, `Spray cartoon fires. Out: ${state.fires.filter((fire) => fire.health === 0).length}/5 • Sprays: ${state.sprays}`);
-    addBody(this, 130, state.lastMessage);
+    addBody(this, 120, state.lastMessage);
 
     this.drawPlayfield(state);
     this.addControls();
@@ -52,7 +52,7 @@ export class FireFixScene extends Phaser.Scene {
   }
 
   private drawPlayfield(state: FireFixState): void {
-    this.add.rectangle(480, 275, 760, 290, 0xdff8d8).setStrokeStyle(4, 0x203247);
+    this.add.rectangle(480, 286, 760, 270, 0xdff8d8).setStrokeStyle(4, 0x203247);
     addSprite(this, { key: 'props.hydrant', x: 170, y: 360, width: 64, height: 64, pop: true });
     this.add.circle(state.player.x, state.player.y, 28, 0xffffff, 0.78).setStrokeStyle(4, 0x203247);
     addHelperAvatar(this, 'ember', state.player.x, state.player.y - 5, 64, { pop: true });
