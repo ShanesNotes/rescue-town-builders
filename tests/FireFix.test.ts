@@ -46,4 +46,25 @@ describe('FireFix', () => {
     expect(assisted.helperAssists).toBe(1);
     expect(assisted.fires[0]?.health).toBeLessThan(5);
   });
+
+  it('never strands a spray-only child who never moves (No-Fail Rule)', () => {
+    // The hardest real case: a young child taps Spray from the start position and
+    // never moves Ember. Only grill-fire is ever in range; the rest are out of the
+    // spray cone forever. The helper drone must guarantee completion regardless.
+    let state = createFireFixState(picnicFires);
+    let completed = false;
+
+    for (let i = 0; i < 40 && !completed; i += 1) {
+      const outcome = sprayWater(state);
+      state = outcome.state;
+      completed = outcome.completed;
+    }
+
+    expect(state.completed).toBe(true);
+    expect(completed).toBe(true); // the spray outcome itself must report completion
+
+    const result = getFireFixResult(state);
+    expect(result.completed).toBe(true);
+    expect(result.stars).toBeGreaterThanOrEqual(1);
+  });
 });

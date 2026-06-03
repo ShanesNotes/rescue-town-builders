@@ -72,7 +72,8 @@ export function sprayWater(state: FireFixState): SprayOutcome {
       sprays: state.sprays + 1,
       lastMessage: 'Water missed. Move closer or aim at a fire.',
     };
-    return { state: maybeAssist(missed), hit: false, completed: false };
+    const assisted = maybeAssist(missed);
+    return { state: assisted, hit: false, completed: assisted.completed };
   }
 
   const fires = state.fires.map((fire, index) =>
@@ -118,7 +119,14 @@ export function getFireFixResult(state: FireFixState): MissionResult {
 
 function maybeAssist(state: FireFixState): FireFixState {
   const remainingPressure = state.fires.reduce((total, fire) => total + fire.health, 0);
+  if (remainingPressure === 0) return state;
+  // Early nudge: one drone pass once a child has sprayed a while with heavy fire left.
   if (state.sprays >= 5 && remainingPressure >= 5 && state.helperAssists === 0) {
+    return applyHelperDrone(state);
+  }
+  // No-Fail floor: after enough missed sprays with ANY fire left, the drone helps on
+  // every miss until the mission can finish — a spray-only child is never stranded.
+  if (state.sprays >= 8) {
     return applyHelperDrone(state);
   }
   return state;
