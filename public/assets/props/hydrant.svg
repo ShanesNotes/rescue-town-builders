@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="H asset"><rect width="128" height="128" rx="24" fill="#ff4d4d"/><circle cx="64" cy="52" r="28" fill="#fff7dc" stroke="#203247" stroke-width="6"/><text x="64" y="104" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="28" fill="#203247">H</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Fire hydrant">
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="#eaf7ff"/>
+  <path d="M52 34h24l8 14v44H44V48z" fill="#ff5c5c" stroke="#203247" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M43 56H26v22h17M85 56h17v22H85" fill="#ffcf5c" stroke="#203247" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M42 94h44v15H42zM56 22h16v13H56z" fill="#ffcf5c" stroke="#203247" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M53 62h22M53 78h22" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+</svg>
