@@ -12,6 +12,7 @@ describe('Slice 1 scene flow', () => {
       'ParentSettingsGateScene',
       'ParentSettingsScene',
       'RecyclingRunScene',
+      'HouseBuilderScene',
       'PlaceholderMissionScene',
       'MissionCompleteScene',
     ]);

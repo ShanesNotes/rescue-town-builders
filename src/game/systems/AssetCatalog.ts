@@ -47,6 +47,13 @@ export const assetCatalog: AssetNeed[] = [
     notes: 'Implemented in code for Slice 2; production icon-first art remains in the asset backlog.',
   },
   {
+    key: 'props.house-parts',
+    kind: 'prop',
+    status: 'placeholder',
+    description: 'Runtime shape/text placeholders for House Builder foundation, walls, roof, door, and decoration parts.',
+    notes: 'Implemented in code for Slice 3; production icon-first house-part art remains in the asset backlog.',
+  },
+  {
     key: 'audio.theme-loop',
     kind: 'audio',
     status: 'backlog',

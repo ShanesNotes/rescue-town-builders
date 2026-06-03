@@ -1,7 +1,7 @@
 {
   "version": 1,
   "createdAt": "2026-06-03T02:45:59.336Z",
-  "updatedAt": "2026-06-03T03:33:15.750Z",
+  "updatedAt": "2026-06-03T03:36:58.572Z",
   "briefPath": ".omx/ultragoal/brief.md",
   "goalsPath": ".omx/ultragoal/goals.json",
   "ledgerPath": ".omx/ultragoal/ledger.jsonl",
@@ -83,10 +83,13 @@
       "id": "G007-slice-3-tdd-brick-s-house-builder",
       "title": "Slice 3 TDD Brick's House Builder",
       "objective": "Slice 3 TDD Brick's House Builder\nObjective: Build the construction sequence mini-game through tested blueprint data, part placement, hints, scoring, and sticker unlock.",
-      "status": "pending",
-      "attempt": 0,
+      "status": "complete",
+      "attempt": 1,
       "createdAt": "2026-06-03T02:45:59.336Z",
-      "updatedAt": "2026-06-03T02:45:59.336Z"
+      "updatedAt": "2026-06-03T03:36:58.572Z",
+      "startedAt": "2026-06-03T03:34:06.316Z",
+      "completedAt": "2026-06-03T03:36:58.572Z",
+      "evidence": "Brick's House Builder implemented: houseBlueprints define 3 houses with foundation->walls->roof->door->decoration order; HouseBuilder module covers wrong-piece no-fail hints, sequencing, 3-house completion, accuracy stars, and sticker unlock; HouseBuilderScene provides large touch part tray plus keyboard/gamepad selection and shape snap feedback; TownMap routes house-builder to real scene; MissionComplete persists sticker/star result; asset backlog records runtime placeholder house parts. Verified npm test (25/25), npm run typecheck, npm run build, npm run dev HTTP 200."
     },
     {
       "id": "G008-slice-4-tdd-ember-s-fire-fix",

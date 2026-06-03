@@ -88,6 +88,10 @@ export class TownMapScene extends Phaser.Scene {
       this.scene.start('RecyclingRunScene');
       return;
     }
+    if (missionId === 'house-builder') {
+      this.scene.start('HouseBuilderScene');
+      return;
+    }
     this.scene.start('PlaceholderMissionScene', { missionId });
   }
 }
