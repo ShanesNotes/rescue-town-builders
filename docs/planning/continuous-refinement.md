@@ -132,3 +132,13 @@ tree each cycle (the audit was written before Codex's G010 refactor).
   (`471c4de`), verified green, then merged. **81 tests green**, typecheck + build clean.
   (Playwright browser binaries not yet installed; `npm run test:e2e` is wired but pending
   `@playwright/test`.)
+
+### Cycle 8 — 2026-06-03 — Sticker Book + reward lore (#14, Grok-assisted)
+- New read-only **Sticker Book**: `data/stickers.ts` (childPoem/parentNote lore generated
+  by the **Grok** model, best-of-n, curated, in the warm project voice), `StickerCatalog.ts`
+  (pure, 5 tests incl. a completeness invariant against mission + secret ids),
+  `StickerBookScene.ts` (grid + a "read it again" reading page), reachable via a "My Stickers"
+  button on the Town Map. The three secret stickers show as gentle silhouettes until found
+  (PRD acceptance criterion #7). **86 tests green.** Issue #14 closed.
+- Grok ran in the allowed single-turn content-generation mode (its autonomous build is still
+  pending Shane's approval of the `--always-approve` gate).

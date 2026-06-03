@@ -10,6 +10,7 @@ import { PreloadScene } from './scenes/PreloadScene';
 import { ProfileScene } from './scenes/ProfileScene';
 import { RecyclingRunScene } from './scenes/RecyclingRunScene';
 import { StartScene } from './scenes/StartScene';
+import { StickerBookScene } from './scenes/StickerBookScene';
 import { TownMapScene } from './scenes/TownMapScene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
@@ -41,5 +42,6 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     FireFixScene,
     PlaceholderMissionScene,
     MissionCompleteScene,
+    StickerBookScene,
   ],
 };

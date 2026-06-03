@@ -14,6 +14,7 @@ export const SCENE_KEYS = {
   fireFix: 'FireFixScene',
   placeholderMission: 'PlaceholderMissionScene',
   missionComplete: 'MissionCompleteScene',
+  stickerBook: 'StickerBookScene',
 } as const;
 
 export type SceneKey = (typeof SCENE_KEYS)[keyof typeof SCENE_KEYS];
@@ -54,6 +55,10 @@ export function startParentSettingsGate(scene: Phaser.Scene, returnScene: Parent
 
 export function returnToTownMap(scene: Phaser.Scene): void {
   startScene(scene, SCENE_KEYS.townMap);
+}
+
+export function startStickerBook(scene: Phaser.Scene): void {
+  startScene(scene, SCENE_KEYS.stickerBook);
 }
 
 export function returnToParentScene(scene: Phaser.Scene, returnScene: ParentSettingsReturnScene): void {

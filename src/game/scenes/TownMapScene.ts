@@ -3,7 +3,7 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionId } from '../types';
 import { getSaveSystem, missionRegistry } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
-import { SCENE_KEYS, sceneKeyForMission, startParentSettingsGate, startScene } from '../systems/SceneNavigation';
+import { SCENE_KEYS, sceneKeyForMission, startParentSettingsGate, startScene, startStickerBook } from '../systems/SceneNavigation';
 import { projectTownMapNodes } from '../systems/TownMapProgress';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
@@ -61,6 +61,16 @@ export class TownMapScene extends Phaser.Scene {
       fill: 0xffffff,
       onPress: () => startScene(this, SCENE_KEYS.profile),
       testId: 'townmap.profiles',
+    });
+    addButton(this, {
+      x: 452,
+      y: 500,
+      width: 230,
+      height: 58,
+      label: 'My Stickers',
+      fill: 0xffffff,
+      onPress: () => startStickerBook(this),
+      testId: 'townmap.sticker-book',
     });
     addBody(this, 458, 'Gamepad: D-pad chooses • A starts mission • B returns to profiles');
 
