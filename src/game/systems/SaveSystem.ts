@@ -12,16 +12,19 @@ export type MissionProgress = {
   lastPlayedAt: string;
 };
 
+export type ProfileSettings = {
+  difficulty: Difficulty;
+  musicVolume: number;
+  sfxVolume: number;
+  audioMuted: boolean;
+};
+
 export type PlayerProfile = {
   id: string;
   name: string;
   avatarId: string;
   createdAt: string;
-  settings: {
-    difficulty: Difficulty;
-    musicVolume: number;
-    sfxVolume: number;
-  };
+  settings: ProfileSettings;
   progress: {
     missions: Partial<Record<MissionId, MissionProgress>>;
     stickers: string[];
@@ -43,6 +46,19 @@ export type CreateProfileInput = {
 const SAVE_KEY = 'rescue-town-builders.save.v1';
 const SAVE_VERSION = 1;
 const MAX_PROFILES = 5;
+
+function defaultSettings(): ProfileSettings {
+  return {
+    difficulty: 'helper',
+    musicVolume: 0,
+    sfxVolume: 0.7,
+    audioMuted: false,
+  };
+}
+
+function clampVolume(value: number): number {
+  return Math.max(0, Math.min(1, Math.round(value * 100) / 100));
+}
 
 function emptySave(): SaveData {
   return {
@@ -90,11 +106,7 @@ export class SaveSystem {
       name: input.name.trim() || `Player ${this.data.profiles.length + 1}`,
       avatarId: input.avatarId,
       createdAt: now,
-      settings: {
-        difficulty: 'helper',
-        musicVolume: 0,
-        sfxVolume: 0.7,
-      },
+      settings: defaultSettings(),
       progress: {
         missions: {},
         stickers: [],
@@ -104,6 +116,22 @@ export class SaveSystem {
 
     this.data.profiles.push(profile);
     this.data.selectedProfileId = profile.id;
+    this.persist();
+    return structuredClone(profile);
+  }
+
+  updateProfileSettings(profileId: string, settings: Partial<ProfileSettings>): PlayerProfile {
+    const profile = this.data.profiles.find((candidate) => candidate.id === profileId);
+    if (!profile) {
+      throw new Error(`Unknown profile: ${profileId}`);
+    }
+
+    profile.settings = {
+      ...profile.settings,
+      ...settings,
+      musicVolume: settings.musicVolume === undefined ? profile.settings.musicVolume : clampVolume(settings.musicVolume),
+      sfxVolume: settings.sfxVolume === undefined ? profile.settings.sfxVolume : clampVolume(settings.sfxVolume),
+    };
     this.persist();
     return structuredClone(profile);
   }
@@ -161,7 +189,18 @@ export class SaveSystem {
       if (parsed.version !== SAVE_VERSION || !Array.isArray(parsed.profiles)) {
         return emptySave();
       }
-      return parsed;
+      return {
+        ...parsed,
+        profiles: parsed.profiles.map((profile) => ({
+          ...profile,
+          settings: {
+            ...defaultSettings(),
+            ...profile.settings,
+            musicVolume: clampVolume(profile.settings?.musicVolume ?? defaultSettings().musicVolume),
+            sfxVolume: clampVolume(profile.settings?.sfxVolume ?? defaultSettings().sfxVolume),
+          },
+        })),
+      };
     } catch {
       return emptySave();
     }

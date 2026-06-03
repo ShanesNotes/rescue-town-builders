@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { MissionCompleteScene } from './scenes/MissionCompleteScene';
+import { ParentSettingsGateScene } from './scenes/ParentSettingsGateScene';
+import { ParentSettingsScene } from './scenes/ParentSettingsScene';
 import { PlaceholderMissionScene } from './scenes/PlaceholderMissionScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { ProfileScene } from './scenes/ProfileScene';
@@ -29,6 +31,8 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     StartScene,
     ProfileScene,
     TownMapScene,
+    ParentSettingsGateScene,
+    ParentSettingsScene,
     PlaceholderMissionScene,
     MissionCompleteScene,
   ],

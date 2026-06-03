@@ -1,7 +1,7 @@
 {
   "version": 1,
   "createdAt": "2026-06-03T02:45:59.336Z",
-  "updatedAt": "2026-06-03T03:20:55.928Z",
+  "updatedAt": "2026-06-03T03:28:30.793Z",
   "briefPath": ".omx/ultragoal/brief.md",
   "goalsPath": ".omx/ultragoal/goals.json",
   "ledgerPath": ".omx/ultragoal/ledger.jsonl",
@@ -59,10 +59,13 @@
       "id": "G005-slice-1-tdd-profile-and-town-map-loo",
       "title": "Slice 1 TDD profile and town map loop",
       "objective": "Slice 1 TDD profile and town map loop\nObjective: Build profile selection, parent settings, static town map, registry-driven mission nodes, and persisted fake completion progress.",
-      "status": "pending",
-      "attempt": 0,
+      "status": "complete",
+      "attempt": 1,
       "createdAt": "2026-06-03T02:45:59.336Z",
-      "updatedAt": "2026-06-03T02:45:59.336Z"
+      "updatedAt": "2026-06-03T03:28:30.793Z",
+      "startedAt": "2026-06-03T03:23:17.068Z",
+      "completedAt": "2026-06-03T03:28:30.793Z",
+      "evidence": "Slice 1 profile/map loop implemented: up to 5 local profiles with selection, parent settings behind 3-second hold gate, settings screen for mute/volume/difficulty/reset, registry-driven town map projection via TownMapProgress, persisted fake mission stars shown after reload path, scene route includes Start->Profile->TownMap->PlaceholderMission->MissionComplete plus settings. Verified npm test (18/18), npm run typecheck, npm run build, npm run dev HTTP 200."
     },
     {
       "id": "G006-slice-2-tdd-rivet-s-recycling-run",

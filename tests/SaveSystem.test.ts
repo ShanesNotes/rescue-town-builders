@@ -60,4 +60,35 @@ describe('SaveSystem', () => {
     expect(progress?.stickers).toContain('recycling-hero');
     expect(progress?.totalStars).toBe(3);
   });
+
+  it('persists parent settings updates for a selected profile', () => {
+    const storage = memoryStorage();
+    const saves = new SaveSystem(storage);
+    const profile = saves.createProfile({ name: 'Player 1', avatarId: 'rivet' });
+
+    saves.updateProfileSettings(profile.id, {
+      difficulty: 'easy',
+      musicVolume: 0.25,
+      sfxVolume: 0,
+      audioMuted: true,
+    });
+
+    const reloaded = new SaveSystem(storage);
+    expect(reloaded.getSelectedProfile()?.settings).toEqual({
+      difficulty: 'easy',
+      musicVolume: 0.25,
+      sfxVolume: 0,
+      audioMuted: true,
+    });
+  });
+
+  it('resets all local profile data from parent settings', () => {
+    const saves = new SaveSystem(memoryStorage());
+    saves.createProfile({ name: 'Player 1', avatarId: 'rivet' });
+
+    saves.reset();
+
+    expect(saves.getProfiles()).toEqual([]);
+    expect(saves.getSelectedProfile()).toBeNull();
+  });
 });

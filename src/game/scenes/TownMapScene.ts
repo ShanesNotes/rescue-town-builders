@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { MissionId } from '../types';
 import { getSaveSystem, missionRegistry } from '../systems/GameServices';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { projectTownMapNodes } from '../systems/TownMapProgress';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
 
@@ -20,47 +21,66 @@ export class TownMapScene extends Phaser.Scene {
       return;
     }
 
-    const missions = missionRegistry.list();
+    const nodes = projectTownMapNodes(missionRegistry.list(), profile);
     addTitle(this, 'Rescue Town Map');
-    addBody(this, 120, `${profile.name}, choose a mission. These are placeholder loops for Slice 0.`);
+    addBody(this, 110, `${profile.name}, choose a mission. Map nodes are driven by the MissionRegistry.`);
 
-    missions.forEach((mission, index) => {
-      const progress = profile.progress.missions[mission.id];
-      const stars = progress ? '⭐'.repeat(progress.bestStars) : 'No stars yet';
+    nodes.forEach((node, index) => {
+      const selected = index === this.selectedIndex ? '▶ ' : '';
       addButton(this, {
         x: 480,
-        y: 210 + index * 95,
-        width: 620,
-        height: 76,
-        label: `${mission.title} • ${stars}`,
-        fill: [0xb7e6ff, 0xffd6a5, 0xffb3c6][index] ?? 0xffffff,
-        onPress: () => this.startMission(mission.id),
+        y: 188 + index * 90,
+        width: 650,
+        height: 74,
+        label: `${selected}${node.title}\n${node.mapNodeId} • ${node.starsLabel}`,
+        fill: index === this.selectedIndex ? 0xfff4bf : ([0xb7e6ff, 0xffd6a5, 0xffb3c6][index] ?? 0xffffff),
+        onPress: () => this.startMission(node.missionId),
       });
     });
 
-    addBody(this, 510, 'Gamepad: D-pad chooses the next mission later; A starts the highlighted/default mission.');
+    addButton(this, {
+      x: 760,
+      y: 500,
+      width: 280,
+      height: 58,
+      label: 'Parent Settings',
+      fill: 0xffffff,
+      onPress: () => this.scene.start('ParentSettingsGateScene', { returnScene: 'TownMapScene' }),
+    });
+    addButton(this, {
+      x: 145,
+      y: 500,
+      width: 200,
+      height: 58,
+      label: 'Profiles',
+      fill: 0xffffff,
+      onPress: () => this.scene.start('ProfileScene'),
+    });
+    addBody(this, 458, 'Gamepad: D-pad chooses • A starts mission • B returns to profiles');
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       const intent = inputIntentFromKeyboard(event.key);
-      if (intent?.type === 'move') {
-        this.selectedIndex = Math.max(0, Math.min(missions.length - 1, this.selectedIndex + intent.y));
-      }
+      if (intent?.type === 'move') this.moveSelection(intent.y, nodes.length);
       if (intent?.type === 'confirm' || intent?.type === 'action') {
-        this.startMission(missions[this.selectedIndex]?.id ?? 'recycling-run');
+        this.startMission(nodes[this.selectedIndex]?.missionId ?? 'recycling-run');
       }
       if (intent?.type === 'back') this.scene.start('ProfileScene');
     });
 
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
       const intent = inputIntentFromGamepadButton(button.index);
-      if (intent?.type === 'move') {
-        this.selectedIndex = Math.max(0, Math.min(missions.length - 1, this.selectedIndex + intent.y));
-      }
+      if (intent?.type === 'move') this.moveSelection(intent.y, nodes.length);
       if (intent?.type === 'confirm' || intent?.type === 'action') {
-        this.startMission(missions[this.selectedIndex]?.id ?? 'recycling-run');
+        this.startMission(nodes[this.selectedIndex]?.missionId ?? 'recycling-run');
       }
       if (intent?.type === 'back') this.scene.start('ProfileScene');
     });
+  }
+
+  private moveSelection(delta: number, count: number): void {
+    if (delta === 0) return;
+    this.selectedIndex = Math.max(0, Math.min(count - 1, this.selectedIndex + delta));
+    this.scene.restart();
   }
 
   private startMission(missionId: MissionId): void {
