@@ -54,6 +54,10 @@ export const SECRET_DEFINITIONS: Record<SecretId, SecretDefinition> = {
   },
 };
 
+export function isSecretId(value: string): value is SecretId {
+  return Object.prototype.hasOwnProperty.call(SECRET_DEFINITIONS, value);
+}
+
 export interface SecretsConfig {
   /** The child's profile name, so a reveal can greet them by name. */
   playerName?: string;

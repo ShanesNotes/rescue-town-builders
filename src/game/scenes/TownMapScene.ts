@@ -7,6 +7,7 @@ import { SCENE_KEYS, sceneKeyForMission, startParentSettingsGate, startScene, st
 import { projectTownMapNodes } from '../systems/TownMapProgress';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
+import { createSecretsForProfile, touchSecret, showSecretReveal } from '../systems/secretHotspot';
 
 export class TownMapScene extends Phaser.Scene {
   private selectedIndex = 0;
@@ -73,6 +74,13 @@ export class TownMapScene extends Phaser.Scene {
       testId: 'townmap.sticker-book',
     });
     addBody(this, 458, 'Gamepad: D-pad chooses • A starts mission • B returns to profiles');
+
+    // Cluckle's Dream: a sleepy hen who dreams the whole town in miniature (3 touches).
+    const secrets = createSecretsForProfile();
+    this.add.circle(70, 150, 16, 0xfff4bf, 0.18).setInteractive().on('pointerdown', () => {
+      const message = touchSecret(secrets, 'cluckle-dream');
+      if (message) showSecretReveal(this, message);
+    });
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       const intent = inputIntentFromKeyboard(event.key);

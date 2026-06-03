@@ -4,6 +4,7 @@ import { houseBlueprints } from '../data/houseBlueprints';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { getSfx } from '../systems/GameServices';
+import { createSecretsForProfile, touchSecret, showSecretReveal } from '../systems/secretHotspot';
 import {
   createHouseBuilderState,
   getHouseBuilderResult,
@@ -70,6 +71,13 @@ export class HouseBuilderScene extends Phaser.Scene {
       fill: 0xffffff,
       onPress: () => returnToTownMap(this),
       testId: 'house.back-to-map',
+    });
+
+    // Hidden Light: a quiet glimmer that holds a loved one's words (1 touch).
+    const secrets = createSecretsForProfile();
+    this.add.circle(840, 150, 16, 0xfff4bf, 0.18).setInteractive().on('pointerdown', () => {
+      const message = touchSecret(secrets, 'hidden-light');
+      if (message) showSecretReveal(this, message);
     });
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {

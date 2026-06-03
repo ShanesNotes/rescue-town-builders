@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Secrets, type SecretId } from '../src/game/systems/Secrets';
+import { Secrets, isSecretId, type SecretId } from '../src/game/systems/Secrets';
 
 describe('Secrets', () => {
   it('stays hidden until the touch threshold is crossed', () => {
@@ -81,5 +81,13 @@ describe('Secrets', () => {
 
     const reveal = secrets.touch('hidden-light');
     expect(reveal?.pattern).toContain(patterns['hidden-light']);
+  });
+
+  it('recognizes secret ids so a save can rehydrate which secrets were found', () => {
+    expect(isSecretId('secret-friend')).toBe(true);
+    expect(isSecretId('hidden-light')).toBe(true);
+    expect(isSecretId('cluckle-dream')).toBe(true);
+    expect(isSecretId('recycling-run-starter')).toBe(false);
+    expect(isSecretId('toString')).toBe(false);
   });
 });

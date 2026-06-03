@@ -257,4 +257,32 @@ describe('SaveSystem', () => {
     expect(progress?.stickers).toContain('recycling-hero');
     expect(progress?.totalStars).toBe(3);
   });
+
+  it('unlocks a sticker directly (for found secrets) and persists it', () => {
+    const storage = memoryStorage();
+    const saves = new SaveSystem(storage);
+    const profile = saves.createProfile({ name: 'Willem', avatarId: 'rivet' });
+
+    saves.unlockSticker(profile.id, 'secret-friend');
+
+    expect(saves.getSelectedProfile()?.progress.stickers).toContain('secret-friend');
+    const reloaded = new SaveSystem(storage);
+    expect(reloaded.getSelectedProfile()?.progress.stickers).toContain('secret-friend');
+  });
+
+  it('does not duplicate an already-unlocked sticker', () => {
+    const saves = new SaveSystem(memoryStorage());
+    const profile = saves.createProfile({ name: 'Willem', avatarId: 'rivet' });
+
+    saves.unlockSticker(profile.id, 'hidden-light');
+    saves.unlockSticker(profile.id, 'hidden-light');
+
+    const stickers = saves.getSelectedProfile()?.progress.stickers ?? [];
+    expect(stickers.filter((id) => id === 'hidden-light')).toHaveLength(1);
+  });
+
+  it('throws when unlocking a sticker for an unknown profile', () => {
+    const saves = new SaveSystem(memoryStorage());
+    expect(() => saves.unlockSticker('nope', 'cluckle-dream')).toThrow(/Unknown profile/);
+  });
 });

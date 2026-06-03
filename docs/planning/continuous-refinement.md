@@ -142,3 +142,13 @@ tree each cycle (the audit was written before Codex's G010 refactor).
   (PRD acceptance criterion #7). **86 tests green.** Issue #14 closed.
 - Grok ran in the allowed single-turn content-generation mode (its autonomous build is still
   pending Shane's approval of the `--always-approve` gate).
+
+### Cycle 9 — 2026-06-03 — Wire the Secrets into the scenes (#13, the soul)
+- `SaveSystem.unlockSticker` + `Secrets.isSecretId` (TDD). New `secretHotspot` helper
+  (`createSecretsForProfile` / `touchSecret` / `showSecretReveal`). Three quiet hotspots:
+  **Hidden Light** (House, 1 touch), **Secret Friend** (Fire Fix, 3), **Cluckle's Dream**
+  (Town Map, 3). A found secret chimes (`secret` sfx), persists its sticker, and shows a
+  soft dismissable reveal — then lives forever in the Sticker Book with Grok's poem.
+  **90 tests green.** Issue #13 closed.
+- The easter egg that sparked the project (for Willem) is now playable. Dad's personal
+  knob is still open: set `hiddenLightMessage` to put your own words in the Hidden Light.

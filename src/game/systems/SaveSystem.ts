@@ -201,6 +201,19 @@ export class SaveSystem {
     return structuredClone(profile);
   }
 
+  unlockSticker(profileId: string, sticker: string): PlayerProfile {
+    const profile = this.data.profiles.find((candidate) => candidate.id === profileId);
+    if (!profile) {
+      throw new Error(`Unknown profile: ${profileId}`);
+    }
+    // Used for rewards earned outside a mission result (e.g. a found secret).
+    if (!profile.progress.stickers.includes(sticker)) {
+      profile.progress.stickers.push(sticker);
+      this.persist();
+    }
+    return structuredClone(profile);
+  }
+
   reset(): void {
     this.data = emptySave();
     try {

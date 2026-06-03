@@ -4,6 +4,7 @@ import { picnicFires } from '../data/picnicFires';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { getSfx } from '../systems/GameServices';
+import { createSecretsForProfile, touchSecret, showSecretReveal } from '../systems/secretHotspot';
 import {
   createFireFixState,
   getFireFixResult,
@@ -39,6 +40,14 @@ export class FireFixScene extends Phaser.Scene {
     this.drawPlayfield(state);
     this.addControls();
     this.bindInput();
+
+    // Secret Friend: a tiny shy creature that appears for a child who keeps looking
+    // (3 touches). Placed outside the fire playfield, so it never affects the spray.
+    const secrets = createSecretsForProfile();
+    this.add.circle(880, 110, 16, 0xfff4bf, 0.18).setInteractive().on('pointerdown', () => {
+      const message = touchSecret(secrets, 'secret-friend');
+      if (message) showSecretReveal(this, message);
+    });
   }
 
   private drawPlayfield(state: FireFixState): void {
