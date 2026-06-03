@@ -15,6 +15,15 @@ import {
 } from '../systems/HouseBuilder';
 import { addButton } from '../ui/Button';
 import { addBody, addTitle } from '../ui/SceneText';
+import { addHelperAvatar, addSprite } from '../ui/Sprite';
+
+const housePartSpriteKeys: Record<HousePartId, string> = {
+  foundation: 'props.house-foundation',
+  walls: 'props.house-walls',
+  roof: 'props.house-roof',
+  door: 'props.house-door',
+  decoration: 'props.house-decoration',
+};
 
 export class HouseBuilderScene extends Phaser.Scene {
   private state: HouseBuilderState | null = null;
@@ -46,12 +55,23 @@ export class HouseBuilderScene extends Phaser.Scene {
     }
 
     this.drawHouseGhost(state);
+    addHelperAvatar(this, 'brick', 770, 215, 86, { idle: true, pop: true });
     addBody(this, 290, state.lastHint ?? `Next snap target: ${part.label}`);
 
     housePartTray.forEach((trayPart, index) => {
       const selected = index === this.selectedPartIndex ? '▶ ' : '';
+      const x = 115 + index * 180;
+      addSprite(this, {
+        key: housePartSpriteKeys[trayPart.id],
+        x,
+        y: 348,
+        width: 48,
+        height: 48,
+        alpha: index === this.selectedPartIndex ? 1 : 0.84,
+        pop: index === this.selectedPartIndex,
+      });
       addButton(this, {
-        x: 115 + index * 180,
+        x,
         y: 405,
         width: 165,
         height: 84,
@@ -117,10 +137,28 @@ export class HouseBuilderScene extends Phaser.Scene {
     const decorColor = placed > 4 ? 0x9be7c4 : 0xffffff;
 
     this.add.rectangle(centerX, y + 76, 240, 24, foundationColor).setStrokeStyle(3, 0x203247);
+    this.addHousePartSprite('foundation', centerX - 118, y + 78, placed > 0, placed === 0);
     this.add.rectangle(centerX, y + 18, 185, 94, wallColor).setStrokeStyle(3, 0x203247);
+    this.addHousePartSprite('walls', centerX + 118, y + 20, placed > 1, placed === 1);
     this.add.triangle(centerX, y - 70, -115, 70, 115, 70, 0, -15, roofColor).setStrokeStyle(3, 0x203247);
+    this.addHousePartSprite('roof', centerX, y - 84, placed > 2, placed === 2);
     this.add.rectangle(centerX, y + 46, 42, 55, doorColor).setStrokeStyle(3, 0x203247);
+    this.addHousePartSprite('door', centerX, y + 46, placed > 3, placed === 3);
     this.add.circle(centerX + 126, y + 75, 18, decorColor).setStrokeStyle(3, 0x203247);
+    this.addHousePartSprite('decoration', centerX + 168, y + 75, placed > 4, placed === 4);
+  }
+
+  private addHousePartSprite(partId: HousePartId, x: number, y: number, built: boolean, next: boolean): void {
+    this.add.circle(x, y, next ? 30 : 26, built ? 0xffffff : 0xfff4bf, built ? 0.82 : 0.34);
+    addSprite(this, {
+      key: housePartSpriteKeys[partId],
+      x,
+      y,
+      width: next ? 54 : 44,
+      height: next ? 54 : 44,
+      alpha: built ? 1 : 0.36,
+      pop: built || next,
+    });
   }
 
   private moveSelection(delta: number, count: number): void {
