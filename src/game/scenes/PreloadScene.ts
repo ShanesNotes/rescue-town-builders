@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { assetCatalog, listLoadableAssets, resolveAssetPath } from '../systems/AssetCatalog';
+import { loadHearthlightAssets } from '../data/hearthlightAssets';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, startScene } from '../systems/SceneNavigation';
 import { addBody, addTitle } from '../ui/SceneText';
@@ -21,6 +22,7 @@ export class PreloadScene extends Phaser.Scene {
       }
       if (asset.loadType === 'audio') this.load.audio(asset.key, path);
     }
+    loadHearthlightAssets(this, import.meta.env.BASE_URL);
   }
 
   create(): void {

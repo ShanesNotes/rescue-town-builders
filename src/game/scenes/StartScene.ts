@@ -3,15 +3,13 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, startScene } from '../systems/SceneNavigation';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { getMusic } from '../systems/GameServices';
-import { addButton } from '../ui/Button';
+import { addIconButton } from '../ui/Button';
 import { motionAllowed } from '../ui/Sprite';
 
-// Drawn in-engine as crisp sticker-book badges (palette from design.md) so the very first
-// screen is reliable and never depends on async art loading.
 const HELPERS = [
-  { name: 'Rivet', x: 300, color: 0x5ec8b5 },
-  { name: 'Brick', x: 480, color: 0xf4a261 },
-  { name: 'Ember', x: 660, color: 0xf48a9e },
+  { key: 'hl.char.rivet', x: 250 },
+  { key: 'hl.char.brick', x: 470 },
+  { key: 'hl.char.ember', x: 690 },
 ] as const;
 
 export class StartScene extends Phaser.Scene {
@@ -21,131 +19,89 @@ export class StartScene extends Phaser.Scene {
 
   create(): void {
     fadeInScene(this);
-    this.cameras.main.setBackgroundColor('#d9f5ff');
-    this.paintSky();
+    this.paintWorld();
 
-    // Title banner.
-    this.add.rectangle(480, 96, 720, 110, 0xffffff, 0.75).setStrokeStyle(5, 0x9be7c4, 1);
+    // Title on a soft dusk band so it stays readable over the art.
+    this.add.rectangle(480, 46, 960, 104, 0x1b2a41, 0.5);
     this.add
-      .text(480, 78, 'Rescue Town\nBuilders', {
+      .text(480, 40, 'RESCUE TOWN BUILDERS', {
         fontFamily: 'Trebuchet MS, Arial, sans-serif',
         fontSize: '46px',
-        color: '#1f6f4a',
-        align: 'center',
+        color: '#FFE6A3',
         fontStyle: 'bold',
-        lineSpacing: 2,
+        stroke: '#1B2A41',
+        strokeThickness: 8,
       })
-      .setOrigin(0.5);
-    this.add
-      .text(480, 168, "Let's help our town! 🐾", {
-        fontFamily: 'Trebuchet MS, Arial, sans-serif',
-        fontSize: '24px',
-        color: '#2a5d7a',
-        align: 'center',
-      })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setShadow(0, 4, '#000000', 6, true, true);
 
-    this.paintHelpers();
-
-    // Big, friendly Play button with a gentle pulse so a pre-reader knows where to go.
-    const play = addButton(this, {
+    // The glowing Play coin — the one obvious thing to touch.
+    const play = addIconButton(this, {
       x: 480,
-      y: 448,
-      width: 360,
-      height: 88,
-      label: '▶  Play',
-      fill: 0x9be7c4,
+      y: 250,
+      size: 132,
+      key: 'hl.ui.play',
       onPress: () => this.begin(),
       testId: 'start.play',
+      pulse: true,
     });
-    if (motionAllowed()) {
-      this.tweens.add({
-        targets: play,
-        scale: 1.05,
-        duration: 760,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-      });
-    }
+    play.setDepth(20);
 
     this.add
-      .text(480, 514, 'Grown-ups: tap Play. Arrow keys, touch, or a gamepad all work.', {
+      .text(480, 524, 'Tap the glowing button to help the town', {
         fontFamily: 'Trebuchet MS, Arial, sans-serif',
-        fontSize: '18px',
-        color: '#42637a',
-        align: 'center',
+        fontSize: '17px',
+        color: '#EBDDDA',
+        stroke: '#1B2A41',
+        strokeThickness: 4,
       })
       .setOrigin(0.5);
 
     // Music begins on the first real gesture (browser autoplay policy), then plays on.
     this.input.once('pointerdown', () => getMusic().start());
-
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       const intent = inputIntentFromKeyboard(event.key);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.begin();
     });
-
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
       const intent = inputIntentFromGamepadButton(button.index);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.begin();
     });
   }
 
-  /** Soft sun + clouds so the title feels like a sunny morning over Rescue Town. */
-  private paintSky(): void {
-    this.add.circle(852, 96, 58, 0xfff1a8, 0.9);
-    this.add.circle(852, 96, 78, 0xfff1a8, 0.35);
-    const cloud = (x: number, y: number, s: number) => {
-      this.add.ellipse(x, y, 120 * s, 54 * s, 0xffffff, 0.85);
-      this.add.ellipse(x - 42 * s, y + 6 * s, 70 * s, 40 * s, 0xffffff, 0.85);
-      this.add.ellipse(x + 44 * s, y + 8 * s, 76 * s, 42 * s, 0xffffff, 0.85);
-    };
-    cloud(150, 130, 1);
-    cloud(720, 220, 0.8);
-    // A soft green hill the helpers stand on.
-    this.add.rectangle(480, 540, 960, 200, 0xbdebc4, 1).setOrigin(0.5, 1);
-  }
+  private paintWorld(): void {
+    this.add.image(480, 270, 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
 
-  private paintHelpers(): void {
-    const cy = 292;
+    // The three helpers stand on the warm cobbles, breathing.
     HELPERS.forEach((helper, index) => {
-      const c = this.add.container(helper.x, cy);
-      const body = this.add.graphics();
-      body.fillStyle(helper.color, 1);
-      body.fillRoundedRect(-44, -42, 88, 88, 22);
-      body.lineStyle(4, 0x203247, 1);
-      body.strokeRoundedRect(-44, -42, 88, 88, 22);
-      const face = this.add.circle(0, -8, 24, 0xfff8e7).setStrokeStyle(4, 0x203247, 1);
-      const eyeL = this.add.circle(-9, -12, 4, 0x203247);
-      const eyeR = this.add.circle(9, -12, 4, 0x203247);
-      const smile = this.add.graphics();
-      smile.lineStyle(4, 0x203247, 1);
-      smile.beginPath();
-      smile.arc(0, -6, 12, Phaser.Math.DegToRad(20), Phaser.Math.DegToRad(160));
-      smile.strokePath();
-      const name = this.add
-        .text(0, 60, helper.name, {
-          fontFamily: 'Trebuchet MS, Arial, sans-serif',
-          fontSize: '22px',
-          color: '#203247',
-          fontStyle: 'bold',
-        })
-        .setOrigin(0.5);
-      c.add([body, face, eyeL, eyeR, smile, name]);
-      // Staggered idle bob — a little sign of life (skipped when reduced-motion is set).
+      const y = 410;
+      const sprite = this.add.image(helper.x, y, helper.key).setDisplaySize(112, 112).setDepth(10);
       if (motionAllowed()) {
         this.tweens.add({
-          targets: c,
-          y: cy - 10,
-          duration: 1000 + index * 120,
+          targets: sprite,
+          y: y - 8,
+          duration: 1100 + index * 130,
           yoyo: true,
           repeat: -1,
           ease: 'Sine.easeInOut',
-          delay: index * 160,
+          delay: index * 180,
         });
       }
     });
+
+    // Cluckle, the dreaming heart, dozes nearby.
+    const cluckle = this.add.image(840, 452, 'hl.char.cluckle').setDisplaySize(78, 78).setDepth(10);
+    if (motionAllowed()) {
+      this.tweens.add({ targets: cluckle, scale: cluckle.scale * 1.05, duration: 1800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+
+    // Drifting fireflies for a little living magic.
+    if (motionAllowed()) {
+      [[150, 300], [760, 250], [400, 200], [600, 330]].forEach(([fx, fy], i) => {
+        const fly = this.add.image(fx, fy, 'hl.prop.firefly').setDisplaySize(14, 14).setDepth(15).setAlpha(0.8);
+        this.tweens.add({ targets: fly, y: fy - 22, x: fx + (i % 2 ? 18 : -18), alpha: 0.25, duration: 1600 + i * 240, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      });
+    }
   }
 
   private begin(): void {
