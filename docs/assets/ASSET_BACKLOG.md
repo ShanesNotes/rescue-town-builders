@@ -61,6 +61,15 @@ Use this checklist before importing any asset file:
 
 ## License ledger
 
+## Hearthlight generated asset ledger — 2026-06-03
+
+| Asset | Source URL | Source/author | License | Attribution required | Date checked | Imported path | Notes |
+| ----- | ---------- | ------------- | ------- | -------------------- | ------------ | ------------- | ----- |
+| Hearthlight Rivet character PNG | `public/assets/` | Rescue Town Builders original generated asset set | Project-owned original generated asset | No | 2026-06-03 | `public/assets/hearthlight/characters/rivet.png` | Original, generated, IP-safe. Built with Codex image generation, chroma-key alpha removal, and locked Hearthlight palette cleanup. |
+| Hearthlight Brick character PNG | `public/assets/` | Rescue Town Builders original generated asset set | Project-owned original generated asset | No | 2026-06-03 | `public/assets/hearthlight/characters/brick.png` | Original, generated, IP-safe. Built with Codex image generation, chroma-key alpha removal, and locked Hearthlight palette cleanup. |
+| Hearthlight Ember character PNG | `public/assets/` | Rescue Town Builders original generated asset set | Project-owned original generated asset | No | 2026-06-03 | `public/assets/hearthlight/characters/ember.png` | Original, generated, IP-safe. Built with Codex image generation, chroma-key alpha removal, and locked Hearthlight palette cleanup. |
+| Hearthlight Cluckle character PNG | `public/assets/` | Rescue Town Builders original generated asset set | Project-owned original generated asset | No | 2026-06-03 | `public/assets/hearthlight/characters/cluckle.png` | Original, generated, IP-safe. Built with Codex image generation, chroma-key alpha removal, and locked Hearthlight palette cleanup. |
+
 | Asset | Source URL | Source/author | License | Attribution required | Date checked | Imported path | Notes |
 | ----- | ---------- | ------------- | ------- | -------------------- | ------------ | ------------- | ----- |
 | Kenney UI Pack selected button/star PNGs | `https://kenney.nl/assets/ui-pack` | Kenney | CC0-1.0 | No | 2026-06-03 | `public/assets/kenney/ui/*.png` | Official Kenney page lists Creative Commons CC0. Used as visual layer under existing hit targets. |
