@@ -11,6 +11,7 @@ describe('Slice 1 scene flow', () => {
       'TownMapScene',
       'ParentSettingsGateScene',
       'ParentSettingsScene',
+      'RecyclingRunScene',
       'PlaceholderMissionScene',
       'MissionCompleteScene',
     ]);

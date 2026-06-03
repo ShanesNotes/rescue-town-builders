@@ -84,6 +84,10 @@ export class TownMapScene extends Phaser.Scene {
   }
 
   private startMission(missionId: MissionId): void {
+    if (missionId === 'recycling-run') {
+      this.scene.start('RecyclingRunScene');
+      return;
+    }
     this.scene.start('PlaceholderMissionScene', { missionId });
   }
 }

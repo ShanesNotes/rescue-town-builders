@@ -6,6 +6,7 @@ export const SCENE_KEYS = {
   townMap: 'TownMapScene',
   parentSettingsGate: 'ParentSettingsGateScene',
   parentSettings: 'ParentSettingsScene',
+  recyclingRun: 'RecyclingRunScene',
   placeholderMission: 'PlaceholderMissionScene',
   missionComplete: 'MissionCompleteScene',
 } as const;
@@ -18,6 +19,7 @@ export const SLICE_1_SCENE_FLOW = [
   SCENE_KEYS.townMap,
   SCENE_KEYS.parentSettingsGate,
   SCENE_KEYS.parentSettings,
+  SCENE_KEYS.recyclingRun,
   SCENE_KEYS.placeholderMission,
   SCENE_KEYS.missionComplete,
 ] as const;

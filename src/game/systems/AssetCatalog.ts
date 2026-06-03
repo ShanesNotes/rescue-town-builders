@@ -40,6 +40,13 @@ export const assetCatalog: AssetNeed[] = [
     notes: 'Use simple text/emoji marker until production-safe art is selected.',
   },
   {
+    key: 'props.recycling-bins-items',
+    kind: 'prop',
+    status: 'placeholder',
+    description: 'Runtime emoji/text placeholders for Recycling Run bins and sortable items.',
+    notes: 'Implemented in code for Slice 2; production icon-first art remains in the asset backlog.',
+  },
+  {
     key: 'audio.theme-loop',
     kind: 'audio',
     status: 'backlog',
