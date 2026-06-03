@@ -47,7 +47,7 @@ export class FireFixScene extends Phaser.Scene {
     // (3 touches). Tucked near the hydrant landmark, outside the fire playfield so it never
     // affects the spray, where a lingering child will notice its gentle glimmer.
     const secrets = createSecretsForProfile();
-    addSecretHotspot(this, secrets, 'secret-friend', 815, 470);
+    addSecretHotspot(this, secrets, 'secret-friend', 822, 438);
   }
 
   private drawPlayfield(state: FireFixState): void {

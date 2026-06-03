@@ -60,15 +60,21 @@ export function addSecretHotspot(scene: Phaser.Scene, secrets: Secrets, id: Secr
     .on('pointerdown', () => {
       const message = touchSecret(secrets, id);
       if (!message) return;
-      // Cluckle's Dream embodies the microcosm: the whole town, small enough to hold,
-      // glows inside the hotspot for one breath before the words arrive.
-      if (id === 'cluckle-dream') {
-        playMiniatureTown(scene, x, y, () => showSecretReveal(scene, message));
-      } else {
-        showSecretReveal(scene, message);
-      }
+      // Each secret gets its own little visual soul (Language-of-Creation patterns) before
+      // the words: the microcosm, light-from-darkness, naming-the-animals.
+      const intro = SECRET_INTROS[id];
+      if (intro) intro(scene, x, y, () => showSecretReveal(scene, message));
+      else showSecretReveal(scene, message);
     });
 }
+
+type SecretIntro = (scene: Phaser.Scene, x: number, y: number, onDone: () => void) => void;
+
+const SECRET_INTROS: Partial<Record<SecretId, SecretIntro>> = {
+  'cluckle-dream': playMiniatureTown,
+  'hidden-light': playPointOfLight,
+  'secret-friend': playShyFriend,
+};
 
 /** A tiny glowing town (two little houses, a path, a tree) that blooms then fades. */
 function playMiniatureTown(scene: Phaser.Scene, x: number, y: number, onDone: () => void): void {
@@ -110,6 +116,64 @@ function playMiniatureTown(scene: Phaser.Scene, x: number, y: number, onDone: ()
           onDone();
         },
       }),
+  });
+}
+
+/** Hidden Light: a single point of light grows out of the quiet (light from darkness). */
+function playPointOfLight(scene: Phaser.Scene, x: number, y: number, onDone: () => void): void {
+  const depth = 999;
+  const halo = scene.add.circle(x, y, 30, 0xfff1a8, 0.35).setScale(0.15).setDepth(depth);
+  const core = scene.add.circle(x, y, 10, 0xfffdf2, 0.95).setScale(0.15).setDepth(depth + 1);
+  const finish = () => {
+    halo.destroy();
+    core.destroy();
+    onDone();
+  };
+  if (!motionAllowed()) {
+    halo.setScale(1.4);
+    core.setScale(1);
+    scene.time.delayedCall(800, finish);
+    return;
+  }
+  scene.tweens.add({ targets: halo, scale: 1.7, alpha: 0.12, duration: 750, ease: 'Sine.easeOut' });
+  scene.tweens.add({
+    targets: core,
+    scale: 1.1,
+    duration: 600,
+    yoyo: true,
+    hold: 350,
+    ease: 'Sine.easeOut',
+    onComplete: finish,
+  });
+}
+
+/** Secret Friend: a small shy creature peeks up, holds your gaze, then ducks back. */
+function playShyFriend(scene: Phaser.Scene, x: number, y: number, onDone: () => void): void {
+  const depth = 999;
+  const friend = scene.add.container(x, y + 20).setDepth(depth).setAlpha(0);
+  const earL = scene.add.circle(-9, -12, 5, 0xc9b8e8).setStrokeStyle(2, 0x203247, 0.8);
+  const earR = scene.add.circle(9, -12, 5, 0xc9b8e8).setStrokeStyle(2, 0x203247, 0.8);
+  const body = scene.add.circle(0, 0, 15, 0xc9b8e8).setStrokeStyle(2, 0x203247, 0.8);
+  const eyeL = scene.add.circle(-5, -2, 2.6, 0x203247);
+  const eyeR = scene.add.circle(5, -2, 2.6, 0x203247);
+  friend.add([earL, earR, body, eyeL, eyeR]);
+  const finish = () => {
+    friend.destroy();
+    onDone();
+  };
+  if (!motionAllowed()) {
+    friend.setY(y).setAlpha(1);
+    scene.time.delayedCall(800, finish);
+    return;
+  }
+  scene.tweens.add({
+    targets: friend,
+    y,
+    alpha: 1,
+    duration: 450,
+    ease: 'Back.Out',
+    onComplete: () =>
+      scene.tweens.add({ targets: friend, y: y + 20, alpha: 0, duration: 450, delay: 650, ease: 'Sine.easeIn', onComplete: finish }),
   });
 }
 
