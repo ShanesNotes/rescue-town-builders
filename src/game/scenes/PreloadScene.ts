@@ -3,7 +3,7 @@ import { assetCatalog, listLoadableAssets, resolveAssetPath } from '../systems/A
 import { loadHearthlightAssets } from '../data/hearthlightAssets';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, startScene } from '../systems/SceneNavigation';
-import { addBody, addTitle } from '../ui/SceneText';
+import { FONTS } from '../ui/typography';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -27,9 +27,24 @@ export class PreloadScene extends Phaser.Scene {
 
   create(): void {
     fadeInScene(this);
-    this.cameras.main.setBackgroundColor('#d9f5ff');
-    addTitle(this, 'Rescue Town Builders');
-    addBody(this, 190, 'Loading friendly CC0 assets with placeholder fallbacks...');
+    this.cameras.main.setBackgroundColor('#1B2A41');
+    this.add
+      .text(480, 250, 'RESCUE TOWN BUILDERS', {
+        fontFamily: FONTS.display,
+        fontSize: '40px',
+        color: '#FFE2A6',
+        fontStyle: 'bold',
+        stroke: '#2A1606',
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5);
+    this.add
+      .text(480, 312, 'lighting the lamps...', {
+        fontFamily: FONTS.label,
+        fontSize: '15px',
+        color: '#9DB4C0',
+      })
+      .setOrigin(0.5);
     this.time.delayedCall(250, () => startScene(this, SCENE_KEYS.start));
   }
 }

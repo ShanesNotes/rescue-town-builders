@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { MIN_TOUCH_TARGET } from '../systems/AccessibilityRules';
 import { registerE2EButton, registerE2EScene } from '../systems/E2EBridge';
 import { hasTexture, motionAllowed } from './Sprite';
+import { FONTS } from './typography';
 
 export type IconButtonOptions = {
   x: number;
@@ -32,7 +33,7 @@ export function addIconButton(scene: Phaser.Scene, options: IconButtonOptions): 
     children.push(
       scene.add
         .text(0, size / 2 + 16, options.caption, {
-          fontFamily: 'Trebuchet MS, Arial, sans-serif',
+          fontFamily: FONTS.display,
           fontSize: '20px',
           color: '#FFE6A3',
           align: 'center',
@@ -94,8 +95,8 @@ export function addButton(scene: Phaser.Scene, options: ButtonOptions): Phaser.G
     : null;
   if (panelArt) panel.setAlpha(0.18);
   const label = scene.add.text(0, 0, options.label, {
-    fontFamily: 'Trebuchet MS, Arial, sans-serif',
-    fontSize: '28px',
+    fontFamily: FONTS.display,
+    fontSize: '26px',
     color: '#203247',
     align: 'center',
     wordWrap: { width: width - 32 },

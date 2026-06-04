@@ -1,7 +1,7 @@
 :root {
-  color: #203247;
-  background: #d9f5ff;
-  font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+  color: #ffe2a6;
+  background: #1b2a41;
+  font-family: "Pixelify Sans", ui-rounded, system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -34,6 +34,9 @@ canvas {
   /* block removes the inline baseline gap (~5px) that otherwise overflows the
      viewport height on small landscape screens. */
   display: block;
+  /* The 960x540 canvas is CSS-upscaled to fit the viewport; nearest-neighbour keeps
+     the pixel art crisp instead of bilinear-blurry (the old "clunky" look). */
+  image-rendering: pixelated;
   border-radius: 18px;
   box-shadow: 0 14px 40px rgb(32 50 71 / 18%);
   max-width: 100%;
