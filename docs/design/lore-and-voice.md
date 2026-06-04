@@ -238,6 +238,105 @@ These are optional one-breath captions — the full poem lives in the book for r
 
 ---
 
+## Roadmap Wave — Secret-Reveal Lore in Voice (Hearthlight Overlays)
+
+> Extension for the 11 roadmap helpers and the reskinned Hearthlight secret moments.  
+> The three secrets (Secret Friend, Hidden Light, Cluckle's Dream) now carry playable voice from the new characters and especially Cluckle's inverse-dream register.  
+> All lines remain sparse, pre-reader, grateful, never instructional. They appear as tiny glowing toasts or whisper overlays on the Hearthlight town map or in-mission quiet corners.  
+> "Reskinned Hearthlight overlays" means the secret reveals now sit inside the locked dusk palette, warm light language, and "window lights because you noticed" soul — no cold popups, only soft candle-gold glows and one-breath words.
+
+**Root reminder (from design-system §9 and secrets-language-of-creation):**  
+- Hidden Light = a parent's words lowered into one spark.  
+- Secret Friend = naming by returning (the shy creature learns the child's name because they kept coming back).  
+- Cluckle's Dream (microcosm) = the whole town made small enough to hold inside one dreaming hen — now playable as inverse matching in her mission.
+
+The voice for these moments is the town's thank-you made audible, not a lecture.
+
+### Updated / Expanded Secret Reveal Voice (for overlays)
+
+These lines can be used in the secret system, Cluckle mission complete, well hotspot, or quiet corner reveals. They are optional to "hear" (tap character or linger). They carry the lore without ever requiring the child to read or "get it."
+
+**Cluckle (inverse-dream register — primary secret voice)**  
+- "I dreamed your name into the light."  
+- "The whole town fits inside one small heart — and now you hold it too."  
+- "Small hands made the big dark become a window."  
+- "In my dream the parent’s words are already inside you."  
+- "Upside down just means the light is looking back at you."
+
+**Hidden Light secret (parent's words lowered — appears in one quiet corner, often house-builder or bike-explorer map spot)**  
+- "A spark remembers your name."  
+- "Hands that love you placed this light here."  
+- "Even when the room is dark, you are held."  
+- (The actual message can be Dad's private text; the voice above is the frame the child hears first.)
+
+**Secret Friend (shy creature — appears on 3rd patient return to a mission, often fire-fix / picnic or scooter field)**  
+- "You came back. I learned your name."  
+- "A friend was waiting for the one who stays."  
+- "Because you noticed the quiet corner, I am no longer alone."
+
+**Rivet (recycle / found-thing secret echo)**  
+- "Every scrap that finds home was once a secret waiting."  
+
+**Brick (build / promise secret echo)**  
+- "The wall you raised now holds a light that was hidden."  
+
+**Ember (gentle spray / visitor secret echo)**  
+- "Even the things that felt too bright needed only a kind reminder to rest."  
+
+**Wings (flight secret echo — for high or ring moments)**  
+- "From up here the town looks like it fits inside a wing."  
+
+**Scoot (herd secret echo)**  
+- "All the friends were already walking the same path home."  
+
+**Dash (light signal secret echo)**  
+- "One planted light makes the whole road remember the way."  
+
+**Reed (tinker secret echo)**  
+- "Old pieces become new when someone gentle puts them together."  
+
+**Milo (explorer secret echo)**  
+- "The quiet places were waiting for the one who pedals slowly."  
+
+**Mayor Grumble (goo secret echo)**  
+- "Even the silliest mess can hide a small warm truth."  
+
+**Mayor Merry (dream statue secret echo)**  
+- "The statue you placed was already dreaming of you."  
+
+**Captain Coral (treasure secret echo)**  
+- "Every box the water kept safe was a hello with your name on it."  
+
+**Baker Benny (bread secret echo)**  
+- "Warmth delivered is light remembered."  
+
+**Nova Noodle (foam secret echo)**  
+- "The stars that fell were only asking for a soft hello."  
+
+**Usage in Hearthlight overlays:**  
+The lines appear with a soft sparkle-cluster or light-burst fx (from art-prompts) in candle-gold, over the dark window or secret hotspot, then fade. No full sentences on screen unless parent layer. Child can tap the glowing hero silhouette again for the next line. Cluckle's inverse lines are the "deep" ones — they reward the child who finds her well or completes her mission with the flipped wonder feeling.
+
+### Cluckle's Playable Inverse-Dream Voice Notes (for her mission + overlays)
+
+Cluckle's mission (Chicken Inverse Dream) is the only place the child hears her "speak" more than rarely. Her voice is deliberately opposite, microcosm-flavored, and warm-playful:
+
+- It never says "do the opposite." It simply offers the flipped line after a successful match or patient wait.  
+- Lines live in the same tiny-toast system as other heroes but feel like they come from inside the dream.  
+- When the microcosm glows (on 3rd well touch or mission complete), one of the inverse lines appears with the tiny town inside her outline or the well reflection.  
+- This is the "secret-reveal lore made playable": the child experiences the Language of Creation (microcosm, hidden light, naming) as a gentle mechanical flip rather than an explanation.
+
+Example flow in Cluckle mission: child places the "tiny mayor" on the "big hen" slot → soft glow → Cluckle line: "Small mayors make the biggest statues." → one window on the distant tiny house in the backdrop lights.
+
+The inverse voice is the gift that makes the secret-friend / hidden-light / microcosm trio feel like one living grammar instead of three separate collectibles.
+
+---
+
+**Roadmap wave + secret voice complete on the grok/hearthlight-prompts branch.**
+
+This layer closes the loop: the 11 new helpers now have visual identity (roadmap-characters), art targets (art-prompts), and living voice that carries the three secrets into the Hearthlight world. The child who lingers will feel the town has been dreaming them the whole time.
+
+---
+
 **All four phases complete on the grok/hearthlight-prompts branch.**
 
 Deliverables:

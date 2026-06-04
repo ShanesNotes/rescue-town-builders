@@ -48,8 +48,8 @@ Gentle, present, grateful. The town is not a task list — it is a friend who wa
 **Body instruction (pre-reader safe)**  
 - Remove entirely or reduce to one line under title:  
   Current: "Create up to five local profiles. No accounts..."  
-  Proposed: `Up to 5 friends. No grown-up logins.` (parent tone)  
-  Or for child layer: **(no text — the row of glowing profile coins speaks)**
+  Child layer: **(no text — the row of glowing profile coins speaks for itself)**  
+  Privacy / no-network language lives only in the parent gate (see §9). Child never sees "accounts," "logins," or network words.
 
 **Profile row buttons (one per existing profile)**  
 - Icon: the helper avatar (Rivet teal satchel, Brick hardhat, Ember water pack) large.  
@@ -65,8 +65,8 @@ Gentle, present, grateful. The town is not a task list — it is a friend who wa
 - Parent Settings: coin icon = cozy key / lantern-gear / scroll. Words: none or `Grown-ups` (parent layer).  
 - Back: coin icon = winding path or house-with-arrow. Words: `Back` (1 word) or none.
 
-**Gamepad hint (bottom, smallest bitmap, parent-ish):**  
-`D-pad • A • B` (keep minimal symbols; or replace with tiny d-pad icon later)
+**Gamepad hint (bottom, smallest bitmap, parent layer only):**  
+`D-pad • A • B` (or tiny d-pad icon). Child layer sees only the discoverable glowing coins and map nodes — no control diagrams. Full gamepad support documented in parent settings.
 
 **No-Fail / encouraging microcopy (on create success path):**  
 - After new profile: a tiny toast or sparkle line that fades: `A new light joins the town.` (or no text — just the avatar pops in warm)
@@ -100,7 +100,7 @@ Current long `title\nmapNodeId • starsLabel` → gone. MapNodeId was internal;
 - Profiles: small face row or single avatar coin → `Friends` (1 word)  
 - My Stickers: star or sticker-frame coin → `Stickers` (1 word) or pure joyful star coin
 
-**Gamepad hint:** minimal symbols only, or omit (the coins + map nodes are discoverable).
+**Gamepad hint:** minimal symbols only (parent layer) or omit entirely from child view (the coins + map nodes are discoverable by touch/keyboard/gamepad from the first second).
 
 **Secret hotspots (no text ever):**  
 - Cluckle's Dream well: no label. The patient child finds the microcosm glow on 3rd touch. Sticker reveals the poem later.
@@ -257,14 +257,17 @@ Then: the number of stars as big chunky stars row (visual, no "with 2 stars").
 
 Sticker reveal: the new sticker pops with its icon + short title (phase 4 names). One soft bounce.
 
-**Celebration messages (keep short, always full joy — No-Fail)**  
-- 1 star: `You did it!` (or warmer: `The town feels you.`)  
-- 2 stars: `Great helping!` (or `Light spreads because of you.`)  
-- 3 stars: `Super helper!` (or `Cluckle dreamed this light for you.`)
+**Celebration vocabulary — wordless streak + milestone pops (never punitive)**  
+Core rule: the child path is icon + light first, words second and minimal. Streaks are visual (lit windows accumulating, soft glow trail on map, confetti count) — no visible "streak counter" or pressure. Milestone pops use warm joyful bursts ("Wow!", "Super!", sparkle-cluster + light-burst) that celebrate the light, never the child's performance.
 
-Bigger party for more stars (more confetti, more sparkles), but the base message never diminishes the 1-star child.
+- On any finish (even 1-star): primary pop is wordless or one-breath — big warm "Wow!" or "Super!" with confetti in palette colors + one lit-window sparkle. The town simply grew brighter because the child stayed.
+- 1-star milestone: `Wow!` (or `A window glows.`) — smallest burst.
+- 2-star milestone: `Super!` (or `Light spreads.`) — medium confetti + two sparkles.
+- 3-star milestone: `Wow! Super!` or `Cluckle dreamed this.` — biggest party (more leaves, more glows) but the 1-star child still receives full "the town is brighter" warmth. No "almost" language, no "next time," no comparison.
 
-**Total stars line:** visual only or `Your light so far: [big number] ⭐` (parent layer ok).
+Bigger visual party for higher stars, but the base feeling is identical: gratitude from the town. The message never punishes or withholds joy.
+
+**Total stars line:** visual stars/pips only on child surfaces. `Your light so far: [big number] ⭐` or cumulative window count lives only in parent layer (see §9).
 
 **Action:** big warm "Back to Map" coin or path icon + `Town` (1 word). No other choices.
 
@@ -322,7 +325,8 @@ Other:
 
 - `Done` coin: path or check icon + `Back` (or pure check coin)
 
-**Tone for parents:** "Everything stays on this device. No accounts, no sharing, no rush. Change anything anytime. The child only ever feels the warmth."
+**Tone for parents (all privacy, network, gamepad, difficulty, and quiet language lives here only — never leaks to child path):**  
+"Everything stays on this device. No accounts, no network, no sharing, no rush. The game works with keyboard, touch, and gamepad from the first second (D-pad or stick + one action button is enough for every mission). Difficulty and quiet defaults are parent choices only — child never sees or feels a 'hard mode.' Change anything anytime. The child only ever feels the warmth. All lights, streaks, and celebrations are No-Fail: trying is helping; the town glows because they came. Wordless milestone pops ('Wow!', 'Super!') and visual streaks celebrate the light, never the child."
 
 ---
 
@@ -361,7 +365,16 @@ Text under: 1 line max, or none (the art + character will show the "why").
 - Always visual first: star icons, pips, lit-window count on town map.  
 - Numerals only as fat friendly bitmap when count matters (e.g. 3/10 items). Never "attempts" shown to child.
 
+**Wordless streak + celebration (child path only)**  
+- Streaks are purely visual (accumulating lit windows on the map, soft glow trails, gentle confetti count). No numeric streak counter, no "keep going" pressure text.  
+- Milestone pops use "Wow!" / "Super!" (or wordless sparkle + light burst) with warm confetti. Always full joy. Never punitive, never comparative, never "you can do better." The 1-star finish receives the same town gratitude as 3 stars — only the visual party size grows.
+
+**Parent-layer copy (gated, never child-facing)**  
+- Privacy / no-network / local-only statements, gamepad diagrams or instructions, difficulty modes ("Helper / Easy / Normal"), quiet / calm-night defaults, and any "how the save works" explanations appear only behind the 3-second parent gate and inside Parent Settings. Child surfaces stay icon + light + one-breath wonder.
+
 ---
+
+
 
 ## 11. Data & Implementation Notes (for the team)
 
