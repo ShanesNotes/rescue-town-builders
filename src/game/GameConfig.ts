@@ -1,7 +1,10 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { FireFixScene } from './scenes/FireFixScene';
+import { AimMissionScene } from './scenes/AimMissionScene';
 import { HouseBuilderScene } from './scenes/HouseBuilderScene';
+import { JourneyMissionScene } from './scenes/JourneyMissionScene';
+import { MatchMissionScene } from './scenes/MatchMissionScene';
 import { MissionCompleteScene } from './scenes/MissionCompleteScene';
 import { ParentSettingsGateScene } from './scenes/ParentSettingsGateScene';
 import { ParentSettingsScene } from './scenes/ParentSettingsScene';
@@ -44,6 +47,9 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     RecyclingRunScene,
     HouseBuilderScene,
     FireFixScene,
+    MatchMissionScene,
+    AimMissionScene,
+    JourneyMissionScene,
     PlaceholderMissionScene,
     MissionCompleteScene,
     StickerBookScene,

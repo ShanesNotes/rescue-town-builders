@@ -85,6 +85,54 @@ test('captures every screen and stays error-free across a full playthrough', asy
   await tap(page, 'mission.complete.back-to-map');
   await scene(page, 'TownMapScene');
 
+  // Roadmap (Epic H): page to the next town screen and play a Match mission end-to-end.
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await shot(page, '09-townmap-roadmap');
+  await tap(page, 'townmap.mission.inverse-dream');
+  await scene(page, 'MatchMissionScene');
+  await shot(page, '10-inverse-dream');
+  await clearMission(page, 'MatchMissionScene', [
+    'inverse-dream.target.moon',
+    'inverse-dream.target.cold',
+    'inverse-dream.target.small',
+    'inverse-dream.target.night',
+    'inverse-dream.target.quiet',
+  ], 60);
+  await tap(page, 'mission.complete.back-to-map');
+  await scene(page, 'TownMapScene');
+
+  // An Aim mission (Goo Cleanup) — verify the AimMissionScene + No-Fail drone floor.
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await tap(page, 'townmap.mission.goo-cleanup');
+  await scene(page, 'AimMissionScene');
+  await shot(page, '11-goo-cleanup');
+  await clearMission(page, 'AimMissionScene', ['goo-cleanup.act'], 40);
+  await tap(page, 'mission.complete.back-to-map');
+  await scene(page, 'TownMapScene');
+
+  // A Journey mission (Scooter Roundup) — verify the JourneyMissionScene waypoint flow.
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await tap(page, 'townmap.mission.scooter-roundup');
+  await scene(page, 'JourneyMissionScene');
+  await shot(page, '12-scooter-roundup');
+  await clearMission(page, 'JourneyMissionScene', [
+    'scooter-roundup.waypoint.w0',
+    'scooter-roundup.waypoint.w1',
+    'scooter-roundup.waypoint.w2',
+    'scooter-roundup.waypoint.w3',
+  ], 40);
+  await tap(page, 'mission.complete.back-to-map');
+  await scene(page, 'TownMapScene');
+
   await tap(page, 'townmap.sticker-book');
   await scene(page, 'StickerBookScene');
   await shot(page, '08-stickers');

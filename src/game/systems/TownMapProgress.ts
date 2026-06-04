@@ -1,4 +1,4 @@
-import type { MissionDefinition, MissionId } from '../types';
+import type { MissionArchetype, MissionDefinition, MissionId } from '../types';
 import type { PlayerProfile } from './SaveSystem';
 
 export type TownMapNode = {
@@ -11,6 +11,8 @@ export type TownMapNode = {
   attempts: number;
   starsLabel: string;
   statusLabel: string;
+  archetype?: MissionArchetype;
+  coinKey?: string;
 };
 
 export function projectTownMapNodes(
@@ -30,6 +32,8 @@ export function projectTownMapNodes(
       attempts: progress?.attempts ?? 0,
       starsLabel: bestStars > 0 ? '⭐'.repeat(bestStars) : 'No stars yet',
       statusLabel: progress?.completed ? `Best: ${'⭐'.repeat(bestStars)}` : 'Ready to try',
+      archetype: definition.archetype,
+      coinKey: definition.coinKey,
     };
   });
 }

@@ -1,5 +1,13 @@
 # Production team — Rescue Town Builders as a complete, masterpiece-grade game
 
+> **STATUS 2026-06-04:** the full game is built + polished + on `origin/continuous-refinement`.
+> 8 Hearthlight scenes + **14 missions** (3 core + 11 roadmap on Match/Aim/Journey engines), paged
+> town world, 17-sticker book, real soundtrack, fixed P0 input, hidden secrets. Two multi-agent
+> reviews applied. 110 unit + 6 e2e green; ADR-0006 gate green (honest human authorization). A
+> 4-specialist review verdict: **shippable as a gift.** Remaining = optional flourishes (PixelLab
+> living-character animation; a couple asset-only icon tweaks) and the merge to `main`, which awaits
+> **Willem's play-test** (Shane's reserved call).
+
 > **Mandate (Shane, 2026-06-04, expanded):** apply the locked Hearthlight direction + satisfying
 > mechanics to the **ENTIRE game** — every scene AND the **full PRD v0.1.0 roadmap characters**
 > (Epic H). **No more checkpoints** — keep working until the game is done and polished. **Push to

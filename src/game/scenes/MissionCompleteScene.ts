@@ -14,6 +14,34 @@ const PLACE: Record<string, string> = {
   'recycling-run': 'recycling yard',
   'house-builder': 'new home',
   'fire-fix': 'picnic',
+  'inverse-dream': 'dream',
+  'dream-statues': 'statue garden',
+  'recycled-inventions': 'workshop',
+  'bread-rush': 'bakery',
+  'goo-cleanup': 'town square',
+  'frog-flight': 'sky',
+  'asteroid-blaster': 'night sky',
+  'scooter-roundup': 'meadow',
+  'safety-lights': 'crossing',
+  'bike-explorer': 'neighborhood',
+  'treasure-boat': 'harbor',
+};
+// The place that just got better — painted behind the celebration so the lit window is in THAT world.
+const MISSION_BG: Record<string, string> = {
+  'recycling-run': 'hl.bg.recycle',
+  'house-builder': 'hl.bg.build',
+  'fire-fix': 'hl.bg.fire',
+  'inverse-dream': 'hl.bg.inverseDream',
+  'dream-statues': 'hl.bg.dreamStatues',
+  'recycled-inventions': 'hl.bg.recycledInventions',
+  'bread-rush': 'hl.bg.breadRush',
+  'goo-cleanup': 'hl.bg.gooCleanup',
+  'frog-flight': 'hl.bg.frogFlight',
+  'asteroid-blaster': 'hl.bg.asteroidBlaster',
+  'scooter-roundup': 'hl.bg.scooterRoundup',
+  'safety-lights': 'hl.bg.safetyLights',
+  'bike-explorer': 'hl.bg.bikeExplorer',
+  'treasure-boat': 'hl.bg.treasureBoat',
 };
 const CONFETTI = [0xffc857, 0xe86f3a, 0x43a29c, 0xffd98a, 0xffb3c6, 0xf2f0e6];
 
@@ -42,7 +70,7 @@ export class MissionCompleteScene extends Phaser.Scene {
     const celebration = createCelebrationPlan(this.result);
     const place = PLACE[this.result.missionId] ?? 'town';
 
-    this.paintWorld();
+    this.paintWorld(MISSION_BG[this.result.missionId] ?? 'hl.bg.town');
 
     // Title — the light IS the completion.
     this.add
@@ -93,8 +121,8 @@ export class MissionCompleteScene extends Phaser.Scene {
     bindIntents(this, { onConfirm: () => returnToTownMap(this), onBack: () => returnToTownMap(this) });
   }
 
-  private paintWorld(): void {
-    this.add.image(480, 270, 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
+  private paintWorld(bgKey: string): void {
+    this.add.image(480, 270, hasTexture(this, bgKey) ? bgKey : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
     // A gentle edge vignette that stays CLEAR in the centre, so the light reads as the brightest point.
     this.add.rectangle(480, 30, 960, 80, 0x101b2e, 0.34).setDepth(1);
     this.add.rectangle(480, 510, 960, 80, 0x101b2e, 0.34).setDepth(1);
