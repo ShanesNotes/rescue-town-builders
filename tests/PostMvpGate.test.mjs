@@ -64,7 +64,7 @@ describe('post-MVP gate check', () => {
     expect(validatePostMvpGate({
       missionSource: expandedMissionSource,
       evidenceExists: true,
-      evidenceText: 'Gate verdict: pass-roadmap-expansion\nPlay-test: pass\n',
+      evidenceText: `${REQUIRED_GATE_MARKERS[0]}\n${REQUIRED_GATE_MARKERS[1]}\n`,
     })).toMatchObject({
       ok: false,
       reason: 'missing-evidence-markers',

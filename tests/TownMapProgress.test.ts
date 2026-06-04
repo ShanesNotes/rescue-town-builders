@@ -16,7 +16,8 @@ describe('TownMapProgress', () => {
   it('projects static map nodes from the mission registry', () => {
     const nodes = projectTownMapNodes(missionDefinitions, null);
 
-    expect(nodes.map((node) => node.mapNodeId)).toEqual([
+    expect(nodes.map((node) => node.mapNodeId)).toEqual(missionDefinitions.map((d) => d.mapNodeId));
+    expect(nodes.slice(0, 3).map((node) => node.mapNodeId)).toEqual([
       'recycling-center',
       'construction-lot',
       'picnic-park',

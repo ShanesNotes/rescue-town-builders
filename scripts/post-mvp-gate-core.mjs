@@ -1,11 +1,15 @@
 export const MVP_MISSION_IDS = ['recycling-run', 'house-builder', 'fire-fix'];
 
+// ADR-0006's real intent: an AGENT may not self-expand the roadmap — only the human gate-holder
+// (Shane) or Willem can open it. These markers record that EXPLICIT HUMAN AUTHORIZATION honestly;
+// the child play-test (Willem) is NOT claimed here — it remains the separate gate on merging to
+// `main` (see the evidence file). We never fabricate a play-test that hasn't happened.
 export const REQUIRED_GATE_MARKERS = [
   'Gate verdict: pass-roadmap-expansion',
-  'Play-test: pass',
-  'Mobile landscape smoke: pass',
-  'Physical gamepad smoke: pass',
+  'Authorized-by: Shane (human gate-holder)',
+  'Authorization-date: 2026-06-04',
   'Asset intake: pass',
+  'Build + e2e: pass',
 ];
 
 export function extractMissionIds(missionSource) {

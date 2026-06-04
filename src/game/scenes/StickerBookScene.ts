@@ -63,11 +63,11 @@ export class StickerBookScene extends Phaser.Scene {
       this.add.image(startX + i * gap, 104, i < found ? 'hl.ui.starFull' : 'hl.ui.starEmpty').setDisplaySize(24, 24).setDepth(40);
     });
 
-    const cols = 3;
-    const cellW = 240;
-    const cellH = 168;
-    const gridX = 480 - cellW;
-    const gridY = 222;
+    const cols = 5;
+    const cellW = 164;
+    const cellH = 176;
+    const gridX = 480 - 2 * cellW;
+    const gridY = 218;
     stickers.forEach((sticker, index) => {
       const unlocked = isStickerUnlocked(sticker.id, owned);
       const x = gridX + (index % cols) * cellW;
@@ -79,16 +79,16 @@ export class StickerBookScene extends Phaser.Scene {
   private stickerCell(id: string, icon: string, title: string, x: number, y: number, unlocked: boolean, owned: readonly string[]): void {
     let frame: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle;
     if (hasTexture(this, 'hl.ui.stickerFrame')) {
-      const img = this.add.image(x, y, 'hl.ui.stickerFrame').setDisplaySize(124, 124).setDepth(6);
+      const img = this.add.image(x, y, 'hl.ui.stickerFrame').setDisplaySize(108, 108).setDepth(6);
       if (!unlocked) img.setTint(0x5a6a88).setAlpha(0.8);
       frame = img;
     } else {
-      frame = this.add.rectangle(x, y, 124, 124, unlocked ? 0x1b2a41 : 0x101a2e, 0.9).setStrokeStyle(4, 0xffc857).setDepth(6);
+      frame = this.add.rectangle(x, y, 108, 108, unlocked ? 0x1b2a41 : 0x101a2e, 0.9).setStrokeStyle(4, 0xffc857).setDepth(6);
     }
-    if (unlocked) this.add.image(x, y - 6, icon).setDisplaySize(62, 62).setDepth(7);
-    else this.add.text(x, y - 6, '?', { fontSize: '44px', color: '#7e8cab' }).setOrigin(0.5).setDepth(7);
+    if (unlocked) this.add.image(x, y - 6, icon).setDisplaySize(54, 54).setDepth(7);
+    else this.add.text(x, y - 6, '?', { fontSize: '40px', color: '#7e8cab' }).setOrigin(0.5).setDepth(7);
     this.add
-      .text(x, y + 56, unlocked ? title : 'waiting', { fontFamily: FONTS.display, fontSize: '15px', color: unlocked ? '#FFE2A6' : '#7e8cab', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 3, align: 'center', wordWrap: { width: 200 } })
+      .text(x, y + 56, unlocked ? title : 'waiting', { fontFamily: FONTS.display, fontSize: '13px', color: unlocked ? '#FFE2A6' : '#7e8cab', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 3, align: 'center', wordWrap: { width: 156 } })
       .setOrigin(0.5)
       .setDepth(7);
     frame.setInteractive({ useHandCursor: true }).on('pointerup', () => unlocked && this.scene.restart({ readingId: id }));

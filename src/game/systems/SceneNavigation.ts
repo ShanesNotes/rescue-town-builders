@@ -1,5 +1,5 @@
+import type { MissionArchetype, MissionId, MissionResult } from '../types';
 import type Phaser from 'phaser';
-import type { MissionId, MissionResult } from '../types';
 
 export const SCENE_KEYS = {
   boot: 'BootScene',
@@ -12,6 +12,9 @@ export const SCENE_KEYS = {
   recyclingRun: 'RecyclingRunScene',
   houseBuilder: 'HouseBuilderScene',
   fireFix: 'FireFixScene',
+  matchMission: 'MatchMissionScene',
+  aimMission: 'AimMissionScene',
+  journeyMission: 'JourneyMissionScene',
   placeholderMission: 'PlaceholderMissionScene',
   missionComplete: 'MissionCompleteScene',
   stickerBook: 'StickerBookScene',
@@ -35,14 +38,22 @@ export const MVP_SCENE_FLOW = [
   SCENE_KEYS.missionComplete,
 ] as const;
 
-export const MISSION_SCENE_KEYS: Record<MissionId, SceneKey> = {
+// The original three have bespoke scenes; roadmap missions route by archetype to a shared engine scene.
+export const MISSION_SCENE_KEYS: Partial<Record<MissionId, SceneKey>> = {
   'recycling-run': SCENE_KEYS.recyclingRun,
   'house-builder': SCENE_KEYS.houseBuilder,
   'fire-fix': SCENE_KEYS.fireFix,
 };
 
-export function sceneKeyForMission(missionId: MissionId): SceneKey {
-  return MISSION_SCENE_KEYS[missionId];
+const ARCHETYPE_SCENE_KEYS: Record<MissionArchetype, SceneKey> = {
+  match: SCENE_KEYS.matchMission,
+  aim: SCENE_KEYS.aimMission,
+  journey: SCENE_KEYS.journeyMission,
+};
+
+export function sceneKeyForMission(missionId: MissionId, archetype?: MissionArchetype): SceneKey {
+  if (archetype) return ARCHETYPE_SCENE_KEYS[archetype];
+  return MISSION_SCENE_KEYS[missionId] ?? SCENE_KEYS.placeholderMission;
 }
 
 export function startScene(scene: Phaser.Scene, key: SceneKey, data?: object): void {
