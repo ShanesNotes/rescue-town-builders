@@ -66,7 +66,7 @@ export class FireFixScene extends Phaser.Scene {
 
     // Secret Friend: a shy creature for the patient child (3 touches), away from the playfield.
     const secrets = createSecretsForProfile();
-    addSecretHotspot(this, secrets, 'secret-friend', 822, 470);
+    addSecretHotspot(this, secrets, 'secret-friend', 822, 438);
 
     bindIntents(this, {
       onMove: (x, y) => this.move({ x, y }),
