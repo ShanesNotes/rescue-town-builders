@@ -302,16 +302,18 @@ function withCurrent(state: RecyclingRunState): RecyclingRunState {
     ...state,
     currentBlueprint,
     currentSlot,
-    choices: !completed && currentSlot ? buildChoices(state.items, currentSlot.kind) : [],
+    choices: !completed && currentSlot ? buildChoices(state.items, currentSlot.kind, state.currentBlueprintIndex + state.currentSlotIndex) : [],
     completed,
   };
 }
 
-function buildChoices(items: RecyclingItem[], matchingKind: ReusePartKind): ReuseChoice[] {
+function buildChoices(items: RecyclingItem[], matchingKind: ReusePartKind, rotationSeed: number): ReuseChoice[] {
   const match = findFirstMatchingItem(items, matchingKind);
   const distractors = items.filter((item) => item.partKind !== matchingKind).slice(0, 2);
   const extras = items.filter((item) => item.id !== match.id && !distractors.some((distractor) => distractor.id === item.id));
-  return [match, ...distractors, ...extras].slice(0, 3).map((item) => ({ ...item, isMatch: item.partKind === matchingKind }));
+  const choices = [match, ...distractors, ...extras].slice(0, 3);
+  const rotation = choices.length > 0 ? rotationSeed % choices.length : 0;
+  return [...choices.slice(rotation), ...choices.slice(0, rotation)].map((item) => ({ ...item, isMatch: item.partKind === matchingKind }));
 }
 
 function findFirstMatchingItem(items: RecyclingItem[], matchingKind: ReusePartKind): RecyclingItem {

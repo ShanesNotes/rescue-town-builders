@@ -256,8 +256,9 @@ export class RecyclingRunScene extends Phaser.Scene {
   private decorateWithWrongPiece(itemId: string): void {
     const item = this.state.items.find((candidate) => candidate.id === itemId);
     if (!item) return;
-    const x = 300 + (this.state.decoratedParts.length % 6) * 34;
-    const y = 138 + (this.state.decoratedParts.length % 2) * 34;
+    const index = Math.max(0, this.state.decoratedParts.length - 1);
+    const x = 300 + (index % 6) * 34;
+    const y = 138 + (index % 2) * 34;
     const deco = this.add.image(x, y, this.itemKeyFor(item)).setDisplaySize(28, 28).setDepth(18).setAlpha(0.88);
     if (motionAllowed()) this.tweens.add({ targets: deco, angle: 10, yoyo: true, repeat: 3, duration: 100 });
   }

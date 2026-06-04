@@ -219,7 +219,7 @@ export class HouseBuilderScene extends Phaser.Scene {
 
   private addYardDecoration(id: HousePartId, assisted: boolean): void {
     const key = hasTexture(this, PART_KEY[id]) ? PART_KEY[id] : FALLBACK_KEY[id];
-    const index = this.state.decorativeTries;
+    const index = Math.max(0, this.state.decorativeTries - 1);
     const x = 318 + (index % 6) * 58;
     const y = 350 + (index % 2) * 22;
     const deco = this.add.image(x, y, key).setDisplaySize(30, 30).setDepth(12).setAlpha(assisted ? 0.95 : 0.78);

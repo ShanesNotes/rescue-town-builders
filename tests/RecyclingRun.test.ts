@@ -37,6 +37,19 @@ describe('RecyclingRun reuse workshop', () => {
     expect(helperBlueprints.every((blueprint) => blueprint.slots.every((slot) => ['sheet', 'tube'].includes(slot.kind)))).toBe(true);
   });
 
+  it('rotates the matching choice position across slots so the workshop is not always first-card correct', () => {
+    const blueprints = [reuseBlueprints.find((blueprint) => blueprint.id === 'bubble-sprinkler')!];
+    let state = createRecyclingRunState('helper', chooseRecyclingItems(recyclingItems, ['paper', 'plastic'], 6), blueprints);
+    const firstMatchIndex = state.choices.findIndex((choice) => choice.isMatch);
+    const firstMatch = state.choices[firstMatchIndex]!;
+
+    state = tryReusePart(state, firstMatch.id).state;
+    const secondMatchIndex = state.choices.findIndex((choice) => choice.isMatch);
+
+    expect(firstMatchIndex).toBe(0);
+    expect(secondMatchIndex).not.toBe(firstMatchIndex);
+  });
+
   it('turns a matching rescued item into a placed invention part', () => {
     const blueprints = [reuseBlueprints.find((blueprint) => blueprint.id === 'bubble-sprinkler')!];
     let state = createRecyclingRunState('helper', chooseRecyclingItems(recyclingItems, ['paper', 'plastic'], 6), blueprints);
