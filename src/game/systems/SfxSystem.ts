@@ -7,7 +7,7 @@
 // tests). Real CC0 samples can later be swapped in behind the same SfxCue
 // interface without touching any caller.
 
-export type SfxCue = 'correct' | 'place' | 'spray-hit' | 'fanfare' | 'secret';
+export type SfxCue = 'tap' | 'try-again' | 'correct' | 'place' | 'spray-hit' | 'fanfare' | 'secret';
 
 export type SfxRecipe = {
   /** Note frequencies in Hz, played in order. Ascending reads as "good / up". */
@@ -17,6 +17,8 @@ export type SfxRecipe = {
 };
 
 export const SFX_RECIPES: Record<SfxCue, SfxRecipe> = {
+  tap: { notes: [659.25], noteDuration: 0.045 }, // E5, a soft press tick — the "I pressed it" signal
+  'try-again': { notes: [466.16, 523.25], noteDuration: 0.07 }, // gentle up-nudge, NEVER a buzzer (No-Fail)
   correct: { notes: [523.25, 659.25], noteDuration: 0.09 }, // C5 -> E5, a happy blip
   place: { notes: [440, 587.33], noteDuration: 0.08 }, // A4 -> D5, a satisfying click-up
   'spray-hit': { notes: [392], noteDuration: 0.05 }, // short G4 tick

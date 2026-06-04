@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { picnicFires } from '../data/picnicFires';
-import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { bindIntents } from '../systems/bindIntents';
+import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { getSfx } from '../systems/GameServices';
 import { createSecretsForProfile, addSecretHotspot } from '../systems/secretHotspot';
@@ -13,155 +14,203 @@ import {
   type Direction,
   type FireFixState,
 } from '../systems/FireFix';
-import { addButton } from '../ui/Button';
-import { addBody, addTitle } from '../ui/SceneText';
+import { addIconButton } from '../ui/Button';
+import { FONTS } from '../ui/typography';
+import { hasTexture, motionAllowed } from '../ui/Sprite';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
-import { addHelperAvatar, addSprite, shrinkAndFade } from '../ui/Sprite';
 
 export class FireFixScene extends Phaser.Scene {
-  private state: FireFixState | null = null;
+  private state!: FireFixState;
+  private ember!: Phaser.GameObjects.Image;
+  private emberShadow!: Phaser.GameObjects.Ellipse;
+  private beam!: Phaser.GameObjects.Rectangle;
+  private fireSprites = new Map<string, Phaser.GameObjects.Image>();
+  private fireSmoke = new Map<string, Phaser.GameObjects.Image>();
+  private pips: Phaser.GameObjects.Arc[] = [];
+  private message!: Phaser.GameObjects.Text;
+  private done = false;
 
   constructor() {
     super('FireFixScene');
   }
 
-  init(data: { state?: FireFixState }): void {
-    this.state = data.state ?? null;
-  }
-
   create(): void {
     fadeInScene(this);
-    this.cameras.main.setBackgroundColor('#eaf7ff');
-    this.state ??= createFireFixState(picnicFires);
-    const state = this.state;
+    this.state = createFireFixState(picnicFires);
+    this.fireSprites = new Map();
+    this.fireSmoke = new Map();
+    this.pips = [];
+    this.done = false;
 
-    addTitle(this, "Ember's Fire Fix");
-    addBody(this, 95, `Spray cartoon fires. Out: ${state.fires.filter((fire) => fire.health === 0).length}/5 • Sprays: ${state.sprays}`);
-    addBody(this, 120, state.lastMessage);
+    this.paintWorld();
+    this.buildPips();
 
-    this.drawPlayfield(state);
-    this.addControls();
-    this.bindInput();
+    // Fires (no numeric labels — size + colour show their state).
+    for (const fire of this.state.fires) {
+      this.fireSmoke.set(fire.id, this.add.image(fire.x, fire.y - 34, 'hl.prop.smokeWisp').setDisplaySize(40, 46).setDepth(11).setAlpha(0.5));
+      const flame = this.add.image(fire.x, fire.y, 'hl.prop.campfire').setOrigin(0.5, 1).setDepth(12);
+      this.fireSprites.set(fire.id, flame);
+    }
 
-    // Secret Friend: a tiny shy creature that appears for a child who keeps looking
-    // (3 touches). Tucked near the hydrant landmark, outside the fire playfield so it never
-    // affects the spray, where a lingering child will notice its gentle glimmer.
+    // The aim beam (where the water will reach), then Ember on top.
+    this.beam = this.add.rectangle(0, 0, 190, 46, 0x6fd3e0, 0.16).setOrigin(0, 0.5).setBlendMode(Phaser.BlendModes.ADD).setDepth(13);
+    this.emberShadow = this.add.ellipse(0, 0, 64, 18, 0x0a1322, 0.5).setDepth(14);
+    this.ember = this.add.image(0, 0, 'hl.char.ember').setOrigin(0.5, 1).setDisplaySize(92, 92).setDepth(15);
+
+    this.message = this.add
+      .text(480, 96, '', { fontFamily: FONTS.display, fontSize: '18px', color: '#FFE2A6', stroke: '#2A1606', strokeThickness: 4, align: 'center', wordWrap: { width: 600 } })
+      .setOrigin(0.5)
+      .setDepth(30);
+
+    this.buildControls();
+
+    // Secret Friend: a shy creature for the patient child (3 touches), away from the playfield.
     const secrets = createSecretsForProfile();
     addSecretHotspot(this, secrets, 'secret-friend', 822, 438);
-  }
 
-  private drawPlayfield(state: FireFixState): void {
-    this.add.rectangle(480, 286, 760, 270, 0xdff8d8).setStrokeStyle(4, 0x203247);
-    addSprite(this, { key: 'props.hydrant', x: 170, y: 338, width: 64, height: 64, pop: true });
-    this.add.circle(state.player.x, state.player.y, 28, 0xffffff, 0.78).setStrokeStyle(4, 0x203247);
-    addHelperAvatar(this, 'ember', state.player.x, state.player.y - 5, 64, { pop: true });
-    this.add.text(state.player.x, state.player.y - 45, 'Ember', {
-      fontFamily: 'Trebuchet MS, Arial, sans-serif',
-      fontSize: '18px',
-      color: '#203247',
-    }).setOrigin(0.5);
-    this.add.line(
-      state.player.x,
-      state.player.y,
-      0,
-      0,
-      state.aim.x * 60,
-      state.aim.y * 60,
-      0x2299ff,
-      1,
-    ).setLineWidth(6);
-    addSprite(this, {
-      key: 'props.water-spray',
-      x: state.player.x + state.aim.x * 78,
-      y: state.player.y + state.aim.y * 78,
-      width: 82,
-      height: 48,
-      angle: angleForDirection(state.aim),
-      alpha: 0.76,
+    bindIntents(this, {
+      onMove: (x, y) => this.move({ x, y }),
+      onConfirm: () => !isMissionExitOpen(this) && this.spray(),
+      onBack: () => this.requestExit(),
     });
 
-    for (const fire of state.fires) {
-      const intensity = fire.health / fire.maxHealth;
-      const color = fire.health === 0 ? 0x9be7c4 : intensity > 0.5 ? 0xff6b35 : 0xffc857;
-      this.add.circle(fire.x, fire.y, 22 + fire.health * 5, color).setStrokeStyle(4, 0x203247);
-      const fireSprite = addSprite(this, {
-        key: 'props.fire',
-        x: fire.x,
-        y: fire.y,
-        width: fire.health === 0 ? 38 : 52 + intensity * 30,
-        height: fire.health === 0 ? 38 : 52 + intensity * 30,
-        alpha: fire.health === 0 ? 0.5 : 1,
-        pop: fire.health > 0,
-      });
-      if (fire.health === 0 && fireSprite) shrinkAndFade(this, fireSprite);
-      this.add.text(fire.x, fire.y - 48, `${fire.label}\n${fire.health}/${fire.maxHealth}`, {
-        fontFamily: 'Trebuchet MS, Arial, sans-serif',
-        fontSize: '16px',
-        color: '#203247',
-        align: 'center',
-      }).setOrigin(0.5);
-    }
+    this.renderFires();
+    this.placeEmber(false);
+  }
 
-    if (state.helperAssists > 0) {
-      this.add.text(780, 160, '🤖 Helper drone helped!', {
-        fontFamily: 'Trebuchet MS, Arial, sans-serif',
-        fontSize: '20px',
-        color: '#203247',
-      }).setOrigin(0.5);
+  private paintWorld(): void {
+    this.add.image(480, 270, 'hl.bg.fire').setDisplaySize(960, 540).setDepth(0);
+    this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.22).setDepth(1);
+    this.add.rectangle(480, 28, 960, 64, 0x101b2e, 0.4).setDepth(1);
+    if (hasTexture(this, 'hl.prop.hydrant')) this.add.image(150, 360, 'hl.prop.hydrant').setOrigin(0.5, 1).setDisplaySize(70, 84).setDepth(10);
+  }
+
+  private buildPips(): void {
+    const total = this.state.fires.length;
+    const gap = 28;
+    const startX = 480 - ((total - 1) * gap) / 2;
+    for (let i = 0; i < total; i += 1) {
+      this.pips.push(this.add.circle(startX + i * gap, 40, 7, 0x6b3a2a).setStrokeStyle(2, 0x1b2a41).setDepth(20));
     }
   }
 
-  private addControls(): void {
-    // Cross fits within the 540px canvas (down-arrow no longer clipped); hydrant moved up
-    // so the up-arrow clears it.
-    addButton(this, { x: 120, y: 460, width: 90, height: 52, label: '←', fill: 0xffffff, onPress: () => this.move({ x: -1, y: 0 }), testId: 'fire.move.left' });
-    addButton(this, { x: 220, y: 460, width: 90, height: 52, label: '→', fill: 0xffffff, onPress: () => this.move({ x: 1, y: 0 }), testId: 'fire.move.right' });
-    addButton(this, { x: 170, y: 408, width: 90, height: 52, label: '↑', fill: 0xffffff, onPress: () => this.move({ x: 0, y: -1 }), testId: 'fire.move.up' });
-    addButton(this, { x: 170, y: 512, width: 90, height: 52, label: '↓', fill: 0xffffff, onPress: () => this.move({ x: 0, y: 1 }), testId: 'fire.move.down' });
-    addButton(this, { x: 480, y: 498, width: 250, height: 74, label: 'Spray Water', fill: 0xb7e6ff, onPress: () => this.spray(), testId: 'fire.spray' });
-    addButton(this, { x: 800, y: 508, width: 210, height: 52, label: 'Back to Map', fill: 0xffffff, onPress: () => this.requestExit(), testId: 'fire.back-to-map' });
+  private placeEmber(animate: boolean): void {
+    const { x, y } = this.state.player;
+    const angle = Math.atan2(this.state.aim.y, this.state.aim.x);
+    this.beam.setPosition(x, y - 30).setRotation(angle);
+    if (animate && motionAllowed()) {
+      this.tweens.add({ targets: [this.ember], x, y: y + 34, duration: 200, ease: 'Quad.easeOut' });
+      this.tweens.add({ targets: [this.emberShadow], x, y: y + 36, duration: 200, ease: 'Quad.easeOut' });
+    } else {
+      this.ember.setPosition(x, y + 34);
+      this.emberShadow.setPosition(x, y + 36);
+    }
   }
 
-  private bindInput(): void {
-    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-      if (isMissionExitOpen(this)) return;
-      const intent = inputIntentFromKeyboard(event.key);
-      if (intent?.type === 'move') this.move(intent);
-      if (intent?.type === 'confirm' || intent?.type === 'action') this.spray();
-      if (intent?.type === 'back') this.requestExit();
-    });
+  private renderFires(): void {
+    let out = 0;
+    for (const fire of this.state.fires) {
+      const flame = this.fireSprites.get(fire.id);
+      const smoke = this.fireSmoke.get(fire.id);
+      if (!flame) continue;
+      if (fire.health <= 0) {
+        out += 1;
+        // Unmistakably COLD + safe: small, faint, cool-teal tint, with a calm rising steam curl.
+        flame.setTexture(hasTexture(this, 'hl.prop.embers') ? 'hl.prop.embers' : 'hl.prop.campfire').setDisplaySize(42, 38).setAlpha(0.35).setTint(0x6fd3e0);
+        smoke?.setAlpha(0.6).setPosition(fire.x, fire.y - 26);
+      } else {
+        const size = 52 + fire.health * 22;
+        // Danger reads WARM-orange (no bright white rim); only slightly cooler as it shrinks.
+        flame.setTexture('hl.prop.campfire').setDisplaySize(size, size).setAlpha(1);
+        flame.setTint(fire.health >= fire.maxHealth ? 0xffb24a : 0xffd9a0);
+        smoke?.setAlpha(0.5).setPosition(fire.x, fire.y - size * 0.7);
+      }
+    }
+    this.pips.forEach((pip, i) => pip.setFillStyle(i < out ? 0x6fd3e0 : 0x6b3a2a));
+  }
 
-    this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
-      if (isMissionExitOpen(this)) return;
-      const intent = inputIntentFromGamepadButton(button.index);
-      if (intent?.type === 'move') this.move(intent);
-      if (intent?.type === 'confirm' || intent?.type === 'action') this.spray();
-      if (intent?.type === 'back') this.requestExit();
+  private move(direction: Direction): void {
+    if (this.done || (direction.x === 0 && direction.y === 0)) return;
+    this.state = moveFirefighter(this.state, direction);
+    this.placeEmber(true);
+  }
+
+  private spray(): void {
+    if (this.done) return;
+    const prevAssists = this.state.helperAssists;
+    const prevHealth = new Map(this.state.fires.map((f) => [f.id, f.health]));
+    const outcome = sprayWater(this.state);
+    this.state = outcome.state;
+
+    this.sprayVisual();
+    if (outcome.hit) getSfx().play('spray-hit');
+
+    // Splash + steam on any fire that just dropped (player spray or drone assist).
+    for (const fire of this.state.fires) {
+      if ((prevHealth.get(fire.id) ?? 0) > fire.health) {
+        Juice.burst(this, fire.x, fire.y - 20, { color: 0x9fe3ee, count: 7, radius: 30 });
+      }
+    }
+    if (this.state.helperAssists > prevAssists) this.droneFlyby();
+
+    this.message.setText(this.state.lastMessage);
+    this.renderFires();
+
+    if (outcome.completed) {
+      this.done = true;
+      if (motionAllowed()) Juice.shake(this, 100, 0.003);
+      this.time.delayedCall(motionAllowed() ? 360 : 0, () => completeMission(this, getFireFixResult(this.state)));
+    }
+  }
+
+  private sprayVisual(): void {
+    if (!motionAllowed()) return;
+    this.tweens.add({ targets: this.beam, alpha: 0.5, duration: 90, yoyo: true, ease: 'Quad.easeOut' });
+    const { x, y } = this.state.player;
+    const a = this.state.aim;
+    for (let i = 0; i < 6; i += 1) {
+      const key = hasTexture(this, 'hl.fx.waterDroplet') ? 'hl.fx.waterDroplet' : null;
+      const drop = key ? this.add.image(x, y - 20, key).setDisplaySize(14, 14).setDepth(16) : this.add.circle(x, y - 20, 5, 0x9fe3ee).setDepth(16);
+      const dist = 60 + i * 22;
+      this.tweens.add({ targets: drop, x: x + a.x * dist + (a.x === 0 ? (Math.random() * 30 - 15) : 0), y: y - 20 + a.y * dist + (a.y === 0 ? (Math.random() * 20 - 10) : 0), alpha: 0, duration: 320, ease: 'Quad.easeOut', onComplete: () => drop.destroy() });
+    }
+  }
+
+  private droneFlyby(): void {
+    const drone = this.add.circle(-40, 150, 14, 0x9fe3ee, 0.9).setStrokeStyle(3, 0xffc857).setDepth(35);
+    if (!motionAllowed()) {
+      drone.destroy();
+      return;
+    }
+    this.tweens.add({ targets: drone, x: 1000, y: 180, duration: 1100, ease: 'Sine.easeInOut', onComplete: () => drone.destroy() });
+  }
+
+  private buildControls(): void {
+    // D-pad cluster (bottom-left), spray (centre), back (top-left). All icon-coins.
+    this.arrowCoin(160, 410, '↑', { x: 0, y: -1 }, 'fire.move.up');
+    this.arrowCoin(104, 478, '←', { x: -1, y: 0 }, 'fire.move.left');
+    this.arrowCoin(216, 478, '→', { x: 1, y: 0 }, 'fire.move.right');
+    this.arrowCoin(160, 514, '↓', { x: 0, y: 1 }, 'fire.move.down');
+    const spray = addIconButton(this, {
+      x: 520,
+      y: 486,
+      size: 104,
+      key: hasTexture(this, 'hl.prop.waterSplash') ? 'hl.prop.waterSplash' : '__spray__',
+      onPress: () => !isMissionExitOpen(this) && this.spray(),
+      testId: 'fire.spray',
+      pulse: true,
     });
+    spray.setDepth(40);
+    addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => this.requestExit(), testId: 'fire.back-to-map' }).setDepth(40);
+  }
+
+  private arrowCoin(x: number, y: number, glyph: string, dir: Direction, testId: string): void {
+    const coin = addIconButton(this, { x, y, size: 56, key: '__arrow__', onPress: () => !isMissionExitOpen(this) && this.move(dir), testId });
+    coin.add(this.add.text(0, 0, glyph, { fontFamily: FONTS.display, fontSize: '34px', color: '#2A1606', fontStyle: 'bold' }).setOrigin(0.5));
+    coin.setDepth(40);
   }
 
   private requestExit(): void {
     confirmMissionExit(this, () => returnToTownMap(this));
   }
-
-  private move(direction: Direction): void {
-    if (!this.state) return;
-    this.scene.restart({ state: moveFirefighter(this.state, direction) });
-  }
-
-  private spray(): void {
-    if (!this.state) return;
-    const outcome = sprayWater(this.state);
-    if (outcome.hit) getSfx().play('spray-hit');
-    if (outcome.completed) {
-      completeMission(this, getFireFixResult(outcome.state));
-      return;
-    }
-    this.scene.restart({ state: outcome.state });
-  }
-}
-
-function angleForDirection(direction: Direction): number {
-  if (direction.x === 0 && direction.y === 0) return 0;
-  return Phaser.Math.RadToDeg(Math.atan2(direction.y, direction.x));
 }

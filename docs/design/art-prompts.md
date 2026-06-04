@@ -1,0 +1,907 @@
+# Hearthlight Town — Art Prompt Bible (LOCKED)
+
+> **For Codex (image generation) and the team.**  
+> Every prompt here is ready to paste into the image tool.  
+> This document + `docs/design/design-system.md` is the contract. Shane chose Hearthlight; obey exactly.  
+> Goal: a child leans in at first sight and wants to fall into this world. Warmth spreads as you help.
+
+**Core rule:** All art is original, IP-safe, zero third-party likenesses, names, or references (no Paw Patrol, no existing game characters, no branded marks). The technique and the soul are one: **a dark window lights warm** when a friend is rescued. The microcosm lives in Cluckle's dream.
+
+---
+
+## STYLE CONSISTENCY GUIDE (the #1 risk — read before every prompt)
+
+**Technique**  
+- Hand-crafted **pixel-art**, chunky and bold. Visible pixels, flat fills, minimal dither, crisp 1–2 px outlines at source resolution.  
+- No anti-aliasing, no smooth gradients, no vector softness. Nearest-neighbor perfect.  
+- Author at **2× half-density**: logical game 960×540, art created for 480×270 grid so one art texel = 2 game pixels. Source sprites 64×64 / 128×128 common; tiles 32×32 or 48×48. Backdrops 480×270 or 960×540.
+
+**Lighting (non-negotiable)**  
+- **Consistent warm directional light from UPPER LEFT** (~45°). Every asset obeys the same sun/lamp angle.  
+- Lit side: candle-gold `#FFC857` + warm-highlight `#FFE6A3`.  
+- Shadow side + under: ember-shadow `#572D42`, deep-slate-night `#1B2A41`.  
+- Distant / unlit: cool-shadow `#3A4D6B`.  
+- Light **spills** softly onto ground and nearby surfaces in all lit-window / lantern / character-face assets. Additive bloom layer (warm-glow fx) sits behind key lights later.
+
+**Palette (LOCKED — nothing else)**  
+Use *only* these hexes. No pure black, no neon, no cold blues, no high-saturation primaries outside the listed warms.  
+- `deep-slate-night` `#1B2A41` — base floor, letterbox, deepest shadow, night sky  
+- `cool-shadow` `#3A4D6B` — unlit shadow, far parallax layers  
+- `ember-shadow` `#572D42` — warm shadow under lights, under forms  
+- `deep-ember` `#A73428` — dark warm accents  
+- `ember-fox-orange` `#E86F3A` — Ember, primary fire/warm, main character warmth  
+- `lantern` `#F4A24C` — lamplight mid-tone  
+- `candle-gold` `#FFC857` — lit window glow, reward gold, coin rims  
+- `warm-highlight` `#FFE6A3` — brightest sparkles, inner glows, cream edges  
+- `teal-relief` `#43A29C` — Rivet accents, water, cool relief (use *sparingly*)  
+- `warm-cream` `#EBDDDA` — soft neutrals, Cluckle body, UI text ground, highlight on warm surfaces  
+
+Rule: cool navy/slate **floor and distance**, warm gold/ember **light and life**. Contrast is warmth vs. dark, never saturation vs. blur. Scenes stay mostly dim with pools of light.
+
+**Silhouette & Scale**  
+- **Bold, simple, chunky silhouettes** — instantly readable at 48–80 px on screen.  
+- Large heads, big friendly eyes, minimal internal detail. Form first, then a few telling accents (satchel, hardhat, pack).  
+- Test mentally at 48 px: does the shape still read as "raccoon with satchel"? If not, simplify.
+
+**Mood & Soul**  
+- Sleepy **golden-hour dusk** town at the moment lamps begin to glow. Cozy, lush, hand-warm, quietly hopeful. Never cold, never generic cute, never scary.  
+- References in spirit (never copy): A Short Hike warmth, Hyper Light Drifter silhouette clarity, Eastward tenderness, Stardew Valley cozy scale — but pixel, dusk, our palette.  
+- **Hidden Light / Language of Creation**: every dark building asset carries the *potential* of a warm window. Cluckle always contains the microcosm (tiny roofs + lit dots inside her form or in the well reflection). The gesture "rescue → light" is visible even in static props.
+
+**Backgrounds & Export**  
+- **Transparent PNG** for characters, props, tiles (except full backdrops/parallax layers and UI panels that may need subtle ground plane).  
+- No canvas color, no drop shadows unless the art itself casts one (rare).  
+- Centered subject, generous padding for silhouette breathing room.  
+- File names match the prompts below. Generate, then record exact path + date in `docs/assets/ASSET_BACKLOG.md`.
+
+**Animation Poses (for idle/cheer/oops)**  
+- **idle**: relaxed neutral stance, gentle breathing suggestion (slight chest/shoulder lift in form, soft smile or closed eyes for Cluckle). 2–4 frames later via tiny y-offset variants.  
+- **cheer/happy**: open joyful expression, eyes bright or crescent, arms slightly raised or tool lifted, tail or ears perky.  
+- **oops**: mild friendly surprise (eyes a touch wider, small "o" or soft gasp mouth, one ear or hand lifted), never distress or fear — still safe and inviting.  
+All three share exact same body model, lighting angle, palette, line weight so they feel like one character.
+
+**Line weight & Polish**  
+- Outlines: 1–2 px, use deep-slate-night or ember-shadow for weight; never pure black.  
+- Inner detail lines thinner or same warm shadow.  
+- Lit windows, lanterns, sparkles, and Cluckle's inner glow get a 1 px warm-highlight rim or candle-gold fill.  
+- Everything feels "from the same hand" — same chunkiness, same light angle, same limited palette discipline.
+
+**IP & Originality Guard**  
+Every prompt repeats: original design, no existing IP, no third-party character likeness. If the output looks like a known brand, regenerate.
+
+**How to use this doc**  
+1. Copy one full prompt block below.  
+2. Paste into Codex image tool.  
+3. Add any tool-specific: "pixel art, low resolution, crisp pixels, transparent background".  
+4. Generate at source size noted.  
+5. If drift appears (wrong palette, soft edges, cold light), paste the STYLE GUIDE paragraph + offending prompt again with "exactly matching previous Hearthlight assets, fix lighting to upper left, restrict to locked palette only".  
+6. Curate, name exactly, atlas later.
+
+---
+
+## HERO PROMPTS (extra care — title + character anchors)
+
+### Title Backdrop (hero)
+`public/assets/hearthlight/backdrops/title-backdrop.png` — 480×270 or 960×540 source. Full scene used under title + Cluckle silhouette. Transparent or full-bleed dusk sky.
+
+Prompt:
+```
+Hearthlight Town pixel art title backdrop, cozy golden-hour dusk at sleepy town hour, warm upper-left light from candle-gold #FFC857 and warm-highlight #FFE6A3 pooling on forms, deep navy #1B2A41 shadows and floor, cool-shadow #3A4D6B far distance, bold simple silhouettes readable even small. Center-lower: large round Cluckle the dreaming hen, soft warm-cream #EBDDDA body with faint ember-shadow #572D42 feather lines, eyes gently closed in a dreaming smile, the secret heart who holds the whole world inside her. Inside her soft rounded outline, visible only on close look, tiny glowing miniature town — two small houses with lit candle-gold windows, a winding path, one tree with nest, a single well — all rendered as microcosm dots and roofs in warm light, the Language of Creation made small enough for a child to hold. Low rolling far-hills in desaturated cool-shadow and ember-shadow. Mid-ground: rounded rooftops and one chimney with a soft smoke curl catching warm light. Three small helper silhouettes peek from behind low hills or soft cloud shapes at left and right edges, facing inward: left Rivet (raccoon with tiny satchel), center-right Brick (badger with hardhat), right Ember (fox with water pack). One or two slow elements: a single paper leaf or seed drifting down left side, one very faint sparkle rising from Cluckle's back right. Sky gradient from deep-slate-night #1B2A41 at very top melting to warmer lantern #F4A24C and candle-gold near the low horizon, no hard line, soft pre-glow feeling. Overall mood: the town is already dreaming the child, safe, glowing, waiting. Chunky pixel art, crisp edges, flat fills, transparent where sky meets subject but full coverage for backdrop use, consistent upper-left warm light across every element, exactly the locked Hearthlight palette only, original IP-safe design, no third-party likenesses, high warmth and invitation.
+```
+
+### Rivet Hero (model / title anchor)
+`public/assets/hearthlight/characters/rivet-hero.png` — larger 128×128 or 160×160, full pose for title badge and reference. Use same model for all game states.
+
+Prompt:
+```
+Hearthlight Town pixel art character hero, Rivet the raccoon — the bright patient helper who sees a friend in every lost scrap and guides it home with a quiet smile. Chunky bold silhouette, 128x128 canvas, upper-left warm light, locked Hearthlight palette only. Small bright raccoon, rounded body in warm-cream #EBDDDA with cool-shadow #3A4D6B and ember-shadow #572D42 shading, teal-relief #43A29C accents on tail stripes and little satchel strap, satchel itself in deep-ember #A73428 with warm highlight. Big friendly eyes with warm cream inner, soft smile, one paw raised in gentle offering. Tiny hard-to-see recycle symbol on satchel. Consistent upper-left candle-gold rim light on left side of ears, snout, satchel, tail. Bold simple forms readable at 48px, crisp pixel edges, flat fills, transparent background, original IP-safe, matches every other Hearthlight asset exactly in lighting, line weight, chunkiness and palette.
+```
+
+### Brick Hero
+`public/assets/hearthlight/characters/brick-hero.png`
+
+Prompt:
+```
+Hearthlight Town pixel art character hero, Brick the badger — the sturdy thoughtful builder who listens to the ground and raises walls that feel like promises kept. Chunky bold silhouette, 128x128, upper-left warm light, locked Hearthlight palette only. Stocky badger body in ember-fox-orange #E86F3A and warm-cream mixes with deep-ember #A73428 stripes on face and back, tiny wooden hardhat in lantern #F4A24C with ember-shadow trim. Small trowel or brick in one paw. Big calm eyes, steady warm smile, ears and snout in warm shadow. Upper-left light catches hardhat brim, shoulder, tool edge in candle-gold #FFC857 and warm-highlight. Bold simple readable silhouette at small size, crisp chunky pixels, transparent background, original IP-safe design, exactly consistent with Rivet hero and all Hearthlight set in light angle, palette discipline, line weight.
+```
+
+### Ember Hero
+`public/assets/hearthlight/characters/ember-hero.png`
+
+Prompt:
+```
+Hearthlight Town pixel art character hero, Ember the fox — the quick gentle firefighter who treats every flame like a visitor who's stayed too long and kindly shows it the way to rest. Chunky bold silhouette, 128x128, upper-left warm light, locked Hearthlight palette only. Sleek fox body in ember-fox-orange #E86F3A with warm-cream chest and tail tip, lantern #F4A24C inner ear and accents, small teal-relief water pack on back with soft highlight. Kind bright eyes, gentle closed-mouth smile, tail with a happy slight curve. Upper-left light pools candle-gold on snout, chest, pack rim and tail. Bold simple forms, high readability at 48px, crisp pixels, transparent background, original IP-safe, matches the exact lighting, chunk, palette and warmth of Rivet and Brick heroes.
+```
+
+### Cluckle Hero
+`public/assets/hearthlight/characters/cluckle-hero.png`
+
+Prompt:
+```
+Hearthlight Town pixel art character hero, Cluckle the dreaming hen — the round soft secret heart of the town, eyes half-closed in a dreaming smile, holding the entire glowing world safe inside her sleep. Chunky bold silhouette, 128x128 or rounder 140x140, upper-left warm light, locked Hearthlight palette only. Very round feathery hen body in warm-cream #EBDDDA with ember-shadow #572D42 and cool-shadow feather lines, tiny soft comb and wattle in deep-ember #A73428 with warm highlight. Eyes gently closed, dreaming peaceful smile. Inside the body outline, extremely faint suggestion of tiny lit roofs and warm dots (the microcosm) visible only on close inspection — never busy, just a soft inner glow in candle-gold. Upper-left light gives a soft halo rim on the top and left curve of her form in warm-highlight #FFE6A3. Bold simple, incredibly soft and safe feeling, readable as hen even at 48px, crisp pixel edges, transparent background, original IP-safe, the living proof that something enormous can be carried gently inside something small.
+```
+
+---
+
+## CHARACTERS — Game Sprites (idle / cheer / oops)
+
+All characters use the same body model, lighting, and palette as their hero. Generate the three key poses. Idle will be the base for 2–4 frame breathing bob (tiny vertical variants later).
+
+### Rivet (raccoon — the bright patient helper who sees a friend in every lost scrap and guides it home with a quiet smile)
+
+**rivet-idle** (`characters/rivet-idle.png`)
+```
+Hearthlight Town pixel art sprite, Rivet the raccoon idle breathing pose — the bright patient helper who sees a friend in every lost scrap and guides it home with a quiet smile. 64x64 or 80x80 canvas, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Small raccoon, rounded body warm-cream with teal-relief satchel strap and tail stripes, satchel deep-ember, big friendly eyes soft smile, relaxed stance one paw near satchel. Upper left candle-gold highlight on ear tips, snout, satchel edge. Bold simple silhouette highly readable at 48px, crisp 1-2px outlines, flat fills, transparent background, exactly matches Rivet hero lighting angle and all Hearthlight assets.
+```
+
+**rivet-cheer** (`characters/rivet-cheer.png`)
+```
+Hearthlight Town pixel art sprite, Rivet the raccoon cheer/happy pose — the bright patient helper who sees a friend in every lost scrap and guides it home with a quiet smile. 64x64 or 80x80, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same raccoon model as idle, now joyful: eyes bright crescents or open happy, both paws lifted in gentle celebration or offering a found object, tail perky, big warm smile. Stronger warm-highlight catch on face and satchel. Bold readable silhouette, transparent background, consistent with rivet-idle and hero, original IP-safe.
+```
+
+**rivet-oops** (`characters/rivet-oops.png`)
+```
+Hearthlight Town pixel art sprite, Rivet the raccoon oops/mild surprise pose — the bright patient helper who sees a friend in every lost scrap and guides it home with a quiet smile. 64x64 or 80x80, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same body, gentle surprise: eyes a little wider but still kind, small soft "o" mouth, one paw or ear lifted, satchel shifted slightly. Still safe and friendly, never scared. Light and palette identical to idle. Transparent background, matches the set exactly.
+```
+
+### Brick (badger — the sturdy thoughtful builder who listens to the ground and raises walls that feel like promises kept)
+
+**brick-idle** (`characters/brick-idle.png`)
+```
+Hearthlight Town pixel art sprite, Brick the badger idle breathing pose — the sturdy thoughtful builder who listens to the ground and raises walls that feel like promises kept. 64x64 or 80x80, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Stocky badger, ember-fox-orange body with warm-cream and deep-ember face stripes, tiny hardhat lantern color, relaxed stance holding small trowel or brick low, calm steady eyes and warm closed smile. Upper-left light on hardhat and shoulder. Bold silhouette readable at 48px, transparent background, consistent with Brick hero and Hearthlight set.
+```
+
+**brick-cheer** (`characters/brick-cheer.png`)
+```
+Hearthlight Town pixel art sprite, Brick the badger cheer/happy pose — the sturdy thoughtful builder who listens to the ground and raises walls that feel like promises kept. 64x64 or 80x80, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same model, now quietly triumphant: eyes soft happy, both paws raised or one holding finished small brick piece high, hardhat tipped back a touch, big satisfied smile. Warm light catches tool and hat brim. Matches brick-idle exactly in form, light, palette. Transparent, original.
+```
+
+**brick-oops** (`characters/brick-oops.png`)
+```
+Hearthlight Town pixel art sprite, Brick the badger oops/mild surprise pose — the sturdy thoughtful builder who listens to the ground and raises walls that feel like promises kept. 64x64 or 80x80, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same body, gentle "oops": eyes wider but steady, small thoughtful frown-mouth, one paw to hardhat or brick slightly off. Still solid and kind. Identical lighting and silhouette language to other Brick states. Transparent background.
+```
+
+### Ember (fox — the quick gentle firefighter who treats every flame like a visitor who's stayed too long and kindly shows it the way to rest)
+
+**ember-idle** (`characters/ember-idle.png`)
+```
+Hearthlight Town pixel art sprite, Ember the fox idle breathing pose — the quick gentle firefighter who treats every flame like a visitor who's stayed too long and kindly shows it the way to rest. 64x64 or 80x80, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Sleek fox, ember-fox-orange with warm-cream chest, small teal water pack on back, kind bright eyes, soft gentle smile, relaxed ready stance with hose nozzle low. Upper left light on snout, chest, pack. Bold readable at small size, transparent, matches Ember hero and set.
+```
+
+**ember-cheer** (`characters/ember-cheer.png`)
+```
+Hearthlight Town pixel art sprite, Ember the fox cheer/happy pose — the quick gentle firefighter who treats every flame like a visitor who's stayed too long and kindly shows it the way to rest. 64x64 or 80x80, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same model, happy relief: eyes happy crescents, tail wagging curve, both paws or one raised with hose in small victory, big kind smile. Stronger warm light on face and pack rim. Matches ember-idle form and lighting exactly. Transparent, IP-safe.
+```
+
+**ember-oops** (`characters/ember-oops.png`)
+```
+Hearthlight Town pixel art sprite, Ember the fox oops/mild surprise pose — the quick gentle firefighter who treats every flame like a visitor who's stayed too long and kindly shows it the way to rest. 64x64 or 80x80, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same body, mild surprise: eyes wider kindly, small "oh" expression, hose or paw lifted, tail slightly lower. Still gentle and safe. Exact same light angle, palette, chunk as other Ember states. Transparent background.
+```
+
+### Cluckle (dreaming hen — the round soft secret heart of the town, eyes half-closed in a dreaming smile, holding the entire glowing world safe inside her sleep)
+
+**cluckle-idle** (`characters/cluckle-idle.png`)
+```
+Hearthlight Town pixel art sprite, Cluckle the dreaming hen idle — the round soft secret heart of the town, eyes half-closed in a dreaming smile, holding the entire glowing world safe inside her sleep. 64x64 or 72x72 round canvas, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Very round feathery hen, warm-cream body with soft ember-shadow feather texture, deep-ember comb/wattle, eyes gently closed peaceful, dreaming smile. Extremely faint inner microcosm glow (tiny roofs + candle-gold dots) inside body outline. Soft warm-highlight halo on upper curve. Bold yet soft silhouette, incredibly safe feeling, transparent background, matches Cluckle hero.
+```
+
+**cluckle-cheer** (`characters/cluckle-cheer.png`)
+```
+Hearthlight Town pixel art sprite, Cluckle the dreaming hen cheer — the round soft secret heart of the town, eyes half-closed in a dreaming smile, holding the entire glowing world safe inside her sleep. 64x64 or 72x72, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same round hen model, now gently delighted: eyes softly open with warm light in them, smile wider, wings/feathers lifted in tiny happy shrug, inner microcosm dots a touch brighter. Still dreamy and kind. Matches cluckle-idle lighting and form. Transparent, original.
+```
+
+**cluckle-oops** (`characters/cluckle-oops.png`)
+```
+Hearthlight Town pixel art sprite, Cluckle the dreaming hen oops — the round soft secret heart of the town, eyes half-closed in a dreaming smile, holding the entire glowing world safe inside her sleep. 64x64 or 72x72, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same body, very mild surprise: eyes a little more open but still soft, small gentle "cluck" beak shape, one wing slightly raised. Never alarmed. Inner glow steady. Identical palette, light, chunk to other Cluckle states. Transparent.
+```
+
+### Townsfolk (background critters for windows — 2–3 simple, populate lit buildings)
+
+**townsfolk-a-hedgehog** (`characters/townsfolk-a-hedgehog.png`) — idle + cheer variants if needed; start with one friendly pose per.
+```
+Hearthlight Town pixel art sprite, townsfolk-a a small round hedgehog, simple background critter for window pop. 32x32 or 40x40, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Tiny hedgehog body in cool-shadow and warm-cream, soft spines in ember-shadow, big dark eyes, tiny smile, peeking from window frame. Bold simple silhouette, very small detail, transparent background, matches main characters in lighting and palette discipline.
+```
+
+**townsfolk-b-mouse** (`characters/townsfolk-b-mouse.png`)
+```
+Hearthlight Town pixel art sprite, townsfolk-b a small plump field mouse, simple background critter for window pop. 32x32 or 40x40, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Round mouse body warm-cream with cool-shadow, tiny ears and pinkish nose in deep-ember, holding a seed or just waving, friendly eyes. Minimal, readable at tiny size, transparent, consistent Hearthlight light and colors.
+```
+
+---
+
+## TILES & PARALLAX
+
+All tiles seamless-friendly where repeating. Parallax layers have depth cues (far more desaturated, less detail).
+
+**cobble** (`tiles/cobble.png`) — 32x32 or 48x48 tile
+```
+Hearthlight Town pixel art tile, cobblestone ground, seamless. 32x32 canvas, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Irregular rounded stones in cool-shadow #3A4D6B and deep-slate-night #1B2A41 with warm-cream and lantern mortar lines catching upper-left light. Slight ember-shadow in crevices. Flat, bold, readable as street, tileable, transparent or dark ground ready, matches town mood.
+```
+
+**grass** (`tiles/grass.png`)
+```
+Hearthlight Town pixel art tile, soft grass, seamless. 32x32, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Clumpy grass blades in teal-relief #43A29C mixed with warm-cream and ember-shadow bases, lighter tips where light hits from upper left. Gentle rolling texture, not flat, tileable, cozy dusk field feel.
+```
+
+**path** (`tiles/path.png`)
+```
+Hearthlight Town pixel art tile, winding dirt path, seamless. 32x32, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Warm sand/cream path with ember-shadow and cool-shadow edges, small pebbles in deep-ember, soft upper-left highlight down the center. Feels walked and friendly, tileable.
+```
+
+**water** (`tiles/water.png`)
+```
+Hearthlight Town pixel art tile, calm water, subtle ripple, seamless. 32x32 or 48x48, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Deep cool-shadow and deep-slate-night base, teal-relief reflections and ripples, candle-gold and warm-highlight sparkles on wave crests from upper left. Gentle, not busy, tileable, safe for child scenes.
+```
+
+**night-sky** (`tiles/night-sky.png` or backdrops/night-sky.png) — large gradient
+```
+Hearthlight Town pixel art backdrop, night sky gradient for parallax and scenes. 480x270 or 960x540, chunky pixel art, locked Hearthlight palette only. Vertical gradient deep-slate-night #1B2A41 at top to slightly warmer cool-shadow and faint lantern near bottom horizon. Very subtle scattered warm-highlight dots as distant stars or early fireflies, one soft ember glow low where town lights would be. No hard horizon line, full bleed or with transparent lower for hills to composite. Upper-left light feeling even in sky via the warm low band.
+```
+
+**far-hills** (`parallax/far-hills.png`)
+```
+Hearthlight Town pixel art parallax layer, far hills. Wide 480x120 or similar, chunky pixel art, upper-left warm light, locked Hearthlight palette only, desaturated for depth. Soft rolling hills in cool-shadow #3A4D6B and deep-slate-night, very faint ember-shadow on the light-facing slopes, almost no detail, low contrast, distant feeling. Transparent lower edge for layering, matches overall dusk.
+```
+
+**mid-trees** (`parallax/mid-trees.png`)
+```
+Hearthlight Town pixel art parallax layer, mid distance trees and foliage. Wide, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Rounded tree silhouettes in ember-shadow and cool-shadow with lantern and warm-cream leaf clusters catching light on left/upper sides, a few subtle branches. More detail and slight warmth than far-hills, still atmospheric, some trunk in deep-ember. Transparent bg ready for composite.
+```
+
+---
+
+## BUILDINGS (dark + lit-window variants)
+
+Every building has a dark (unlit, cool dominant) and lit (warm windows + ground spill) version. Lit windows use candle-gold fills + warm-highlight rim + soft spill rectangle or shape below in ember-shadow mixed with lantern on ground.
+
+**house-dark** (`buildings/house-dark.png`)
+```
+Hearthlight Town pixel art building, small cozy house dark/unlit. 96x96 or 120x96 canvas, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Rounded roof in ember-shadow and deep-ember, walls cool-shadow and deep-slate-night, one dark window rectangle in cool-shadow, simple door, tiny chimney. Bold silhouette, no interior light yet, ground shadow in deep-slate-night, transparent background, ready for town map and scenes.
+```
+
+**house-lit** (`buildings/house-lit.png`)
+```
+Hearthlight Town pixel art building, small cozy house with lit window (the core "rescue lights a window" gesture). 96x96 or 120x96, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same house form as dark version, now one or two windows filled with candle-gold #FFC857 and warm-highlight inner glow, soft 1px rim, warm light spills onto ground below in ember-shadow + lantern mix as a soft pool shape. Chimney may have tiny smoke curl catching light. Feels like someone inside is safe and happy. Transparent bg, exactly matches house-dark silhouette for swap.
+```
+
+**recycle-center-dark** (`buildings/recycle-center-dark.png`)
+```
+Hearthlight Town pixel art building, recycle center dark/unlit. Wider 140x90 canvas, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Low sturdy building with sloped roof, cool-shadow and deep-slate-night walls, several dark window and door shapes, a few recycle bin silhouettes against wall in ember-shadow. Bold readable as industrial-but-cozy, transparent, no lights on.
+```
+
+**recycle-center-lit** (`buildings/recycle-center-lit.png`)
+```
+Hearthlight Town pixel art building, recycle center with warm lit windows. 140x90, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same silhouette as dark, now 2–3 windows and perhaps a door glow in bright candle-gold #FFC857 with warm spill on ground and on the recycle bins leaning against it. Light feels like the place is alive because Rivet helped. Matches dark version exactly for state swap.
+```
+
+**construction-lot-dark** (`buildings/construction-lot-dark.png`)
+```
+Hearthlight Town pixel art building/area, construction lot dark. 140x90, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Open lot with partial walls or scaffolding in deep-ember and cool-shadow, stacked wood planks and bricks in lantern and ember-shadow, one small dark shed or house shell. Feels waiting for Brick. Transparent bg.
+```
+
+**construction-lot-lit** (`buildings/construction-lot-lit.png`)
+```
+Hearthlight Town pixel art building/area, construction lot with warm lit windows on the finished part. 140x90, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same forms, now a window or two in the built section glow candle-gold, soft ground spill, a lantern on a post or in window. Feels the house is becoming a home. Exact silhouette match to dark version.
+```
+
+**picnic-park** (fire/picnic area building or shelter) — use dark + lit
+**picnic-park-dark** (`buildings/picnic-park-dark.png`)
+```
+Hearthlight Town pixel art building/area, picnic park shelter or pavilion dark. 120x80, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Open wooden shelter with posts in deep-ember and lantern, roof in ember-shadow, picnic table shape in cool-shadow, no lights, a few dark "fire" spots as unlit circles. Transparent, Ember's domain waiting.
+```
+
+**picnic-park-lit** (`buildings/picnic-park-lit.png`)
+```
+Hearthlight Town pixel art building/area, picnic park shelter with warm lights after fires out. 120x80, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Same shelter, now a hanging lantern or two glow in candle-gold #FFC857, warm light pools on the picnic table and ground, one or two windows in background building lit. Feels safe for play again. Matches dark silhouette.
+```
+
+---
+
+## PROPS
+
+**recycle bins (5)** — one per category for visual distinction in sorting. Different shapes or lid styles, all chunky, warm rim light.
+
+**bin-compost** (`props/bin-compost.png`)
+```
+Hearthlight Town pixel art prop, compost recycle bin. 48x56 canvas, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Tall rounded bin body in cool-shadow with teal-relief #43A29C lid and label stripe, compost leaf/banana shape on front in ember-fox-orange, candle-gold rim highlight on left and top. Bold silhouette, transparent background, consistent Hearthlight lighting.
+```
+
+**bin-metal** (`props/bin-metal.png`)
+```
+Hearthlight Town pixel art prop, metal recycle bin. 48x56, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Squarish sturdy bin in deep-ember and cool-shadow, metal can symbol on front in lantern, warm candle-gold edge light on lid and left face. Transparent, matches other bins in family.
+```
+
+**bin-paper** (`props/bin-paper.png`)
+```
+Hearthlight Town pixel art prop, paper recycle bin. 48x56, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Open-top or slotted bin in warm-cream and ember-shadow, newspaper or folded paper icon on side, candle-gold rim. Transparent.
+```
+
+**bin-plastic** (`props/bin-plastic.png`)
+```
+Hearthlight Town pixel art prop, plastic recycle bin. 48x56, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Rounder or bottle-shaped bin body cool-shadow with lantern accents, plastic bottle symbol, warm upper-left highlight. Transparent, part of the 5-bin set.
+```
+
+**bin-trash** (`props/bin-trash.png`)
+```
+Hearthlight Town pixel art prop, general trash / non-recycle bin. 48x56, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Classic domed lid bin in deep-slate-night and ember-shadow, simple X or crossed lines, subtle candle-gold on the dome curve. Transparent, consistent with the recycle family.
+```
+
+**house parts (5)** — tray icons and placeable, simple bold shapes that snap together visually.
+
+**house-foundation** (`props/house-foundation.png`)
+```
+Hearthlight Town pixel art prop, house foundation stone base. 64x32 or 80x28, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Wide low rectangle of stones in cool-shadow and deep-ember with warm-cream mortar catching light, slight bevel on top edge. Bold, simple, transparent.
+```
+
+**house-walls** (`props/house-walls.png`)
+```
+Hearthlight Town pixel art prop, house walls section. 56x48, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Rectangular wall with window hole or plank lines in warm-cream and lantern, ember-shadow edges and wood grain suggestion, upper left highlight. Transparent.
+```
+
+**house-roof** (`props/house-roof.png`)
+```
+Hearthlight Town pixel art prop, house roof piece. 72x36 triangle-ish, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Rounded or peaked roof in ember-shadow and deep-ember with lantern shingles, warm-highlight along the ridge where light hits. Simple, bold, transparent.
+```
+
+**house-door** (`props/house-door.png`)
+```
+Hearthlight Town pixel art prop, house door. 32x48, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Tall door shape in deep-ember with warm-cream panel lines and tiny knob in candle-gold, light catches left frame. Friendly, simple, transparent.
+```
+
+**house-decoration** (`props/house-decoration.png`)
+```
+Hearthlight Town pixel art prop, house decoration / flower box or flag. 40x32, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Small flower box with teal-relief leaves and ember-fox-orange flowers or a tiny flag in warm-cream and deep-ember, light on the blooms. Joyful final touch. Transparent.
+```
+
+**fire** (`props/fire.png`) — friendly cartoon, multiple sizes or health states via scale/alpha later
+```
+Hearthlight Town pixel art prop, cartoon fire (friendly, never scary). 40x40 or 48x48, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Low playful flame shapes in ember-fox-orange #E86F3A with lantern #F4A24C inner and warm-highlight tips, ember-shadow base. Soft rounded forms, warm light on the flames themselves, transparent background, safe for picnic scene.
+```
+
+**hydrant** (`props/hydrant.png`)
+```
+Hearthlight Town pixel art prop, friendly fire hydrant. 32x48, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Classic short hydrant in deep-ember and lantern with teal-relief cap band, candle-gold highlight on the bolts and top curve. Bold simple, transparent.
+```
+
+**water-spray** (`props/water-spray.png`)
+```
+Hearthlight Town pixel art fx/prop, water spray arc. 64x32, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Gentle curved stream of droplets in teal-relief #43A29C with warm-highlight sparkles on leading edges, soft ember-shadow shadow under the arc. Friendly not harsh, transparent, for Ember's hose.
+```
+
+**lantern** (`props/lantern.png`)
+```
+Hearthlight Town pixel art prop, hanging or standing lantern (lit). 32x40, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Metal frame in cool-shadow and deep-ember, glass body filled with bright candle-gold #FFC857 and warm-highlight glow, soft light spill below. Tiny chain or post. Warm and alive. Transparent.
+```
+
+**firefly** (`props/firefly.png`)
+```
+Hearthlight Town pixel art prop, single firefly for ambient life. 16x16 or 24x24, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Tiny oval body in warm-highlight and candle-gold, faint wings in cool-shadow, soft glow halo. Very small, delicate, multiple can drift. Transparent.
+```
+
+**well** (`props/well.png`) — key for Cluckle's Dream secret (microcosm inside)
+```
+Hearthlight Town pixel art prop, stone well with dark water. 48x48, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Round stone well in cool-shadow and warm-cream, wooden roof or bucket in deep-ember and lantern, dark water surface in deep-slate-night with extremely faint tiny reflection of roofs and a candle-gold dot (the microcosm hint, patient child only). Upper left light on stones. Mysterious and safe. Transparent.
+```
+
+---
+
+## UI — ICON-FIRST, GLOWING COIN BUTTONS + KIT
+
+Buttons are round/rounded glowing "icon-coins": candle-gold rim that pulses, world-object icon in center, bold silhouette, 64x64 or 80x80 typical. No words on child layer.
+
+**coin-play** (`ui/coin-play.png`)
+```
+Hearthlight Town pixel art ui coin, play action. 64x64 round, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Round coin with thick candle-gold #FFC857 rim and warm-highlight inner ring, center icon: a small glowing doorway or open lantern with a ▶ shape inside in deep-ember and warm-cream. Soft inner glow. Transparent background, generous touch size, matches all other coins in rim style and lighting.
+```
+
+**coin-recycle** (`ui/coin-recycle.png`)
+```
+Hearthlight Town pixel art ui coin, recycle action. 64x64 round, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Candle-gold rim, center: a small recycle bin silhouette with arrows in teal-relief and ember-fox-orange, bold simple. Same rim and scale as play coin. Transparent.
+```
+
+**coin-build** (`ui/coin-build.png`)
+```
+Hearthlight Town pixel art ui coin, build / house action. 64x64 round, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Candle-gold rim, center: stacked bricks or tiny house silhouette with roof in ember-fox-orange and lantern, warm-cream walls. Matches coin family exactly. Transparent.
+```
+
+**coin-fire** (`ui/coin-fire.png`)
+```
+Hearthlight Town pixel art ui coin, fire / water action. 64x64 round, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Candle-gold rim, center: gentle flame or water drop + small hydrant in ember-fox-orange and teal-relief. Friendly, not alarming. Same rim, lighting, size as other coins. Transparent.
+```
+
+**coin-stickers** (`ui/coin-stickers.png`)
+```
+Hearthlight Town pixel art ui coin, stickers / reward action. 64x64 round, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Candle-gold rim, center: a big warm star or sticker shape in warm-highlight and candle-gold with tiny Cluckle silhouette inside or a leaf. Joyful. Matches set.
+```
+
+**coin-settings** (`ui/coin-settings.png`)
+```
+Hearthlight Town pixel art ui coin, settings / parent gate. 64x64 round, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Candle-gold rim, center: a small cozy key or lantern-with-gear or rolled scroll icon in deep-ember and lantern. Subtle, world-fitting. Exact same coin treatment.
+```
+
+**coin-back** (`ui/coin-back.png`)
+```
+Hearthlight Town pixel art ui coin, back / map action. 64x64 round, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Candle-gold rim, center: a small winding path or house shape with arrow in cool-shadow and warm-cream, or a little leaf on path. Clear "return" feeling. Consistent coin family.
+```
+
+**9-slice panel** (`ui/panel-9slice.png` or corners/edges described)
+```
+Hearthlight Town pixel art ui, chunky 9-slice panel frame. Generate as assembled sample 160x120 or separate slices (4 corners, 4 edges, center). Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Thick lantern #F4A24C and candle-gold outer frame with deep-ember inner line, soft warm inner glow on the dark wood-like fill in ember-shadow and cool-shadow, rounded chunky corners (rx friendly for 9-slice). Feels like a warm wooden sticker-book frame with light on it. Transparent where possible.
+```
+
+**progress-bar** (`ui/progress-bar.png`)
+```
+Hearthlight Town pixel art ui, progress bar track and fill. 160x24 or similar, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Wide rounded track in deep-slate-night and cool-shadow with candle-gold edge, fill segment in ember-fox-orange to candle-gold gradient from left (light source), small highlight pip. Chunky, warm, easy to read at distance. Transparent bg.
+```
+
+**star** (`ui/star.png`)
+```
+Hearthlight Town pixel art ui, reward star. 48x48 or 56x56, chunky pixel art, upper-left warm light, locked Hearthlight palette only. 5-point chunky star in warm-highlight #FFE6A3 and candle-gold #FFC857 with ember-shadow shading on lower right points, small inner sparkle. Bold, joyful, transparent, used for 1-3 star results and HUD.
+```
+
+**sticker-frame** (`ui/sticker-frame.png`)
+```
+Hearthlight Town pixel art ui, sticker / poem frame. 120x90 or similar rounded, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Soft rounded rectangle frame in lantern and candle-gold with warm-cream inner paper area, ember-shadow outer, tiny corner flourishes in teal or ember. Feels like a page from a beloved picture book. Transparent outer.
+```
+
+**checkmark** (`ui/checkmark.png`)
+```
+Hearthlight Town pixel art ui, mission checklist checkmark. 32x32, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Bold friendly check in candle-gold #FFC857 and warm-highlight with ember-shadow outline, slight bounce-ready form. Simple, clear, warm, transparent.
+```
+
+---
+
+## FX
+
+Small, soft, non-flashing. Many will be used with alpha, scale, additive where appropriate (warm-glow especially).
+
+**warm-glow / bloom** (`fx/warm-glow.png`)
+```
+Hearthlight Town pixel art fx, soft warm glow / bloom sprite for behind windows, lanterns, character faces. 64x64 or 96x96 radial, chunky pixel art, locked Hearthlight palette only. Soft radial falloff from center candle-gold #FFC857 + warm-highlight to transparent edges, very faint ember-fox-orange outer. Low contrast, meant for additive or multiply-light blending later. No hard edges. Matches the light language of the set.
+```
+
+**sparkle** (`fx/sparkle.png`)
+```
+Hearthlight Town pixel art fx, sparkle / twinkle. 24x24 or 32x32, chunky pixel art, locked Hearthlight palette only. Simple 4- or 6-point star or plus with arms in warm-highlight and candle-gold, center bright, very faint cool-shadow tips. One or two pixels of glow. Used for rewards, secrets, drifting. Transparent.
+```
+
+**smoke-puff** (`fx/smoke-puff.png`)
+```
+Hearthlight Town pixel art fx, chimney or happy smoke puff. 32x32, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Soft rounded cloud in cool-shadow and ember-shadow with warm-highlight catching the upper left edge, very gentle. Expands and fades in animation. Transparent.
+```
+
+**water-splash** (`fx/water-splash.png`)
+```
+Hearthlight Town pixel art fx, water splash / droplet burst. 40x32, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Small arc of teal-relief droplets with warm-highlight sparkles on the leading ones, soft ember-shadow under, friendly plink feeling. Transparent.
+```
+
+**confetti** (`fx/confetti.png`)
+```
+Hearthlight Town pixel art fx, celebration confetti. 48x32 sheet or single pieces, chunky pixel art, locked Hearthlight palette only. Assorted small squares, leaves, and dots in candle-gold, ember-fox-orange, teal-relief, warm-cream. A few with tiny inner highlight. Scattered, joyful, transparent bg, used in burst.
+```
+
+**godray** (`fx/godray.png`)
+```
+Hearthlight Town pixel art fx, soft godray / light beam from window or high lantern. Wide tall 80x120, chunky pixel art, locked Hearthlight palette only. Diagonal soft beams in warm-highlight and candle-gold fading to transparent, very low opacity intent, subtle ember-shadow on one side. For window light spill or title atmosphere. Transparent.
+```
+
+**scene-wipe** (`fx/scene-wipe.png`)
+```
+Hearthlight Town pixel art fx, scene transition wipe element. 480x60 band or full, chunky pixel art, locked Hearthlight palette only. Soft sweep of warm light particles, sparkles, and tiny stars in candle-gold and warm-highlight moving across deep navy, or a curtain of soft vertical beams. Feels like light itself opening the next place. Can be animated as particles or sprite sheet.
+```
+
+---
+
+## MISSION BACKDROPS (composed yards — full scenes the child enters)
+
+These are the lived-in places for the three rescues. Use the parallax layers, ground tiles, one central building (dark or ready-to-light), scattered props, long shadows, pools of upper-left warm that feel like "this place is waiting for the child's hands." One or two dark windows visible so the "light up on rescue" reads even in the static backdrop. 480×270 or 960×540 source. Transparent lower edges for parallax composite where needed.
+
+**recycling-yard-backdrop** (`backdrops/recycling-yard.png`)
+```
+Hearthlight Town pixel art mission backdrop, recycling yard at golden-hour dusk. Chunky pixel art, upper-left warm light from candle-gold #FFC857 and warm-highlight #FFE6A3, deep-slate-night #1B2A41 floor and deepest shadows, cool-shadow #3A4D6B distance, ember-shadow #572D42 warm shadows. Center: sturdy low recycle-center building (same silhouette as recycle-center-dark), several dark window rectangles, recycle bin shapes leaning on wall in ember-shadow. Ground: cobbles and grass edge with 4–5 small scattered trash-item silhouettes (banana peel, bottle, paper) in cool shadow, one or two catching faint lantern edge light. Low rolling far-hills desaturated cool-shadow, mid rounded trees with lantern leaf highlights. One chimney with very soft smoke curl. Sky gradient deep-slate-night top to warmer lantern near horizon, no hard line. Subtle firefly dots and one paper leaf drifting. Mood: friendly place where lost things come to be tucked in by Rivet; the building has potential warmth in its dark windows. Exactly locked Hearthlight palette, consistent upper-left light and chunk with all prior assets, bold readable silhouettes, transparent where sky or parallax needs, original IP-safe design, no third-party likenesses.
+```
+
+**construction-lot-backdrop** (`backdrops/construction-lot.png`)
+```
+Hearthlight Town pixel art mission backdrop, construction lot at sleepy dusk. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Open lot with partial wood scaffolding and stacked planks/bricks in deep-ember and lantern, one small house shell or shed in cool-shadow with one dark window shape. Ground: mix of path and bare earth in ember-shadow and warm-cream, a few foundation stones laid. Far-hills and mid-trees as usual (desaturated depth). Tiny Brick silhouette or hardhat shape near the wood stack (optional tiny helper presence). One or two dark windows on the waiting structure. Sky same pre-glow dusk gradient. Mood: a place that wants to become a home; the promise of walls and a lit window is already in the air. Consistent lighting, chunk, palette with every Hearthlight asset, transparent sky/edges ready, original, IP-safe.
+```
+
+**picnic-park-backdrop** (`backdrops/picnic-park.png`)
+```
+Hearthlight Town pixel art mission backdrop, dusk picnic park / shelter area. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Open wooden shelter/pavilion with posts and roof in deep-ember and lantern, picnic table shape in cool-shadow and warm-cream. Ground: grass and path, a few unlit fire circles (friendly low shapes in ember-fox-orange base) and one hydrant. Background: one or two distant rounded buildings with dark windows. Far-hills cool, mid foliage with warm leaf catches. Very soft chimney or lantern potential. Sky warm pre-glow. Mood: the picnic is almost ready again; fires are visitors who will be shown to rest by Ember so friends can play safe. Ember-friendly teal water accents on hydrant. Exactly matches Hearthlight light angle, palette discipline, silhouette clarity, transparent where needed, original IP-safe.
+```
+
+---
+
+## ADDITIONAL MISSION PROPS (pickup items, guides, cozy details)
+
+**trash-item-banana** (`props/trash-banana-peel.png`) — sortable pickup, distinct from bin icon
+```
+Hearthlight Town pixel art prop, banana peel trash item for sorting. 32x24 or 40x28, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Curved peel shape in ember-fox-orange and warm-cream with ember-shadow spots, soft highlight on upper curve. Simple bold silhouette readable at small size in the item circle, transparent background, consistent with bin-compost and all Hearthlight props.
+```
+
+**trash-item-bottle** (`props/trash-water-bottle.png`)
+```
+Hearthlight Town pixel art prop, plastic water bottle trash item. 24x40, chunky pixel art, upper-left warm light, locked palette. Clear-ish body in cool-shadow with lantern cap and teal-relief label hint, warm-highlight on shoulder. Bold simple, transparent, matches the plastic bin family and other trash items.
+```
+
+**trash-item-newspaper** (`props/trash-newspaper.png`)
+```
+Hearthlight Town pixel art prop, folded newspaper item. 36x28, chunky pixel art, upper-left warm light, locked palette. Rectangular folded paper in warm-cream and ember-shadow with faint line "text" suggestion in cool-shadow, rolled edge highlight in candle-gold. Simple, readable, transparent.
+```
+
+**blueprint** (`props/blueprint.png`) — guide overlay for house builder
+```
+Hearthlight Town pixel art prop, builder's blueprint or plan sheet. 64x48 or 80x56, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Rolled or flat cream paper with ember-shadow edges, faint house outline (foundation + walls + roof) in cool-shadow and deep-ember dashed lines, tiny Brick hardhat mark in corner. Warm light catches the paper surface. Feels like a promise drawn by hand. Transparent background.
+```
+
+**picnic-blanket** (`props/picnic-blanket.png`)
+```
+Hearthlight Town pixel art prop, picnic blanket. 56x40, chunky pixel art, upper-left warm light, locked palette. Soft rectangle in warm-cream and teal-relief check or stripe, ember-shadow folds, tiny food or plate hint in ember-fox-orange. Cozy and safe, transparent, for the fire-fix ground.
+```
+
+**hose** (`props/hose.png`) — Ember's tool (nozzle separate or combined)
+```
+Hearthlight Town pixel art prop, gentle fire hose. 48x24, chunky pixel art, upper-left warm light, locked palette. Flexible hose body in cool-shadow and deep-ember, teal-relief nozzle band, candle-gold metal rings, warm highlight along the curve. Friendly not industrial. Transparent.
+```
+
+**campfire-unlit** (`props/campfire-unlit.png`) — base for the friendly fires
+```
+Hearthlight Town pixel art prop, unlit campfire circle. 40x32, chunky pixel art, upper-left warm light, locked palette. Low ring of stones in cool-shadow and warm-cream, dark ember-shadow center, tiny stick hints. Ready to receive the flame prop on top. Transparent.
+```
+
+---
+
+## UI KIT — ADDITIONS (icon-coins + pips for full icon-first)
+
+Current bible covers play, recycle, build, fire, stickers, settings, back, 9-slice, progress-bar, star, sticker-frame, checkmark. These fill the remaining common actions.
+
+**coin-help** (`ui/coin-help.png`)
+```
+Hearthlight Town pixel art ui coin, help / hint action. 64x64 round, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Thick candle-gold rim and warm-highlight inner, center icon: a small question mark or open lantern with gentle ? inside in deep-ember and warm-cream. Soft inner glow. Transparent, generous touch size, matches every other coin in rim, lighting, chunk.
+```
+
+**coin-pause** (`ui/coin-pause.png`)
+```
+Hearthlight Town pixel art ui coin, pause action. 64x64 round, chunky pixel art, upper-left warm light, locked palette only. Candle-gold rim, center: two soft vertical bars or a tiny sleeping Cluckle silhouette (round warm-cream with closed eyes) in ember-shadow and warm-highlight. Calm, safe feeling. Exact same coin family treatment.
+```
+
+**coin-next** (`ui/coin-next.png`)
+```
+Hearthlight Town pixel art ui coin, next / advance. 64x64 round, chunky pixel art, upper-left warm light, locked palette. Candle-gold rim, center: a clear rightward arrow or winding path with a small house at the end in warm-cream and lantern, ember-shadow edge. Feels like "the next kind place." Consistent rim and scale.
+```
+
+**coin-retry** (`ui/coin-retry.png`)
+```
+Hearthlight Town pixel art ui coin, retry / try again. 64x64 round, chunky pixel art, upper-left warm light, locked palette. Candle-gold rim, center: a gentle circular arrow or restart curl with a small warm star or leaf in the middle in ember-fox-orange and candle-gold. Inviting, never frustrated. Matches coin set exactly.
+```
+
+**coin-mute** (`ui/coin-mute.png`)
+```
+Hearthlight Town pixel art ui coin, mute / quiet toggle. 64x64 round, chunky pixel art, upper-left warm light, locked palette. Candle-gold rim, center: a small lantern or speaker shape with a soft crossed or sleeping line in deep-ember over warm-cream. Subtle, world-fitting, same treatment as all coins.
+```
+
+**coin-heart** (`ui/coin-heart.png`) — warmth / No-Fail heart (lives or "town loves you" meter)
+```
+Hearthlight Town pixel art ui coin, heart / warmth. 64x64 round, chunky pixel art, upper-left warm light, locked palette. Candle-gold rim, center: a chunky warm heart in ember-fox-orange and warm-highlight with candle-gold inner glow, soft ember-shadow on lower curve. Feels like a held light. Transparent, consistent with star and other joyful coins.
+```
+
+**progress-pip** (`ui/progress-pip.png`) — small step / count indicator (used in rows for 3 houses, 5 fires, 10 items)
+```
+Hearthlight Town pixel art ui, progress pip / step dot. 16x16 or 20x20, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Small round dot: filled version in candle-gold #FFC857 with warm-highlight rim; empty version in cool-shadow with deep-slate-night edge. Bold, clear at tiny size, transparent. Use in strips for visual progress without numbers.
+```
+
+---
+
+## FX — ADDITIONS & REFINES (dust, light-burst, variants)
+
+Current covers warm-glow, sparkle, smoke-puff, water-splash, confetti, godray, scene-wipe. These add the missing build dust and the big "window lights" moment, plus useful variants.
+
+**dust-puff** (`fx/dust-puff.png`) — build / placement dust, soft and friendly
+```
+Hearthlight Town pixel art fx, soft dust puff for house building or footstep. 32x28, chunky pixel art, locked Hearthlight palette only (no upper-left needed on pure particle). Warm tan/ember-shadow + cool-shadow mix with warm-cream edge highlights, very low contrast, expands and fades. Transparent, used with alpha and scale for gentle "something is settling into place" feel.
+```
+
+**light-burst** (`fx/light-burst.png`) — the core "dark window lights warm" reward / reveal fx
+```
+Hearthlight Town pixel art fx, warm light burst for a window or secret lighting up. 64x64 or 96x96 radial, chunky pixel art, locked Hearthlight palette only. Bright center candle-gold #FFC857 + warm-highlight, soft radial arms in lantern and warm-cream fading to transparent, very faint ember-fox-orange outer halo. Feels like a held breath becoming light. Low contrast for additive bloom use. Transparent edges, matches the light language of every warm window and Cluckle microcosm in the set.
+```
+
+**water-droplet** (`fx/water-droplet.png`) — single friendly droplet for spray / plink
+```
+Hearthlight Town pixel art fx, single water droplet. 12x16 or 16x20, chunky pixel art, upper-left warm light, locked palette. Teal-relief body with warm-highlight spark on the leading curve, tiny ember-shadow tail. Gentle, not sharp. Transparent, multiple can be used for arcs and bursts.
+```
+
+**smoke-ring** (`fx/smoke-ring.png`) — happy chimney or finished-house ring (distinct from puff)
+```
+Hearthlight Town pixel art fx, soft smoke ring / halo. 40x28, chunky pixel art, locked palette. Thin rounded ring/loop in cool-shadow and ember-shadow with warm-highlight catching the top edge, expands and fades softly. Transparent, for the "house is home" exhale after roof or decoration snap.
+```
+
+**confetti-leaf** (`fx/confetti-leaf.png`) — warmer leaf-shaped confetti variant
+```
+Hearthlight Town pixel art fx, celebration leaf confetti. 20x18 or sheet, chunky pixel art, locked palette. Small simple leaf or seed shape in ember-fox-orange, teal-relief, warm-cream, candle-gold. One side highlight. Joyful, slower drift than square confetti. Transparent bg.
+```
+
+**sparkle-cluster** (`fx/sparkle-cluster.png`) — small group for reward / secret pop
+```
+Hearthlight Town pixel art fx, sparkle cluster (3–5 tiny stars). 28x24, chunky pixel art, locked palette. Assorted 4–6 point sparkles in warm-highlight and candle-gold with faint cool tips, one or two pixels of soft glow each. Used for the moment a window lights or a sticker is earned. Transparent.
+```
+
+---
+
+## ROADMAP MISSIONS — BACKDROPS + KEY PROPS
+
+These extend the three core mission backdrops (recycling-yard, construction-lot, picnic-park) for the full 14-mission roadmap. Each reuses one of the four archetypes so the shared mission framework can power them with minimal new systems:
+
+- **sort** — distinct items into labeled receptacles (bins, slots, boxes)
+- **build-sequence** — drag or select parts in a visible order that snaps (house pieces, recipe steps, gadget modules)
+- **move-aim-spray** — directional movement + aimed action (hose, blaster, scoop, glider rings)
+- **match-place** — find the right quiet spot and place or reveal (statues, stickers, inverse pairs, treasure)
+
+All prompts obey the full STYLE CONSISTENCY GUIDE above (chunky pixel, upper-left warm light from candle-gold + warm-highlight, locked Hearthlight palette only, bold readable silhouettes, transparent where sky/parallax needs, one or two dark windows so the "rescue lights a window" gesture is visible even in the static backdrop, original IP-safe, no third-party likenesses). Backdrops 480×270 or 960×540 source. Props sized for tray / world use (32–64 px range). File names follow the existing pattern.
+
+---
+
+### Frog Flight — Wings (move-aim-spray archetype)
+
+**Backdrop** `public/assets/hearthlight/backdrops/frog-flight.png`
+```
+Hearthlight Town pixel art mission backdrop, high golden-hour sky view for frog flight mission. Chunky pixel art, upper-left warm light from candle-gold #FFC857 and warm-highlight #FFE6A3, deep-slate-night #1B2A41 floor and deepest shadows where ground shows far below, cool-shadow #3A4D6B distance hills, ember-shadow #572D42 soft cloud shadows. Mid-ground: several floating chunky sky-rings (lantern and teal-relief edges with candle-gold inner glow), one or two low rooftops with dark window rectangles visible below the flight path, a single round well or Cluckle silhouette hint in the far ground (microcosm echo). Low rolling far-hills desaturated cool-shadow and ember-shadow. Small drifting leaf or paper seed elements. Sky gradient deep-slate-night top through lantern near horizon, no hard line. Subtle firefly dots as high "stars." Mood: the sky itself is a friendly path waiting for gentle hands; the rings and the ground both hold the promise of light returning. Exactly locked Hearthlight palette, consistent upper-left light and chunk with all prior assets, bold readable silhouettes, transparent lower sky edges for parallax composite, original IP-safe design, no third-party likenesses.
+```
+
+**Key props (move-aim-spray):**
+- **sky-ring** (`props/sky-ring.png`)
+```
+Hearthlight Town pixel art prop, floating sky ring for flight mission. 48x48 or 56x56, chunky pixel art, upper-left warm light, locked Hearthlight palette only. Thick ring in lantern #F4A24C and teal-relief #43A29C with candle-gold #FFC857 inner glow and warm-highlight rim, soft ember-shadow outer edge. Bold simple silhouette, reads clearly even small, transparent background, consistent with water-spray and lantern props in lighting and warmth.
+```
+- **leaf-glider** (`props/leaf-glider.png`)
+```
+Hearthlight Town pixel art prop, leaf-shaped glider or wing for frog flight. 40x32, chunky pixel art, upper-left warm light, locked palette. Curved leaf form in teal-relief #43A29C and warm-cream #EBDDDA with ember-shadow veins, candle-gold highlight along the leading edge. Gentle, friendly, transparent, pairs with Wings hero scarf.
+```
+- **rescue-basket** (`props/rescue-basket.png`)
+```
+Hearthlight Town pixel art prop, small friendly rescue basket or pod for the lost frog. 36x32, chunky pixel art, upper-left warm light, locked palette. Woven basket shape in ember-shadow and warm-cream with teal-relief band, soft candle-gold rim, tiny leaf inside. Warm and safe feeling, transparent, the "friend brought home" object.
+```
+
+---
+
+### Scooter Bear Roundup — Scoot (move-aim-spray archetype)
+
+**Backdrop** `public/assets/hearthlight/backdrops/scooter-roundup.png`
+```
+Hearthlight Town pixel art mission backdrop, gentle scooter path through town edge and soft fields for bear herding. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Winding path in warm-cream and ember-shadow, grass edges in teal-relief mixed with cool-shadow, low rounded trees and one small building with dark windows in mid distance. A few soft "bear print" or round friend shapes in cool shadow on the path (waiting to be guided). Far-hills desaturated cool-shadow, mid foliage with lantern leaf catches. One chimney with soft smoke. Sky pre-glow dusk gradient. Mood: a friendly road where bears can be gently turned home; the path and the building both feel ready for more warmth. Consistent lighting, chunk, palette with every Hearthlight asset, transparent sky/edges ready, original, IP-safe.
+```
+
+**Key props (move-aim-spray / herding):**
+- **scooter** (`props/scooter.png`)
+```
+Hearthlight Town pixel art prop, gentle scooter for bear herder. 56x32, chunky pixel art, upper-left warm light, locked palette. Rounded scooter body in deep-ember and lantern with teal-relief wheel accents and candle-gold handle detail. Friendly not speedy, transparent, matches Scoot hero scale.
+```
+- **bear-friend** (`props/bear-friend.png`)
+```
+Hearthlight Town pixel art prop, small round bear friend silhouette for herding. 28x24, chunky pixel art, upper-left warm light, locked palette. Tiny bear body in ember-fox-orange and warm-cream, soft ears, friendly simple face. Bold readable at small size for path dots, transparent.
+```
+- **soft-fence** (`props/soft-fence.png`)
+```
+Hearthlight Town pixel art prop, low soft fence or gate segment for guiding. 48x28, chunky pixel art, upper-left warm light, locked palette. Rounded post-and-rail in cool-shadow and warm-cream with lantern top, ember-shadow base. Cozy not sharp, transparent, for path edges.
+```
+
+---
+
+### Safety Lights Chase — Dash (move-aim-spray archetype)
+
+**Backdrop** `public/assets/hearthlight/backdrops/safety-lights.png`
+```
+Hearthlight Town pixel art mission backdrop, dusk neighborhood street with crosswalks and lamp posts for safety lights mission. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Cobble and path ground, several low buildings with dark window shapes, tall simple lamp posts in cool-shadow and deep-ember. A few "runaway" round shapes in ember-shadow on the road (to be slowed). Mid-trees and far-hills desaturated. One or two already-glowing lantern hints on posts (player will add more). Sky gradient with soft pre-glow. Mood: the street is almost safe; the child's signals will make the last windows feel reachable. Consistent upper-left light, chunk, palette, transparent edges, original IP-safe.
+```
+
+**Key props (move-aim-spray / timing + hook):**
+- **safety-lantern** (`props/safety-lantern.png`)
+```
+Hearthlight Town pixel art prop, signal safety lantern or light. 28x36, chunky pixel art, upper-left warm light, locked palette. Tall post or handheld lantern in deep-ember and lantern color, bright candle-gold #FFC857 glow with warm-highlight rim, soft spill shape below. Bold, friendly, transparent.
+```
+- **soft-hook** (`props/soft-hook.png`)
+```
+Hearthlight Town pixel art prop, gentle curved hook or lasso for slowing. 40x24, chunky pixel art, upper-left warm light, locked palette. Soft curved line in teal-relief and warm-cream with ember-shadow edge, small loop at end. Never sharp, friendly tool, transparent.
+```
+- **crosswalk-mark** (`props/crosswalk-mark.png`)
+```
+Hearthlight Town pixel art prop, ground crosswalk or signal mark. 48x16, chunky pixel art, upper-left warm light, locked palette. Broad stripes in warm-cream and cool-shadow, candle-gold edge highlight. Simple, readable as "safe path," transparent.
+```
+
+---
+
+### Recycled Inventions — Reed (build-sequence archetype)
+
+**Backdrop** `public/assets/hearthlight/backdrops/recycled-inventions.png`
+```
+Hearthlight Town pixel art mission backdrop, cozy inventor's yard or shed side for recycled gadget building. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Low shed or table area with dark window, scattered scrap shapes (distinct silhouettes) in cool-shadow and ember-shadow on ground and bench, one small tree with nest. Far-hills and mid foliage as usual. Path leading in. Mood: a place where lost things become useful again; the shed window is waiting to light when the last clever piece finds its friends. Consistent lighting, chunk, palette, transparent sky/edges, original IP-safe.
+```
+
+**Key props (build-sequence):**
+- **scrap-gear** (`props/scrap-gear.png`)
+```
+Hearthlight Town pixel art prop, recycled gear or wheel scrap for inventing. 32x32, chunky pixel art, upper-left warm light, locked palette. Round gear shape in deep-ember and lantern with teal-relief teeth, warm-highlight on upper teeth. Bold, distinct from other scraps, transparent.
+```
+- **scrap-spring** (`props/scrap-spring.png`)
+```
+Hearthlight Town pixel art prop, coiled spring or bouncy scrap. 36x20, chunky pixel art, upper-left warm light, locked palette. Loopy spring form in cool-shadow and warm-cream with ember-shadow lines, candle-gold highlight on curves. Playful, transparent.
+```
+- **gadget-body** (`props/gadget-body.png`)
+```
+Hearthlight Town pixel art prop, base gadget body or frame for assembly. 48x36, chunky pixel art, upper-left warm light, locked palette. Simple rectangular or rounded body in ember-shadow and warm-cream with lantern panel lines, slot hints. The "core" that other scraps attach to visually, transparent.
+```
+
+---
+
+### Bike Explorer — Milo (match-place archetype)
+
+**Backdrop** `public/assets/hearthlight/backdrops/bike-explorer.png`
+```
+Hearthlight Town pixel art mission backdrop, winding neighborhood map paths for bike exploration. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Network of paths in warm-cream and ember-shadow, grass and garden patches in teal-relief, several small houses and a tree with dark windows or doors, one park bench shape. Far-hills cool, mid trees. A few "sticker" or treasure spot silhouettes in cool shadow (the places waiting to be found and marked). Sky dusk pre-glow. Mood: the neighborhood is full of quiet friends and stories; the child's bike will light the path between them. Consistent Hearthlight light, chunk, palette, transparent edges, original IP-safe.
+```
+
+**Key props (match-place):**
+- **map-sticker** (`props/map-sticker.png`)
+```
+Hearthlight Town pixel art prop, small neighborhood map sticker or flag. 24x24, chunky pixel art, upper-left warm light, locked palette. Star or leaf or house shape in candle-gold and warm-highlight with ember-shadow outline. Joyful collectible, transparent.
+```
+- **bench-spot** (`props/bench-spot.png`)
+```
+Hearthlight Town pixel art prop, park bench or quiet sitting spot for matching. 48x24, chunky pixel art, upper-left warm light, locked palette. Simple bench shape in cool-shadow and warm-cream with lantern wood grain, ember-shadow legs. The "right place" silhouette, transparent.
+```
+- **neighbor-door** (`props/neighbor-door.png`)
+```
+Hearthlight Town pixel art prop, small friendly door or window mark for exploration reveal. 28x36, chunky pixel art, upper-left warm light, locked palette. Door shape in deep-ember and warm-cream with candle-gold knob, soft highlight. Used for "found neighbor" pop, transparent.
+```
+
+---
+
+### Goo Cleanup — Mayor Grumble (move-aim-spray archetype)
+
+**Backdrop** `public/assets/hearthlight/backdrops/goo-cleanup.png`
+```
+Hearthlight Town pixel art mission backdrop, town square or street with silly goo puddles for cleanup. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Cobbles and path with several rounded goo puddle shapes in ember-fox-orange and teal-relief (friendly, not scary), low buildings with dark windows, one small cannon or spill source in cool-shadow. Far-hills and trees usual. Mood: the mess is playful; steady hands will turn puddles into clean ground and lit windows. Consistent lighting, chunk, palette, transparent sky, original IP-safe.
+```
+
+**Key props (move-aim-spray):**
+- **goo-puddle** (`props/goo-puddle.png`)
+```
+Hearthlight Town pixel art prop, friendly rounded goo puddle. 40x24, chunky pixel art, upper-left warm light, locked palette. Soft blob in ember-fox-orange #E86F3A and teal-relief #43A29C with ember-shadow edge, warm-highlight catch on top curve. Playful, never alarming, transparent.
+```
+- **spray-nozzle** (`props/spray-nozzle.png`)
+```
+Hearthlight Town pixel art prop, mayor's gentle spray or scoop tool. 36x28, chunky pixel art, upper-left warm light, locked palette. Short nozzle or scoop in deep-ember and lantern with teal-relief band, candle-gold rim. Friendly tool, transparent.
+```
+- **clean-patch** (`props/clean-patch.png`)
+```
+Hearthlight Town pixel art prop, cleaned ground patch or sparkle after goo. 32x20, chunky pixel art, upper-left warm light, locked palette. Soft rectangle or circle in warm-cream and cool-shadow with candle-gold sparkle dots. The "after" state, transparent.
+```
+
+---
+
+### Dream Statues — Mayor Merry (match-place archetype)
+
+**Backdrop** `public/assets/hearthlight/backdrops/dream-statues.png`
+```
+Hearthlight Town pixel art mission backdrop, whimsical dream plaza or square for statue placement. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Open paved area in cool-shadow and warm-cream with lantern patterns, low curved walls or plinths in ember-shadow, one or two buildings with dark windows behind, a single tree with soft nest. Far-hills very distant. A few faint "dream shape" outlines in cool shadow on the plinths (the spots waiting for the right statue). Sky soft pre-glow. Mood: a place where silly dreams become real because a child chose with care. Consistent Hearthlight everything, transparent edges, original IP-safe.
+```
+
+**Key props (match-place):**
+- **statue-base** (`props/statue-base.png`)
+```
+Hearthlight Town pixel art prop, plinth or base for dream statue. 40x24, chunky pixel art, upper-left warm light, locked palette. Low wide base in cool-shadow and warm-cream with lantern top edge and ember-shadow bevel. Simple, the "right place" anchor, transparent.
+```
+- **chicken-statue** (`props/chicken-statue.png`)
+```
+Hearthlight Town pixel art prop, whimsical chicken statue (dream form). 28x36, chunky pixel art, upper-left warm light, locked palette. Stylized round hen shape in warm-cream and deep-ember with candle-gold comb, soft inner glow hint. Silly and joyful, transparent.
+```
+- **dream-cloud** (`props/dream-cloud.png`)
+```
+Hearthlight Town pixel art prop, soft dream cloud or thought bubble for matching. 36x28, chunky pixel art, locked palette. Rounded cloud in cool-shadow and warm-cream with warm-highlight edge. The "idea" or inverse piece, transparent.
+```
+
+---
+
+### Chicken Inverse Dream — Cluckle (match-place archetype)
+
+**Backdrop** `public/assets/hearthlight/backdrops/inverse-dream.png`
+```
+Hearthlight Town pixel art mission backdrop, soft dream-space or well-side clearing for Cluckle's inverse matching. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Dark reflective ground or well circle in deep-slate-night and cool-shadow with extremely faint microcosm roofs and candle-gold dots inside the reflection (patient child only). Low curved "dream" walls or hedge in ember-shadow, one small house with dark window, a single round Cluckle silhouette shape in warm shadow. Far-hills barely visible. Sky very soft and dreamy gradient. Mood: the world is flipped gently here; matching the opposite lights the hidden town inside the hen. Cluckle's microcosm must be visible in the static backdrop. Consistent lighting, chunk, palette, original IP-safe.
+```
+
+**Key props (match-place / inverse):**
+- **inverse-pair-a** (`props/inverse-pair-a.png`)
+```
+Hearthlight Town pixel art prop, one half of an inverse dream pair (mayor shape). 32x32, chunky pixel art, upper-left warm light, locked palette. Simple stylized tiny mayor or crown shape in deep-ember and warm-cream with candle-gold accent. The "ordinary" side, transparent.
+```
+- **inverse-pair-b** (`props/inverse-pair-b.png`)
+```
+Hearthlight Town pixel art prop, matching inverse half (tiny hen or statue flip). 32x32, chunky pixel art, upper-left warm light, locked palette. Round hen or flipped form in warm-cream and teal-relief with ember-shadow, soft inner candle-gold dot. The "dream" side, transparent. When placed on its pair the microcosm glows.
+```
+- **dream-well** (`props/dream-well.png`)
+```
+Hearthlight Town pixel art prop, small well or circle for inverse reveal. 40x40, chunky pixel art, upper-left warm light, locked palette. Round stone well in cool-shadow and warm-cream, dark water with extremely faint tiny roof + candle-gold microcosm dots (visible on close look only). The heart of Cluckle's secret, transparent.
+```
+
+---
+
+### Treasure Boat — Captain Coral (move-aim-spray / match-place hybrid)
+
+**Backdrop** `public/assets/hearthlight/backdrops/treasure-boat.png`
+```
+Hearthlight Town pixel art mission backdrop, gentle dusk harbor or river bend for treasure boat. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Calm water in deep-slate-night and cool-shadow with teal-relief ripples and candle-gold sparkles, low dock or pier in deep-ember and lantern, one or two boats or posts, background buildings with dark windows on the shore, far-hills cool. A few floating "box" silhouettes in ember-shadow on the water (the treasures waiting). Soft smoke or lantern on shore. Mood: the water is calm and full of small stories; opening the right box lights a window on the bank. Consistent Hearthlight light, chunk, palette, transparent water edges, original IP-safe.
+```
+
+**Key props (move-aim + match-place):**
+- **treasure-box** (`props/treasure-box.png`)
+```
+Hearthlight Town pixel art prop, floating treasure box or chest. 32x28, chunky pixel art, upper-left warm light, locked palette. Rounded chest shape in deep-ember and warm-cream with candle-gold latch and warm-highlight rim. Friendly, the "find and open" object, transparent.
+```
+- **boat-hull** (`props/boat-hull.png`)
+```
+Hearthlight Town pixel art prop, small boat or raft for movement. 48x24, chunky pixel art, upper-left warm light, locked palette. Simple hull in cool-shadow and ember-shadow with lantern top rail and teal-relief wave accents. Warm and safe, transparent.
+```
+- **harbor-light** (`props/harbor-light.png`)
+```
+Hearthlight Town pixel art prop, small dock lantern or shore light that lights on success. 24x32, chunky pixel art, upper-left warm light, locked palette. Post lantern in deep-ember and lantern color, bright candle-gold glass with warm spill below. The "window on the bank" reward, transparent.
+```
+
+---
+
+### Bakery Bread Rush — Baker Benny (build-sequence archetype)
+
+**Backdrop** `public/assets/hearthlight/backdrops/bakery-rush.png`
+```
+Hearthlight Town pixel art mission backdrop, cozy bakery yard and delivery path for bread rush. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Low bakery building with dark window and chimney (soft smoke curl catching light), wooden table or counter in ember-shadow and warm-cream, path leading to a few houses with dark windows. Scattered ingredient or basket silhouettes in cool shadow. Far-hills and trees usual. Mood: the ovens are warm, the windows are waiting for fresh bread and light. Consistent lighting, chunk, palette, transparent sky, original IP-safe.
+```
+
+**Key props (build-sequence):**
+- **bread-loaf** (`props/bread-loaf.png`)
+```
+Hearthlight Town pixel art prop, fresh bread loaf for delivery. 36x20, chunky pixel art, upper-left warm light, locked palette. Rounded loaf in warm-cream and lantern with ember-shadow crust lines and candle-gold highlight on the top. Warm and inviting, transparent.
+```
+- **recipe-card** (`props/recipe-card.png`)
+```
+Hearthlight Town pixel art prop, simple recipe step card or tray marker. 32x24, chunky pixel art, upper-left warm light, locked palette. Cream card in warm-cream and ember-shadow with faint icon (flour, egg, heart) in deep-ember. The sequencing guide, transparent.
+```
+- **delivery-basket** (`props/delivery-basket.png`)
+```
+Hearthlight Town pixel art prop, delivery basket that fills with loaves. 40x28, chunky pixel art, upper-left warm light, locked palette. Open basket in deep-ember and warm-cream with teal-relief handle, warm light inside when full. The "complete order" object, transparent.
+```
+
+---
+
+### Asteroid Blaster — Nova Noodle (move-aim-spray archetype)
+
+**Backdrop** `public/assets/hearthlight/backdrops/asteroid-blaster.png`
+```
+Hearthlight Town pixel art mission backdrop, high playful night-sky clearing or rooftop for asteroid foam blaster. Chunky pixel art, upper-left warm light, locked Hearthlight palette only. Rooftop or open hill in cool-shadow and ember-shadow with warm-cream path, low town buildings with dark windows far below, floating "asteroid" shapes (friendly round blobs) in ember-shadow and deep-ember against the sky. A few soft stars in warm-highlight. Sky deep-slate-night top with lantern band near "horizon." Mood: the sky is full of silly falling stars that just need a gentle foam hello; every bop helps a window below remember to glow. Cluckle microcosm hint as one very faint constellation. Consistent upper-left light, chunk, palette, transparent sky, original IP-safe.
+```
+
+**Key props (move-aim-spray):**
+- **foam-star** (`props/foam-star.png`)
+```
+Hearthlight Town pixel art prop, friendly foam star projectile. 24x24, chunky pixel art, locked palette. Soft 5-point star in warm-highlight and candle-gold with faint ember-shadow edge, very low contrast, friendly blob feel. The "blaster" ammo, transparent.
+```
+- **asteroid** (`props/asteroid.png`)
+```
+Hearthlight Town pixel art prop, silly falling asteroid (friendly blob). 32x28, chunky pixel art, upper-left warm light, locked palette. Round irregular blob in deep-ember and cool-shadow with warm-highlight catch, tiny "crater" dots in ember-shadow. Never scary, playful, transparent.
+```
+- **blaster** (`props/foam-blaster.png`)
+```
+Hearthlight Town pixel art prop, noodle-style foam blaster tool. 48x24, chunky pixel art, upper-left warm light, locked palette. Long goofy barrel in lantern and teal-relief with deep-ember grip and candle-gold rings. Silly and warm, transparent, pairs with Nova hero.
+```
+
+---
+
+## NOTES FOR IMPLEMENTATION & COHERENCE
+
+- After generation: place under `public/assets/hearthlight/<category>/<name>.png` (or subdirs characters/, buildings/, etc.).
+- Update `docs/assets/ASSET_BACKLOG.md` with production entries, source="Grok-generated from art-prompts.md against design-system.md", license="original project", date.
+- Later: build texture atlases or load individual; keep nearest-neighbor, no mip smoothing.
+- When a prompt produces drift (wrong hue, soft edges, cold light from right), re-prompt with the full STYLE CONSISTENCY GUIDE paragraph prepended + "fix to exact upper-left light and locked palette only, match previous Hearthlight outputs".
+- Cluckle's microcosm and the "dark window lights" must be visible in spirit even in the smallest assets.
+- This world is for Willem. Every pixel should feel like it already knows the child is coming and is glad.
+
+**End of locked prompt bible.** All subsequent art must trace to this document and design-system.md.

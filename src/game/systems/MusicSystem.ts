@@ -150,3 +150,45 @@ export function createWebAudioMusicSink(): MusicSink {
     },
   };
 }
+
+/**
+ * File sink: plays Shane's real recorded theme (OGG) on a clean loop via an HTMLAudioElement,
+ * polling the live level so the volume slider + mute apply within a beat. Kept gentle (capped,
+ * the track is already loudness-normalised to ~-16 LUFS) so it sits under the SFX. Any failure
+ * is swallowed — music is a bonus and must never interrupt play (No-Fail). The `theme` arg is
+ * unused here; this is the recorded swap-in behind the same MusicSink seam as the synth.
+ */
+export function createHtmlAudioMusicSink(url: string): MusicSink {
+  let audio: HTMLAudioElement | null = null;
+  let timer: ReturnType<typeof setInterval> | null = null;
+  const CAP = 0.55; // music sits softly beneath the SFX
+
+  return {
+    start(_theme, level) {
+      try {
+        if (typeof Audio === 'undefined') return;
+        audio = new Audio(url);
+        audio.loop = true;
+        audio.volume = musicGainFromLevel(level()) * CAP;
+        void audio.play().catch(() => undefined); // autoplay may defer until the gesture resolves
+        timer = setInterval(() => {
+          if (!audio) return;
+          const gain = musicGainFromLevel(level()) * CAP;
+          audio.volume = gain;
+          if (gain <= 0 && !audio.paused) audio.pause();
+          else if (gain > 0 && audio.paused) void audio.play().catch(() => undefined);
+        }, 250);
+      } catch {
+        // No-Fail: a music error must never interrupt the child's play.
+      }
+    },
+    stop() {
+      if (timer) clearInterval(timer);
+      timer = null;
+      if (audio) {
+        audio.pause();
+        audio = null;
+      }
+    },
+  };
+}

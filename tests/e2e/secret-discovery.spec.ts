@@ -46,11 +46,12 @@ test('all three secrets reveal without error and persist as stickers', async ({ 
   await scene(page, 'TownMapScene');
 
   // 1) Cluckle's Dream — Town Map (3 touches). Capture the miniature dream-town mid-bloom.
-  await clickGame(page, 70, 150, 3);
+  // The hotspot sits in the quiet bottom-left corner of the Hearthlight hub.
+  await clickGame(page, 70, 498, 3);
   await page.waitForTimeout(450);
   await page.screenshot({ path: 'test-results/shots/secret-cluckle.png' });
   await page.waitForTimeout(2200); // let the reveal text appear...
-  await clickGame(page, 480, 270, 1); // ...and dismiss it
+  await clickGame(page, 480, 120, 1); // ...and dismiss it (empty band above the mission coins)
   await scene(page, 'TownMapScene');
 
   // 2) Hidden Light — House Builder (1 touch).

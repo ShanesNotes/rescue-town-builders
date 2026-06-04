@@ -2,13 +2,23 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionId } from '../types';
 import { getSaveSystem, missionRegistry } from '../systems/GameServices';
-import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { bindIntents } from '../systems/bindIntents';
 import { SCENE_KEYS, sceneKeyForMission, startParentSettingsGate, startScene, startStickerBook } from '../systems/SceneNavigation';
-import { projectTownMapNodes } from '../systems/TownMapProgress';
-import { addButton } from '../ui/Button';
-import { addBody, addTitle } from '../ui/SceneText';
+import { projectTownMapNodes, type TownMapNode } from '../systems/TownMapProgress';
+import { addIconButton } from '../ui/Button';
+import { FONTS } from '../ui/typography';
+import { motionAllowed } from '../ui/Sprite';
 import { createSecretsForProfile, addSecretHotspot } from '../systems/secretHotspot';
-import { addHelperAvatar, addSprite, hasTexture, type HelperCharacterId } from '../ui/Sprite';
+
+// Each rescue mission is a home in the town. Its window is dark until the child completes the
+// mission — then it lights up. The town glows brighter as you help (the core loop made visible).
+const MISSION_ICON: Record<string, string> = {
+  'recycling-run': 'hl.ui.recycle',
+  'house-builder': 'hl.ui.build',
+  'fire-fix': 'hl.ui.fire',
+};
+// Aligned to the three lamp-lit platforms built into the near-path parallax layer.
+const NODE_X = [252, 480, 708];
 
 export class TownMapScene extends Phaser.Scene {
   private selectedIndex = 0;
@@ -19,7 +29,6 @@ export class TownMapScene extends Phaser.Scene {
 
   create(): void {
     fadeInScene(this);
-    this.cameras.main.setBackgroundColor('#dff8d8');
     const profile = getSaveSystem().getSelectedProfile();
     if (!profile) {
       startScene(this, SCENE_KEYS.profile);
@@ -27,121 +36,119 @@ export class TownMapScene extends Phaser.Scene {
     }
 
     const nodes = projectTownMapNodes(missionRegistry.list(), profile);
-    this.drawTownBackground();
-    addTitle(this, 'Rescue Town Map');
-    addBody(this, 110, `${profile.name}, choose a mission. Map nodes are driven by the MissionRegistry.`);
+    const rescued = nodes.filter((n) => n.completed).length;
+    this.paintWorld(rescued, nodes.length);
+    this.paintHeader();
 
-    nodes.forEach((node, index) => {
-      const selected = index === this.selectedIndex ? '▶ ' : '';
-      const y = 188 + index * 90;
-      addSprite(this, {
-        key: 'town.map-node',
-        x: 120,
-        y,
-        width: selected ? 62 : 54,
-        height: selected ? 62 : 54,
-        pop: Boolean(selected),
-      });
-      addSprite(this, {
-        key: 'kenney.tiny-town.target',
-        x: 120,
-        y,
-        width: selected ? 34 : 28,
-        height: selected ? 34 : 28,
-        pop: Boolean(selected),
-      });
-      addHelperAvatar(this, helperForCharacterId(node.characterId), 835, y, 56, {
-        idle: index === this.selectedIndex,
-        pop: index === this.selectedIndex,
-      });
-      addButton(this, {
-        x: 480,
-        y,
-        width: 650,
-        height: 74,
-        label: `${selected}${node.title}\n${node.mapNodeId} • ${node.starsLabel}`,
-        fill: index === this.selectedIndex ? 0xfff4bf : ([0xb7e6ff, 0xffd6a5, 0xffb3c6][index] ?? 0xffffff),
-        onPress: () => this.startMission(node.missionId),
-        testId: `townmap.mission.${node.missionId}`,
-      });
-    });
+    nodes.forEach((node, index) => this.buildNode(node, index));
 
-    addButton(this, {
-      x: 760,
-      y: 500,
-      width: 280,
-      height: 58,
-      label: 'Parent Settings',
-      fill: 0xffffff,
-      onPress: () => startParentSettingsGate(this, SCENE_KEYS.townMap),
-      testId: 'townmap.parent-settings',
-    });
-    addButton(this, {
-      x: 145,
-      y: 500,
-      width: 200,
-      height: 58,
-      label: 'Profiles',
-      fill: 0xffffff,
-      onPress: () => startScene(this, SCENE_KEYS.profile),
-      testId: 'townmap.profiles',
-    });
-    addButton(this, {
-      x: 452,
-      y: 500,
-      width: 230,
-      height: 58,
-      label: 'My Stickers',
-      fill: 0xffffff,
-      onPress: () => startStickerBook(this),
-      testId: 'townmap.sticker-book',
-    });
-    addBody(this, 458, 'Gamepad: D-pad chooses • A starts mission • B returns to profiles');
+    // Corner coins (icon-first; same destinations + testIds as before).
+    this.cornerCoin(52, 46, 'hl.ui.back', () => startScene(this, SCENE_KEYS.profile), 'townmap.profiles');
+    this.cornerCoin(908, 46, 'hl.ui.stickers', () => startStickerBook(this), 'townmap.sticker-book');
+    this.cornerCoin(908, 498, 'hl.ui.settings', () => startParentSettingsGate(this, SCENE_KEYS.townMap), 'townmap.parent-settings');
 
     // Cluckle's Dream: a sleepy hen who dreams the whole town in miniature (3 touches).
     const secrets = createSecretsForProfile();
-    addSecretHotspot(this, secrets, 'cluckle-dream', 70, 150);
+    addSecretHotspot(this, secrets, 'cluckle-dream', 70, 498);
 
-    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-      const intent = inputIntentFromKeyboard(event.key);
-      if (intent?.type === 'move') this.moveSelection(intent.y, nodes.length);
-      if (intent?.type === 'confirm' || intent?.type === 'action') {
-        this.startMission(nodes[this.selectedIndex]?.missionId ?? 'recycling-run');
-      }
-      if (intent?.type === 'back') startScene(this, SCENE_KEYS.profile);
-    });
-
-    this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
-      const intent = inputIntentFromGamepadButton(button.index);
-      if (intent?.type === 'move') this.moveSelection(intent.y, nodes.length);
-      if (intent?.type === 'confirm' || intent?.type === 'action') {
-        this.startMission(nodes[this.selectedIndex]?.missionId ?? 'recycling-run');
-      }
-      if (intent?.type === 'back') startScene(this, SCENE_KEYS.profile);
-    });
+    this.bindKeys(nodes);
   }
 
-  private drawTownBackground(): void {
-    this.add.rectangle(480, 292, 850, 330, 0x9be7c4, 0.24).setStrokeStyle(3, 0x203247, 0.16);
-    if (hasTexture(this, 'kenney.tiny-town.grass')) {
-      this.add.tileSprite(480, 292, 830, 318, 'kenney.tiny-town.grass').setTileScale(2, 2).setAlpha(0.3);
+  private paintWorld(rescued: number, total: number): void {
+    // Parallax dusk town built for the hub: sky → far hills → town silhouette → lamp-lit path.
+    this.add.image(480, 270, 'hl.map.sky').setDisplaySize(960, 540).setDepth(0);
+    this.add.image(480, 314, 'hl.map.farHills').setOrigin(0.5, 1).setDepth(1);
+    this.add.image(480, 396, 'hl.map.midTown').setOrigin(0.5, 1).setDepth(2);
+    this.add.image(480, 540, 'hl.map.nearPath').setOrigin(0.5, 1).setDepth(3);
+    // The town grows warmer the more homes the child has rescued (light from darkness).
+    const warmth = total > 0 ? rescued / total : 0;
+    this.add.rectangle(480, 270, 960, 540, 0xffb24a, 0.04 + warmth * 0.06).setBlendMode(Phaser.BlendModes.ADD).setDepth(4);
+    this.add.rectangle(480, 32, 960, 88, 0x101b2e, 0.42).setDepth(5);
+  }
+
+  private paintHeader(): void {
+    this.add
+      .text(480, 34, 'RESCUE TOWN', {
+        fontFamily: FONTS.display,
+        fontSize: '34px',
+        color: '#FFE2A6',
+        fontStyle: 'bold',
+        stroke: '#2A1606',
+        strokeThickness: 7,
+      })
+      .setOrigin(0.5)
+      .setDepth(30);
+  }
+
+  // A mission node sitting on a lamp-lit platform: the home is DARK until the child rescues it,
+  // then it's lit and glowing — the light-from-darkness core loop made visible on the hub.
+  // Above it floats the tappable icon-coin (what + button); below, the stars earned.
+  private buildNode(node: TownMapNode, index: number): void {
+    const x = NODE_X[index] ?? 160 + index * 200;
+    const selected = index === this.selectedIndex;
+    const houseY = 392;
+
+    if (selected) {
+      this.add.ellipse(x, houseY + 4, 188, 50, 0xffd98a, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(4);
     }
-    this.add.rectangle(480, 268, 650, 30, 0xffe0a3, 0.45);
-    this.add.rectangle(340, 292, 30, 230, 0xffe0a3, 0.45);
-    this.add.rectangle(650, 292, 30, 230, 0xffe0a3, 0.45);
-    [
-      ['kenney.tiny-town.tree-green', 238, 152],
-      ['kenney.tiny-town.tree-yellow', 718, 150],
-      ['kenney.tiny-town.tree-green', 245, 438],
-      ['kenney.tiny-town.tree-yellow', 720, 436],
-      ['kenney.tiny-town.well', 480, 440],
-    ].forEach(([key, x, y]) => {
-      addSprite(this, { key: String(key), x: Number(x), y: Number(y), width: 44, height: 44, alpha: 0.85 });
+
+    // A rescued home glows; a waiting one is dim.
+    if (node.completed) {
+      const glow = this.add.circle(x, houseY - 52, 84, 0xffc14a, 0.2).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
+      if (motionAllowed()) this.tweens.add({ targets: glow, scale: 1.14, alpha: 0.1, duration: 1900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+    const house = this.add
+      .image(x, houseY, node.completed ? 'hl.map.houseLit' : 'hl.map.houseDark')
+      .setOrigin(0.5, 1)
+      .setDisplaySize(150, 150)
+      .setDepth(6);
+    // The houseDark art already reads "asleep"; a rescued home swaps to the lit art + bloom.
+    house.setInteractive({ useHandCursor: true }).on('pointerup', () => this.startMission(node.missionId));
+    // A faint light-beam ties the floating coin to its home, so it reads as "this house's job".
+    this.add.rectangle(x, 256, 7, 96, 0xffd98a, 0.1).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
+
+    this.starRow(x, 412, node.bestStars);
+
+    addIconButton(this, {
+      x,
+      y: 206,
+      size: 90,
+      key: MISSION_ICON[node.missionId] ?? 'hl.ui.play',
+      onPress: () => this.startMission(node.missionId),
+      testId: `townmap.mission.${node.missionId}`,
+      pulse: selected,
+    }).setDepth(20);
+  }
+
+  private starRow(cx: number, y: number, best: 0 | 1 | 2 | 3): void {
+    const slots = 3;
+    const gap = 30;
+    const start = cx - ((slots - 1) * gap) / 2;
+    for (let i = 0; i < slots; i += 1) {
+      const earned = i < best;
+      this.add
+        .image(start + i * gap, y, 'hl.prop.star')
+        .setDisplaySize(26, 26)
+        .setDepth(12)
+        .setAlpha(earned ? 1 : 0.28)
+        .setTint(earned ? 0xffffff : 0x4a5a72);
+    }
+  }
+
+  private cornerCoin(x: number, y: number, key: string, onPress: () => void, testId: string): void {
+    addIconButton(this, { x, y, size: 58, key, onPress, testId }).setDepth(30);
+  }
+
+  private bindKeys(nodes: TownMapNode[]): void {
+    bindIntents(this, {
+      onMove: (x, y) => this.moveSelection(x || y, nodes.length),
+      onConfirm: () => this.startMission(nodes[this.selectedIndex]?.missionId ?? 'recycling-run'),
+      onBack: () => startScene(this, SCENE_KEYS.profile),
     });
   }
 
   private moveSelection(delta: number, count: number): void {
-    if (delta === 0) return;
+    if (!delta) return;
     this.selectedIndex = Math.max(0, Math.min(count - 1, this.selectedIndex + delta));
     this.scene.restart();
   }
@@ -149,9 +156,4 @@ export class TownMapScene extends Phaser.Scene {
   private startMission(missionId: MissionId): void {
     startScene(this, sceneKeyForMission(missionId));
   }
-}
-
-function helperForCharacterId(characterId: string): HelperCharacterId {
-  if (characterId === 'brick' || characterId === 'ember' || characterId === 'rivet') return characterId;
-  return 'rivet';
 }
