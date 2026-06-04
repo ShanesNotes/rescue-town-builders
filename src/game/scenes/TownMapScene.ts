@@ -17,7 +17,8 @@ const MISSION_ICON: Record<string, string> = {
   'house-builder': 'hl.ui.build',
   'fire-fix': 'hl.ui.fire',
 };
-const NODE_X = [240, 480, 720];
+// Aligned to the three lamp-lit platforms built into the near-path parallax layer.
+const NODE_X = [252, 480, 708];
 
 export class TownMapScene extends Phaser.Scene {
   private selectedIndex = 0;
@@ -35,7 +36,8 @@ export class TownMapScene extends Phaser.Scene {
     }
 
     const nodes = projectTownMapNodes(missionRegistry.list(), profile);
-    this.paintWorld();
+    const rescued = nodes.filter((n) => n.completed).length;
+    this.paintWorld(rescued, nodes.length);
     this.paintHeader();
 
     nodes.forEach((node, index) => this.buildNode(node, index));
@@ -52,12 +54,16 @@ export class TownMapScene extends Phaser.Scene {
     this.bindKeys(nodes);
   }
 
-  private paintWorld(): void {
-    this.add.image(480, 270, 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
-    this.add.rectangle(480, 270, 960, 540, 0xf2b45a, 0.05).setBlendMode(Phaser.BlendModes.ADD).setDepth(1);
-    // Soft navy bands top + bottom so the header and node row stay readable over the art.
-    this.add.rectangle(480, 32, 960, 92, 0x101b2e, 0.42).setDepth(1);
-    this.add.rectangle(480, 512, 960, 70, 0x101b2e, 0.34).setDepth(1);
+  private paintWorld(rescued: number, total: number): void {
+    // Parallax dusk town built for the hub: sky → far hills → town silhouette → lamp-lit path.
+    this.add.image(480, 270, 'hl.map.sky').setDisplaySize(960, 540).setDepth(0);
+    this.add.image(480, 314, 'hl.map.farHills').setOrigin(0.5, 1).setDepth(1);
+    this.add.image(480, 396, 'hl.map.midTown').setOrigin(0.5, 1).setDepth(2);
+    this.add.image(480, 540, 'hl.map.nearPath').setOrigin(0.5, 1).setDepth(3);
+    // The town grows warmer the more homes the child has rescued (light from darkness).
+    const warmth = total > 0 ? rescued / total : 0;
+    this.add.rectangle(480, 270, 960, 540, 0xffb24a, 0.04 + warmth * 0.06).setBlendMode(Phaser.BlendModes.ADD).setDepth(4);
+    this.add.rectangle(480, 32, 960, 88, 0x101b2e, 0.42).setDepth(5);
   }
 
   private paintHeader(): void {
@@ -74,42 +80,39 @@ export class TownMapScene extends Phaser.Scene {
       .setDepth(30);
   }
 
-  // A mission node: a tappable icon-coin (the what + the button), the hero standing beside their
-  // lantern (the who), a star row (the reward), and the lantern that LIGHTS when the mission is
-  // rescued — the light-from-darkness core loop, made visible right on the hub.
+  // A mission node sitting on a lamp-lit platform: the home is DARK until the child rescues it,
+  // then it's lit and glowing — the light-from-darkness core loop made visible on the hub.
+  // Above it floats the tappable icon-coin (what + button); below, the stars earned.
   private buildNode(node: TownMapNode, index: number): void {
     const x = NODE_X[index] ?? 160 + index * 200;
     const selected = index === this.selectedIndex;
-    const feetY = 432;
+    const houseY = 392;
 
-    // Selected platform glow.
     if (selected) {
-      this.add.ellipse(x, feetY + 6, 200, 56, 0xffd98a, 0.16).setBlendMode(Phaser.BlendModes.ADD).setDepth(3);
+      this.add.ellipse(x, houseY + 4, 188, 50, 0xffd98a, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(4);
     }
 
-    // The hero, planted on the cobbles.
-    this.plantCharacter(`hl.char.${node.characterId}`, x - 44, feetY, 90, index);
-
-    // The hero's lantern — dim until they've rescued this home, then warm and glowing.
-    this.add.ellipse(x + 52, feetY + 2, 44, 12, 0x0a1322, 0.4).setDepth(9);
-    const lantern = this.add.image(x + 52, feetY, 'hl.prop.lantern').setOrigin(0.5, 1).setDisplaySize(58, 78).setDepth(11);
+    // A rescued home glows; a waiting one is dim.
     if (node.completed) {
-      const glow = this.add.circle(x + 52, feetY - 40, 40, 0xffc14a, 0.22).setBlendMode(Phaser.BlendModes.ADD).setDepth(10);
-      if (motionAllowed()) {
-        this.tweens.add({ targets: glow, scale: 1.16, alpha: 0.1, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-      }
-    } else {
-      lantern.setTint(0x3a4a66).setAlpha(0.85); // unlit
+      const glow = this.add.circle(x, houseY - 52, 84, 0xffc14a, 0.2).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
+      if (motionAllowed()) this.tweens.add({ targets: glow, scale: 1.14, alpha: 0.1, duration: 1900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
+    const house = this.add
+      .image(x, houseY, node.completed ? 'hl.map.houseLit' : 'hl.map.houseDark')
+      .setOrigin(0.5, 1)
+      .setDisplaySize(150, 150)
+      .setDepth(6);
+    // A home still waiting to be rescued sleeps under a cool moonlit tint, so lighting it
+    // (full warm colour + bloom) is a visible "you brought it to life" moment.
+    if (!node.completed) house.setTint(0x8a98ba);
+    house.setInteractive({ useHandCursor: true }).on('pointerup', () => this.startMission(node.missionId));
 
-    // Stars earned.
-    this.starRow(x, 476, node.bestStars);
+    this.starRow(x, 412, node.bestStars);
 
-    // The icon-coin — the obvious thing to tap to start this rescue.
     addIconButton(this, {
       x,
-      y: 224,
-      size: 92,
+      y: 206,
+      size: 90,
       key: MISSION_ICON[node.missionId] ?? 'hl.ui.play',
       onPress: () => this.startMission(node.missionId),
       testId: `townmap.mission.${node.missionId}`,
@@ -130,14 +133,6 @@ export class TownMapScene extends Phaser.Scene {
         .setAlpha(earned ? 1 : 0.28)
         .setTint(earned ? 0xffffff : 0x4a5a72);
     }
-  }
-
-  private plantCharacter(key: string, x: number, feetY: number, size: number, index: number): void {
-    this.add.ellipse(x, feetY + 2, size * 0.7, size * 0.18, 0x0a1322, 0.5).setDepth(9);
-    const sprite = this.add.image(x, feetY, key).setOrigin(0.5, 1).setDisplaySize(size, size).setDepth(11);
-    if (!motionAllowed()) return;
-    const baseScaleY = sprite.scaleY;
-    this.tweens.add({ targets: sprite, scaleY: baseScaleY * 1.03, duration: 1200 + index * 130, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: index * 160 });
   }
 
   private cornerCoin(x: number, y: number, key: string, onPress: () => void, testId: string): void {
