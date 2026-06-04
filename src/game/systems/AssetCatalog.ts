@@ -271,7 +271,7 @@ export const assetCatalog = [
   {
     key: 'audio.theme-loop',
     kind: 'audio',
-    status: 'ready',
+    status: 'production',
     description: "Shane's recorded theme, normalised to OGG (assets/audio/Rescue-town-builders.ogg).",
     notes: 'Live: looped behind MusicSystem via createHtmlAudioMusicSink. Source WAV in docs/audio-source/.',
   },
