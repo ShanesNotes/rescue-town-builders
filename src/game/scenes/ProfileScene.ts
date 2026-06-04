@@ -5,7 +5,7 @@ import { bindIntents } from '../systems/bindIntents';
 import { getSaveSystem } from '../systems/GameServices';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
-import { motionAllowed } from '../ui/Sprite';
+import { hasTexture, motionAllowed } from '../ui/Sprite';
 
 type ProfileAction = { type: 'select'; profileId: string } | { type: 'create' } | { type: 'settings' } | { type: 'back' };
 
@@ -70,11 +70,12 @@ export class ProfileScene extends Phaser.Scene {
     selected: boolean,
   ): void {
     const avatar = AVATARS.includes(profile.avatarId) ? profile.avatarId : 'rivet';
+    const faceKey = `hl.ui.face${avatar.charAt(0).toUpperCase()}${avatar.slice(1)}`;
     addIconButton(this, {
       x,
       y,
       size: 110,
-      key: `hl.char.${avatar}`,
+      key: hasTexture(this, faceKey) ? faceKey : `hl.char.${avatar}`,
       caption: profile.name,
       onPress: () => this.choose({ type: 'select', profileId: profile.id }),
       testId: `profile.select.${profile.id}`,

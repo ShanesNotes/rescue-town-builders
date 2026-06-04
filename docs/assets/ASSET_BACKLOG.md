@@ -33,7 +33,7 @@ Purpose: keep game development moving with safe placeholders while tracking prod
 | P0 | Props | House parts | Runtime shape/text placeholders in `HouseBuilderScene` | Foundation, wall, roof, door, decoration set | Placeholder in code; production needed |
 | P0 | Props | Hydrant and cartoon fires | Runtime circles/labels in `FireFixScene`; hydrant deferred | Friendly low-intensity fire visuals plus hydrant art | Placeholder in code; production needed |
 | P0 | UI | Buttons, panels, progress bar | Shape-based UI | Large touch-friendly UI kit | Needed |
-| P1 | UI | Profile icons | Simple symbols | Original child-safe avatar icons | Needed |
+| P1 | UI | Profile icons | Simple symbols | Original child-safe avatar icons | Generated: Hearthlight face-coins |
 | P1 | UI | Gamepad button glyphs | Text labels and Input Intent mapping | Simple controller glyph set for A/B/X/D-pad prompts | Needed after gamepad smoke |
 | P1 | Rewards | Stars and stickers | Basic star/sticker shapes | Sticker-book reward art | Needed |
 | P1 | FX | Sparkle, water spray, smoke puff | Runtime blue aim line in `FireFixScene`; other FX deferred | Soft non-flashing FX sprites | Placeholder in code; production needed |
@@ -276,6 +276,115 @@ No new generated image assets were imported in Phase 6. The Phase 4 FX PNGs are 
 | `hl.fx.lightBurst` | Phase 4 FX sheet | `public/assets/hearthlight/fx/light-burst.png` | `ig_0afb98bbf3be3b8a016a210584711c81909891de11f4ba1045.png` | Loaded as a 64×64 Phaser spritesheet, 4 frames. |
 
 Phase 6 handoff — changed files: `src/game/data/hearthlightAssets.ts`, `src/game/ui/AnimatedSprite.ts`, `src/game/scenes/PreloadScene.ts`, `src/game/systems/E2EBridge.ts`, `tests/AnimatedSprite.test.ts`, `tests/e2e/hearthlight-assets.spec.ts`, `docs/assets/ASSET_BACKLOG.md` · verified: `npm run build` passed; `npm test -- AnimatedSprite` passed; `npx playwright test tests/e2e/hearthlight-assets.spec.ts` passed and wrote `test-results/shots/hearthlight-mission-backdrops.png`, `test-results/shots/hearthlight-mission-props.png`, `test-results/shots/hearthlight-ui-kit.png`, `test-results/shots/hearthlight-fx-sheets.png`, and `test-results/shots/hearthlight-town-map.png`; the E2E spec checks exact spritesheet frame counts from Phaser texture metadata · risks: `AnimatedSprite` is a reusable helper, not yet wired into mission scenes; E2E texture inventory is gated behind `?rtb_e2e=1`.
+
+## Hearthlight polish batch 1 asset ledger — 2026-06-04
+
+These recycling-bin assets are original and IP-safe. Fresh built-in `image_gen` calls were attempted with the prompts below, but both returned `TooManyRequests` before a new image file was produced. To keep the batch moving and preserve visual cohesion, the final imported PNGs are local palette-locked pixel edits derived from the approved Phase 2 Codex-generated `bin-paper.png` family asset.
+
+| Key | Prompt | Imported path | Provenance | Notes |
+| --- | ------ | ------------- | ---------- | ----- |
+| `hl.prop.binPlastic` | Polish batch 1 plastic bin prompt | `public/assets/hearthlight/props/bin-plastic.png` | Derived from `public/assets/hearthlight/props/bin-paper.png`, whose Phase 2 source sheet is `ig_0afb98bbf3be3b8a016a20fde2fd2c8190b7e8bfcf82742607.png`; built-in `image_gen` fresh render attempt returned `TooManyRequests`. | 128x128 transparent RGBA; 10 locked Hearthlight visible colors; plastic bottle/cup front icon. |
+| `hl.prop.binMetal` | Polish batch 1 metal bin prompt | `public/assets/hearthlight/props/bin-metal.png` | Derived from `public/assets/hearthlight/props/bin-paper.png`, whose Phase 2 source sheet is `ig_0afb98bbf3be3b8a016a20fde2fd2c8190b7e8bfcf82742607.png`; built-in `image_gen` fresh render attempt returned `TooManyRequests`. | 128x128 transparent RGBA; 10 locked Hearthlight visible colors; calm soup-can front icon. |
+
+### Polish batch 1 prompts
+
+`hl.prop.binPlastic`
+
+```text
+Use case: stylized-concept
+Asset type: transparent pixel-art game prop, 128x128 final crop target
+Primary request: Create a Hearthlight Town recycling bin for PLASTIC, matching the existing bin-paper/bin-trash/bin-compost family.
+Style contract: original IP-safe chunky pixel art, crisp visible pixels, no anti-aliasing, no smooth gradients, no text, no logos, no brand marks, child-safe cozy golden-hour look. Locked Hearthlight palette only: #1B2A41 deep navy bin body and darkest outline, #3A4D6B cool-shadow side planes, #572D42 warm lower shadow, #A73428 small dark warm accents, #E86F3A tiny warm edge accents, #F4A24C lantern edge light, #FFC857 candle-gold rim, #FFE6A3 warm highlight pixels, #43A29C teal-relief sparingly on the right lip and category accent, #EBDDDA warm-cream front icon.
+Composition: single isolated bin, centered, same silhouette as a rounded rectangular open-top recycling bin with slanted top lip; navy body, candle-gold upper-left rim, teal right-side lip, ember-shadow lower edge. Front icon is a simple warm-cream plastic bottle or yogurt-cup silhouette, not a label. 3/4 front view, same scale and line weight as existing 128x128 Hearthlight bin props.
+Background for removal: perfectly flat solid #00ff00 chroma-key background, one uniform color with no shadows, no gradients, no texture, no floor plane, no lighting variation. Do not use #00ff00 anywhere in the subject. No cast shadow, no contact shadow, no reflection, no watermark.
+```
+
+`hl.prop.binMetal`
+
+```text
+Use case: stylized-concept
+Asset type: transparent pixel-art game prop, 128x128 final crop target
+Primary request: Create a Hearthlight Town recycling bin for METAL, matching the existing bin-paper/bin-trash/bin-compost family and the project art prompt for bin-metal.
+Style contract: original IP-safe chunky pixel art, crisp visible pixels, no anti-aliasing, no smooth gradients, no text, no logos, no brand marks, child-safe cozy golden-hour look. Locked Hearthlight palette only: #1B2A41 deep navy/dark outline, #3A4D6B cool-shadow side planes, #572D42 warm lower shadow, #A73428 deep ember sturdy accents, #E86F3A tiny warm accents, #F4A24C lantern metal-can icon, #FFC857 candle-gold rim, #FFE6A3 warm highlight pixels, #43A29C teal-relief only if needed on the right lip, #EBDDDA warm-cream small highlights.
+Composition: single isolated squarish sturdy metal recycle bin, centered, same rounded rectangular open-top bin family as Hearthlight bin-paper/bin-trash/bin-compost. Deep-slate/cool-shadow body with deep-ember sturdy lower face, candle-gold upper-left rim, teal or cool-shadow right-side lip, ember-shadow lower edge. Front icon is a simple lantern/warm-cream soup-can silhouette, not a label. 3/4 front view, same scale and line weight as existing 128x128 Hearthlight bin props.
+Background for removal: perfectly flat solid #00ff00 chroma-key background, one uniform color with no shadows, no gradients, no texture, no floor plane, no lighting variation. Do not use #00ff00 anywhere in the subject. No cast shadow, no contact shadow, no reflection, no watermark.
+```
+
+Polish batch 1 handoff — changed files: `public/assets/hearthlight/props/bin-plastic.png`, `public/assets/hearthlight/props/bin-metal.png`, `src/game/data/hearthlightAssets.ts`, `tests/e2e/hearthlight-assets.spec.ts`, `docs/assets/ASSET_BACKLOG.md` · verified: `npm run build` passed; both PNGs are 128x128 transparent RGBA with 10 locked-palette visible colors.
+
+## Hearthlight polish batch 2 asset ledger — 2026-06-04
+
+This window-bloom asset is original and IP-safe. A fresh built-in `image_gen` call was attempted with the prompt below, but it returned `TooManyRequests` before a new image file was produced. The final imported PNG is a local pixel-FX asset built from locked Hearthlight warm colors with quantized alpha rings.
+
+| Key | Prompt | Imported path | Provenance | Notes |
+| --- | ------ | ------------- | ---------- | ----- |
+| `hl.prop.windowBloom` | Polish batch 2 window bloom prompt | `public/assets/hearthlight/props/window-bloom.png` | Local pixel-FX render by Codex using locked Hearthlight RGB values and quantized alpha; built-in `image_gen` fresh render attempt returned `TooManyRequests`; no external sources. | 128x128 transparent RGBA; 4 locked warm RGB colors; 13 alpha levels; soft oval candle spill for lit windows and celebration. |
+
+### Polish batch 2 prompt
+
+`hl.prop.windowBloom`
+
+```text
+Use case: stylized-concept
+Asset type: transparent pixel-art game prop/fx sprite, 128x128 final crop target
+Primary request: Create `window-bloom.png`, a soft warm candle-spill glow sprite for lit houses and celebration moments in Hearthlight Town.
+Style contract: original IP-safe pixel art, lullaby-warm, cozy golden-hour dusk, child-safe, no scary flame shape, no text, no logos, no character or brand likeness. Crisp chunky pixels, handcrafted dithered glow, no photographic blur, no smooth gradient, no watermark. Locked Hearthlight palette only: #FFC857 candle-gold main glow, #FFE6A3 warm-highlight core, #F4A24C lantern spill, #E86F3A tiny ember edge pixels, #572D42 very sparse warm shadow only if needed, transparent background.
+Composition: centered window-shaped candle glow bloom, brighter small rectangular warm core near upper middle, soft oval spill that falls gently downward like warm light from a cozy house window, feathered by pixel-dither rings and alpha, generous transparent padding. It should read as a warm glow overlay sprite, not a fire, not an explosion, not a torch.
+Background: true transparent-looking isolated sprite if supported; otherwise use a perfectly flat solid #00ff00 chroma-key background with no shadows, gradients, texture, floor plane, reflections, or lighting variation. Do not use #00ff00 in the subject.
+```
+
+Polish batch 2 handoff — changed files: `public/assets/hearthlight/props/window-bloom.png`, `src/game/data/hearthlightAssets.ts`, `tests/e2e/hearthlight-assets.spec.ts`, `docs/assets/ASSET_BACKLOG.md` · verified: `npm run build` passed; `window-bloom.png` is 128x128 transparent RGBA with 4 locked warm RGB colors and 13 alpha levels.
+
+## Hearthlight polish batch 3 asset ledger — 2026-06-04
+
+These mission prop polish assets are original and IP-safe. The raw batch 3 image-gen sheet remains in `/home/ark/.codex/generated_images/019e91eb-7d49-7422-9bfc-19cb9cea46c2/`; imported files were derived or edited locally to preserve the locked Hearthlight palette, calm child-safe read, and existing prop scale. `hl.prop.hose` and `hl.prop.embers` were visually inspected and retained because they already read rounded/calm rather than clinical or alarming.
+
+| Key | Prompt | Imported path | Provenance | Notes |
+| --- | ------ | ------------- | ---------- | ----- |
+| `hl.prop.houseGhost` | Polish batch 3 house ghost prompt | `public/assets/hearthlight/props/house-ghost.png` | Local low-alpha derivation from `public/assets/hearthlight/props/house-preview.png` (`ig_0afb98bbf3be3b8a016a20fe63ad948190ada0b23a697dbd7d.png`); batch 3 image-gen reference sheet `ig_0a6f24bb762ce80d016a2144f3ff34819a8aa53aa782d67435.png`. | 128x128 transparent RGBA; faint placement silhouette with 5 locked RGB colors and low alpha levels. |
+| `hl.prop.campfire` | Polish batch 3 calm picnic flame prompt | `public/assets/hearthlight/props/campfire.png` | Local calm-down edit from the existing Phase 2 fire prop (`ig_0afb98bbf3be3b8a016a20fe94c51c819088920e03be1f5918.png`); batch 3 image-gen reference sheet `ig_0a6f24bb762ce80d016a2144f3ff34819a8aa53aa782d67435.png`. | Tall flame and sparks removed; low rounded flame kept inside the stone ring; 128x128 transparent RGBA, locked palette. |
+| `hl.prop.waterSplash` | Polish batch 3 gentle water spray prompt | `public/assets/hearthlight/props/water-splash.png` | Local redraw informed by existing Phase 2 fire prop (`ig_0afb98bbf3be3b8a016a20fe94c51c819088920e03be1f5918.png`) and batch 3 image-gen reference sheet `ig_0a6f24bb762ce80d016a2144f3ff34819a8aa53aa782d67435.png`. | Replaced wave silhouette with small hose-spray arcs and droplets; 128x128 transparent RGBA, locked palette. |
+
+### Polish batch 3 prompt
+
+`Batch 3 polish sheet`
+
+```text
+Use case: stylized-concept
+Asset type: transparent pixel-art game prop polish sheet, 128x128 final crop targets
+Primary request: Create a 2x2 Hearthlight Town sprite sheet with four child-safe mission-prop polish assets: house-ghost placement silhouette, calm picnic campfire, friendly coiled hose, gentle hose water spray.
+Style contract: original IP-safe chunky pixel art, crisp visible pixels, no anti-aliasing, no smooth gradients, no text, no logos, no character or brand likeness. Locked Hearthlight palette only: #1B2A41 #3A4D6B #572D42 #A73428 #E86F3A #F4A24C #FFC857 #FFE6A3 #43A29C #EBDDDA. Cozy golden-hour upper-left light, lullaby-warm, never alarming, never clinical, never CAD-like.
+Cells left-to-right top-to-bottom: 1) low-contrast cozy house silhouette ghost for House Builder placement, derived from an assembled cottage shape, mostly cool-shadow/deep-slate with low alpha and candle-gold hint, no hard blueprint lines; 2) CALM picnic flame in stone ring, very low flame, rounded ember shapes, small warm core, no tall sharp flame, no danger sign; 3) gentle rounded teal coiled hose with brass nozzle, friendly toy-like proportions, no sharp industrial look; 4) gentle water/hose spray, small droplets and soft arc, not a wave, not explosive, not a blast.
+Background for removal: perfectly flat solid #00ff00 chroma-key background with no shadows, no gradients, no texture, no floor plane, no reflections, no lighting variation. Do not use #00ff00 in the subject. Generous padding in every cell.
+```
+
+Polish batch 3 handoff — changed files: `public/assets/hearthlight/props/house-ghost.png`, `public/assets/hearthlight/props/campfire.png`, `public/assets/hearthlight/props/water-splash.png`, `src/game/data/hearthlightAssets.ts`, `tests/e2e/hearthlight-assets.spec.ts`, `docs/assets/ASSET_BACKLOG.md` · verified: `npm run build` passed; `house-ghost.png`, `campfire.png`, and `water-splash.png` are 128x128 transparent RGBA with locked-palette RGB values.
+
+## Hearthlight polish batch 4 asset ledger — 2026-06-04
+
+These profile face-coin assets are original and IP-safe. A fresh image-gen reference sheet was produced and remains in `/home/ark/.codex/generated_images/019e91eb-7d49-7422-9bfc-19cb9cea46c2/`; final imported PNGs were composed locally from the approved Hearthlight character PNGs and the approved Hearthlight UI coin frame so the profile icons preserve exact helper identity and the locked palette.
+
+| Key | Prompt | Imported path | Provenance | Notes |
+| --- | ------ | ------------- | ---------- | ----- |
+| `hl.ui.faceRivet` | Polish batch 4 face-coin sheet prompt | `public/assets/hearthlight/ui/face-rivet.png` | Local composition from `public/assets/hearthlight/characters/rivet.png` and `public/assets/hearthlight/ui/play.png`; image-gen reference sheet `ig_0a6f24bb762ce80d016a2146bd1134819aa0a46e12107fa36a.png`. | 128x128 transparent RGBA; round portrait coin, candle-gold rim on deep slate, locked palette. |
+| `hl.ui.faceBrick` | Polish batch 4 face-coin sheet prompt | `public/assets/hearthlight/ui/face-brick.png` | Local composition from `public/assets/hearthlight/characters/brick.png` and `public/assets/hearthlight/ui/play.png`; image-gen reference sheet `ig_0a6f24bb762ce80d016a2146bd1134819aa0a46e12107fa36a.png`. | 128x128 transparent RGBA; round portrait coin, candle-gold rim on deep slate, locked palette. |
+| `hl.ui.faceEmber` | Polish batch 4 face-coin sheet prompt | `public/assets/hearthlight/ui/face-ember.png` | Local composition from `public/assets/hearthlight/characters/ember.png` and `public/assets/hearthlight/ui/play.png`; image-gen reference sheet `ig_0a6f24bb762ce80d016a2146bd1134819aa0a46e12107fa36a.png`. | 128x128 transparent RGBA; round portrait coin, candle-gold rim on deep slate, locked palette. |
+| `hl.ui.faceCluckle` | Polish batch 4 face-coin sheet prompt | `public/assets/hearthlight/ui/face-cluckle.png` | Local composition from `public/assets/hearthlight/characters/cluckle.png` and `public/assets/hearthlight/ui/play.png`; image-gen reference sheet `ig_0a6f24bb762ce80d016a2146bd1134819aa0a46e12107fa36a.png`. | 128x128 transparent RGBA; round portrait coin, candle-gold rim on deep slate, locked palette. |
+
+### Polish batch 4 prompt
+
+`Batch 4 face-coin sheet`
+
+```text
+Use case: stylized-concept
+Asset type: transparent pixel-art UI icon-coin sheet, four 128x128 profile-select face coins
+Primary request: Create a 2x2 Hearthlight Town profile face-coin sheet: Rivet raccoon, Brick badger with tiny hardhat, Ember fox firefighter, Cluckle sleepy round hen. Round portrait crops only, faces large and centered, candle-gold rim on deep-slate center.
+Style contract: original IP-safe chunky pixel art, crisp visible pixels, no anti-aliasing, no smooth gradients, no text, no labels, no logos, no third-party likenesses. Locked Hearthlight palette only: #1B2A41 #3A4D6B #572D42 #A73428 #E86F3A #F4A24C #FFC857 #FFE6A3 #43A29C #EBDDDA. Match existing Hearthlight UI coin family: deep-slate round center, thick candle-gold rim, warm-highlight upper-left glints, deep-ember lower-right rim shadow. Friendly child-safe expressions, cozy upper-left light.
+Cells left-to-right top-to-bottom: Rivet face coin, Brick face coin, Ember face coin, Cluckle face coin. Keep each portrait inside the circular rim with generous transparent padding around each coin.
+Background for removal: perfectly flat solid #00ff00 chroma-key background with no shadows, no gradients, no texture, no floor plane, no reflections, no lighting variation. Do not use #00ff00 in the subject.
+```
+
+Polish batch 4 handoff — changed files: `public/assets/hearthlight/ui/face-rivet.png`, `public/assets/hearthlight/ui/face-brick.png`, `public/assets/hearthlight/ui/face-ember.png`, `public/assets/hearthlight/ui/face-cluckle.png`, `src/game/data/hearthlightAssets.ts`, `tests/e2e/hearthlight-assets.spec.ts`, `docs/assets/ASSET_BACKLOG.md` · verified: `npm run build` passed; all four face-coin PNGs are 128x128 transparent RGBA with locked-palette RGB values.
 
 | Asset | Source URL | Source/author | License | Attribution required | Date checked | Imported path | Notes |
 | ----- | ---------- | ------------- | ------- | -------------------- | ------------ | ------------- | ----- |

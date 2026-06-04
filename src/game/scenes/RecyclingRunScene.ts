@@ -34,11 +34,13 @@ const BIN_TINT: Record<RecyclingCategory, number> = {
   metal: 0xffc857,
   compost: 0x8fce6a,
 };
-// Codex's Hearthlight bins exist for these categories; plastic/metal fall back until rendered.
+// Codex's Hearthlight bins, one per category (complete set).
 const BIN_HL: Partial<Record<RecyclingCategory, string>> = {
   trash: 'hl.prop.binTrash',
   paper: 'hl.prop.binPaper',
   compost: 'hl.prop.binCompost',
+  plastic: 'hl.prop.binPlastic',
+  metal: 'hl.prop.binMetal',
 };
 const HOME = { x: 480, y: 214 };
 
