@@ -1,74 +1,98 @@
 import { describe, expect, it } from 'vitest';
-import { recyclingItems } from '../src/game/data/recyclingItems';
+import { recyclingItems, reuseBlueprints } from '../src/game/data/recyclingItems';
 import {
   chooseRecyclingItems,
+  chooseReuseBlueprints,
   createRecyclingRunState,
   getActiveRecyclingCategories,
+  getActiveReusePartKinds,
   getRecyclingAccuracy,
   getRecyclingRunResult,
   sortCurrentRecyclingItem,
+  tryReusePart,
   type RecyclingCategory,
 } from '../src/game/systems/RecyclingRun';
 
-describe('RecyclingRun', () => {
-  it('defines item data for trash, paper, plastic, metal, and compost', () => {
+describe('RecyclingRun reuse workshop', () => {
+  it('defines rescued item data for every material and reuse part kind', () => {
     expect(new Set(recyclingItems.map((item) => item.category))).toEqual(
       new Set(['trash', 'paper', 'plastic', 'metal', 'compost']),
+    );
+    expect(new Set(recyclingItems.map((item) => item.partKind))).toEqual(
+      new Set(['soft', 'sheet', 'tube', 'shiny', 'grow']),
     );
     expect(recyclingItems.length).toBeGreaterThanOrEqual(10);
   });
 
-  it('selects bins by child-friendly difficulty', () => {
-    expect(getActiveRecyclingCategories('helper')).toEqual(['trash', 'paper']);
-    expect(getActiveRecyclingCategories('easy')).toEqual(['trash', 'paper', 'plastic']);
-    expect(getActiveRecyclingCategories('normal')).toEqual(['trash', 'paper', 'plastic', 'metal', 'compost']);
+  it('selects invention part kinds by child-friendly difficulty', () => {
+    expect(getActiveReusePartKinds('helper')).toEqual(['sheet', 'tube']);
+    expect(getActiveReusePartKinds('easy')).toEqual(['sheet', 'tube', 'shiny']);
+    expect(getActiveReusePartKinds('normal')).toEqual(['soft', 'sheet', 'tube', 'shiny', 'grow']);
+    expect(getActiveRecyclingCategories('helper')).toEqual(['paper', 'plastic']);
   });
 
-  it('retries the same item with a hint after an incorrect bin', () => {
-    const state = createRecyclingRunState('normal', [
-      { id: 'banana-peel', label: 'Banana peel', icon: '🍌', category: 'compost' },
-    ]);
-
-    const outcome = sortCurrentRecyclingItem(state, 'trash');
-
-    expect(outcome.correct).toBe(false);
-    expect(outcome.hint).toMatch(/compost/i);
-    expect(outcome.state.currentItem?.id).toBe('banana-peel');
-    expect(outcome.state.completed).toBe(false);
+  it('chooses blueprints that only require active part kinds', () => {
+    const helperBlueprints = chooseReuseBlueprints(reuseBlueprints, getActiveReusePartKinds('helper'), 2);
+    expect(helperBlueprints).toHaveLength(2);
+    expect(helperBlueprints.every((blueprint) => blueprint.slots.every((slot) => ['sheet', 'tube'].includes(slot.kind)))).toBe(true);
   });
 
-  it('completes ten sorted items with accuracy-based stars', () => {
-    let state = createRecyclingRunState('normal', recyclingItems.slice(0, 10));
+  it('turns a matching rescued item into a placed invention part', () => {
+    const blueprints = [reuseBlueprints.find((blueprint) => blueprint.id === 'bubble-sprinkler')!];
+    let state = createRecyclingRunState('helper', chooseRecyclingItems(recyclingItems, ['paper', 'plastic'], 6), blueprints);
+    const matchingChoice = state.choices.find((choice) => choice.isMatch)!;
 
-    for (const item of state.items) {
-      state = sortCurrentRecyclingItem(state, item.category).state;
+    const outcome = tryReusePart(state, matchingChoice.id);
+    state = outcome.state;
+
+    expect(outcome.correct).toBe(true);
+    expect(outcome.placedPart?.item.id).toBe(matchingChoice.id);
+    expect(state.placedParts).toHaveLength(1);
+    expect(state.currentSlotIndex).toBe(1);
+  });
+
+  it('makes wrong pieces become decorations, then helper-snaps the needed part (No-Fail Rule)', () => {
+    const blueprints = [reuseBlueprints.find((blueprint) => blueprint.id === 'bubble-sprinkler')!];
+    let state = createRecyclingRunState('helper', chooseRecyclingItems(recyclingItems, ['paper', 'plastic'], 6), blueprints);
+    const wrongChoice = state.choices.find((choice) => !choice.isMatch)!;
+
+    const firstMiss = tryReusePart(state, wrongChoice.id);
+    expect(firstMiss.decorated).toBe(true);
+    expect(firstMiss.assisted).toBe(false);
+    expect(firstMiss.state.currentSlotIndex).toBe(0);
+    state = firstMiss.state;
+
+    const secondMiss = tryReusePart(state, wrongChoice.id);
+    expect(secondMiss.decorated).toBe(true);
+    expect(secondMiss.assisted).toBe(true);
+    expect(secondMiss.placedPart?.assisted).toBe(true);
+    expect(secondMiss.state.currentSlotIndex).toBe(1);
+  });
+
+  it('completes inventions with accuracy-based stars and workshop stats', () => {
+    const blueprints = chooseReuseBlueprints(reuseBlueprints, getActiveReusePartKinds('helper'), 2);
+    let state = createRecyclingRunState('helper', chooseRecyclingItems(recyclingItems, ['paper', 'plastic'], 6), blueprints);
+
+    while (!state.completed) {
+      const matchingChoice = state.choices.find((choice) => choice.isMatch)!;
+      state = tryReusePart(state, matchingChoice.id).state;
     }
 
     const result = getRecyclingRunResult(state);
     expect(result.completed).toBe(true);
     expect(result.missionId).toBe('recycling-run');
     expect(result.stars).toBe(3);
-    expect(result.stats.sorted).toBe(10);
+    expect(result.stats.inventionsBuilt).toBe(2);
+    expect(result.stats.partsPlaced).toBeGreaterThanOrEqual(4);
   });
 
-  it('never blocks the mission no matter how many wrong bins a child tries (No-Fail Rule)', () => {
-    let state = createRecyclingRunState('normal', recyclingItems.slice(0, 10));
-    const wrongBinFor = (category: RecyclingCategory): RecyclingCategory =>
-      category === 'trash' ? 'paper' : 'trash';
+  it('keeps the legacy bin-category adapter working for e2e and old callers', () => {
+    const blueprints = [reuseBlueprints.find((blueprint) => blueprint.id === 'bubble-sprinkler')!];
+    const state = createRecyclingRunState('helper', chooseRecyclingItems(recyclingItems, ['paper', 'plastic'], 6), blueprints);
+    const matchingChoice = state.choices.find((choice) => choice.isMatch)!;
 
-    for (const item of state.items) {
-      for (let tries = 0; tries < 3; tries += 1) {
-        const miss = sortCurrentRecyclingItem(state, wrongBinFor(item.category));
-        expect(miss.completed).toBe(false);
-        expect(miss.hint).not.toBeNull();
-        state = miss.state;
-      }
-      state = sortCurrentRecyclingItem(state, item.category).state;
-    }
-
-    const result = getRecyclingRunResult(state);
-    expect(result.completed).toBe(true);
-    expect(result.stars).toBeGreaterThanOrEqual(1);
+    const outcome = sortCurrentRecyclingItem(state, matchingChoice.category);
+    expect(outcome.correct).toBe(true);
   });
 
   it('chooses items only from the active categories and cycles to fill the count', () => {
@@ -82,7 +106,26 @@ describe('RecyclingRun', () => {
   });
 
   it('treats a clean run with zero attempts as full accuracy', () => {
-    const state = createRecyclingRunState('helper', recyclingItems.slice(0, 2));
+    const state = createRecyclingRunState('helper', chooseRecyclingItems(recyclingItems, ['paper', 'plastic'], 6), [reuseBlueprints[0]]);
     expect(getRecyclingAccuracy(state)).toBe(1);
+  });
+
+  it('can complete even if a child repeatedly picks the wrong material category', () => {
+    const blueprints = chooseReuseBlueprints(reuseBlueprints, getActiveReusePartKinds('normal'), 2);
+    let state = createRecyclingRunState('normal', recyclingItems, blueprints);
+    const wrongCategoryFor = (category: RecyclingCategory): RecyclingCategory => (category === 'paper' ? 'plastic' : 'paper');
+
+    while (!state.completed) {
+      const needed = state.choices.find((choice) => choice.isMatch)!;
+      const miss = sortCurrentRecyclingItem(state, wrongCategoryFor(needed.category));
+      state = miss.state;
+      if (!state.completed && state.currentSlot?.kind === needed.partKind) {
+        state = sortCurrentRecyclingItem(state, needed.category).state;
+      }
+    }
+
+    const result = getRecyclingRunResult(state);
+    expect(result.completed).toBe(true);
+    expect(result.stars).toBeGreaterThanOrEqual(1);
   });
 });

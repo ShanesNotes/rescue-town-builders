@@ -6,7 +6,7 @@ Use this before claiming mobile polish.
 - [ ] Confirm the Phaser canvas scales to fit without scrolling.
 - [ ] Confirm touch buttons are large enough for child use.
 - [ ] Create/select a profile.
-- [ ] Complete Recycling Run with touch bins.
+- [ ] Complete Reuse Workshop with touch item cards.
 - [ ] Complete House Builder with touch part tray.
 - [ ] Complete Fire Fix with touch movement and Spray button.
 - [ ] Open Parent Settings through the 3-second hold gate.

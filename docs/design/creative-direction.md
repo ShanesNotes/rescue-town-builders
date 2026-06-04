@@ -74,7 +74,7 @@ Cluckle is the round, feathery hen who is the secret heart of Rescue Town. With 
 
 These are the invisible “I love this game” moments. They cost almost nothing in code but live in memory for years.
 
-1. Correct bin in Recycling Run: the item bounces once with extra spring, the bin does a tiny hop (scale 1.0 → 1.08 → 1.0 in 180 ms), and one single paper spark flies straight up like a thank-you note.
+1. Reuse Workshop snap: the rescued scrap bounces into a blueprint slot with extra spring, the slot glows (scale 1.0 → 1.08 → 1.0 in 180 ms), and one tiny invention spark flies straight up like the idea just woke up.
 
 2. House Builder roof snap: the finished house’s chimney releases one perfect, slow smoke ring (a soft circle that expands and fades). For a split second the ring catches the Star Honey light and looks like a little halo, then dissolves into three even smaller sparkles.
 

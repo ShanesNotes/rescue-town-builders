@@ -34,17 +34,19 @@ For each mission, record:
 
 ## Mission checklist
 
-### Rivet's Recycling Run
+### Rivet's Reuse Workshop
 
-- Can the child tell where an item should go?
-- Are the bins easy to select?
-- Are hints friendly after a wrong bin?
+- Can the child tell that old scraps are for building inventions, not just sorting?
+- Are the three rescued-item cards easy to choose with touch/keyboard/gamepad?
+- Does a wrong piece becoming decoration feel funny and safe?
+- Does the invention payoff make the child smile, narrate, or ask to replay?
 
 ### Brick's House Builder
 
-- Does the child understand the build order?
+- Does the child understand the current neighbor wish and next glowing piece?
 - Are house pieces easy to compare?
-- Does placing a wrong piece still feel safe?
+- Does a wrong piece becoming yard decoration/scaffold feel funny and safe?
+- After repeated misses, does Brick's helper snap-in feel supportive rather than like a correction?
 
 ### Ember's Fire Fix
 
