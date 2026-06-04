@@ -102,6 +102,18 @@ test('captures every screen and stays error-free across a full playthrough', asy
   await tap(page, 'mission.complete.back-to-map');
   await scene(page, 'TownMapScene');
 
+  // An Aim mission (Goo Cleanup) — verify the AimMissionScene + No-Fail drone floor.
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await tap(page, 'townmap.mission.goo-cleanup');
+  await scene(page, 'AimMissionScene');
+  await shot(page, '11-goo-cleanup');
+  await clearMission(page, 'AimMissionScene', ['goo-cleanup.act'], 40);
+  await tap(page, 'mission.complete.back-to-map');
+  await scene(page, 'TownMapScene');
+
   await tap(page, 'townmap.sticker-book');
   await scene(page, 'StickerBookScene');
   await shot(page, '08-stickers');

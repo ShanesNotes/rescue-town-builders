@@ -104,4 +104,28 @@ export const STICKER_DEFINITIONS: StickerDefinition[] = [
     icon: 'hl.prop.breadLoaf',
     source: { kind: 'mission', id: 'bread-rush' },
   },
+  {
+    id: 'goo-cleanup-starter',
+    title: 'Grumble Clears the Goo',
+    childPoem: 'The square was sticky, glooped and slow\nGrumble grumbled, then got to work\nSwish and shine, the goo all gone\nand under it — a happy town awoke',
+    parentNote: 'Even a grump helps when it matters. The quiet satisfaction of making a messy place clean and kind again.',
+    icon: 'hl.prop.cleanPatch',
+    source: { kind: 'mission', id: 'goo-cleanup' },
+  },
+  {
+    id: 'frog-flight-starter',
+    title: 'Wings Catches a Friend',
+    childPoem: 'Up where the lanterns turn to stars\nWings glides through ring on ring\nA little frog was lost up high\nand you brought him home — soft landing',
+    parentNote: 'Bravery that is gentle: flying high not to win, but to bring a small lost friend safely down.',
+    icon: 'hl.prop.frogFriend',
+    source: { kind: 'mission', id: 'frog-flight' },
+  },
+  {
+    id: 'asteroid-blaster-starter',
+    title: 'Nova Softens the Sky',
+    childPoem: 'The rocks came drifting, dark and near\nNova aimed her foam of light\npoof, poof, poof — soft and sure\nand the sky was calm tonight',
+    parentNote: 'Meeting something scary with softness, not force — turning a worry into a gentle, winnable game.',
+    icon: 'hl.prop.foamStar',
+    source: { kind: 'mission', id: 'asteroid-blaster' },
+  },
 ];
