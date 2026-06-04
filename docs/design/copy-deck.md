@@ -110,43 +110,43 @@ A tiny permanent thank-you detail appears on the building (flower box, flag, bla
 
 ---
 
-## 4. Recycling Run Scene (RecyclingRunScene) — Rivet's Mission
+## 4. Reuse Workshop Scene (RecyclingRunScene) — Rivet's Mission
 
 **Scene title (icon + 2 words)**  
-- `♻️ Rivet` or `Rivet Sorts`  
-  (Retire "Rivet's Recycling Run" — the art and the raccoon say who it is.)
+- `♻️ Rivet` or `Rivet Builds`  
+  (Retire bin-first language — the art and the raccoon say this is a reuse workshop.)
 
 **Progress / goal (pure visual — no numbers for pre-reader if possible)**  
-- 10 item slots as a picture strip or pips row at top. Each sorted item stamps a small ✓ or glows warm.  
-- Current: `Sort 10 town items. Progress: ${sorted}/10 • Attempts: ${attempts}` → **retire the prose**.  
-- Visual only: a row of 10 faint bin silhouettes; filled ones brighten with the item's icon inside or a warm stamp. Fat numeral optional in HUD corner if parent wants count: `3/10` (bitmap, small).
+- Blueprint pips at the bottom. Each finished invention stamps a small ✓ or glows warm.  
+- Current: blueprint title + one warm prompt. Keep prose short and support it with slot glow.  
+- Visual only: blueprint slots with silhouettes; filled ones brighten with the rescued item inside. Fat numeral optional in HUD corner if parent wants count: `1/2` (bitmap, small).
 
-**Central item (the thing to sort)**  
-- Large art sprite of the item (banana, bottle, etc.) — this *is* the label.  
-- Current text label below: retire or 1-word max if the sprite is ambiguous: e.g. `peel` under banana art (rarely needed).  
-- The art + Rivet avatar watching = the full story.
+**Blueprint bench (the thing to build)**  
+- Large blueprint card with 2–3 glowing slots — this *is* the goal.  
+- Current slot prompt should stay one sentence max: `Choose a tube for water.`  
+- The slot glow + Rivet avatar inventing = the full story.
 
-**Bin choices (5 glowing icon-coins or chunky bin sprites + tiny label)**  
-Use the 5 distinct bin props (compost leaf, metal can, paper slot, plastic bottle, domed trash).  
-Tiny label under each (1 word, bitmap):  
-- `Compost` (or leaf icon only)  
+**Rescued item choices (3 chunky item cards + tiny label)**  
+Use the scrap-item props as cards. The cards should read as possibilities, not quiz answers.  
+Tiny label under each (1–2 words, bitmap):  
+- `Bottle`  
 - `Paper`  
-- `Plastic`  
-- `Metal`  
-- `Trash` (or `Other`)
+- `Can`  
+- `Crayon`  
+- `Peel`
 
-Current emoji + full word in buttons → the real bin art replaces the emoji; word is 1-word fallback.
+Current runtime cards use existing scrap art; future silhouettes should make tube/sheet/shiny/soft/grow readable pre-text.
 
 **Hint / nudge area (when wrong — always warm, never "wrong")**  
-Current style: `Hint: ${item.label} goes in ${item.category}. Try that bin.`  
+Current style: `${selected.label} became silly trim. This spot wants ${slot.label}.`  
 Proposed tiny lines (cycle or pick one; appear under the item, fade on next try):
 
 - `Almost! That one likes friends like it.`  
 - `Rivet smiles — you're close.`  
-- `Try the [leaf / bottle / can] bin again.` (use the bin's icon in text too if needed)  
+- `Try the glowing slot again.` (use the slot icon in text too if needed)  
 - `Every try helps the town breathe easier.`
 
-When correct (no text, just the bounce + single paper sparkle + bin hop):
+When a part snaps in (no text, just the bounce + single idea sparkle + slot glow):
 
 - Optional tiny whisper that vanishes: `Home.` or `Thank you.`
 

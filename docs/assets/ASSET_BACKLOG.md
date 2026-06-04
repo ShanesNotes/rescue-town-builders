@@ -29,7 +29,7 @@ Purpose: keep game development moving with safe placeholders while tracking prod
 | P1 | Character | Generic townspeople | Simple geometric people | Small set of original town residents | Needed |
 | P0 | Tiles | Grass, road, sidewalk | Approved CC0 top-down/flat tile pack | Cohesive rounded sticker-book town tiles | Needed |
 | P0 | Tiles | House lot, park, picnic area | Approved CC0 tile pack or simple shapes | Cohesive mission-specific environments | Needed |
-| P0 | Props | Recycling bins and trash items | Runtime emoji/text buttons in `RecyclingRunScene` | Clear icon-first bin and object set | Placeholder in code; production needed |
+| P0 | Props | Reuse Workshop invention pieces and blueprint slots | Existing Hearthlight scrap-item art plus runtime slot shapes in `RecyclingRunScene` | Clear icon-first rescued-part set: tube, sheet, shiny, soft, grow, plus snap-slot silhouettes | Pivoted from bin sorting to invention play; production silhouettes needed |
 | P0 | Props | House parts | Runtime shape/text placeholders in `HouseBuilderScene` | Foundation, wall, roof, door, decoration set | Placeholder in code; production needed |
 | P0 | Props | Hydrant and cartoon fires | Runtime circles/labels in `FireFixScene`; hydrant deferred | Friendly low-intensity fire visuals plus hydrant art | Placeholder in code; production needed |
 | P0 | UI | Buttons, panels, progress bar | Shape-based UI | Large touch-friendly UI kit | Needed |
@@ -37,6 +37,7 @@ Purpose: keep game development moving with safe placeholders while tracking prod
 | P1 | UI | Gamepad button glyphs | Text labels and Input Intent mapping | Simple controller glyph set for A/B/X/D-pad prompts | Needed after gamepad smoke |
 | P1 | Rewards | Stars and stickers | Basic star/sticker shapes | Sticker-book reward art | Needed |
 | P1 | FX | Sparkle, water spray, smoke puff | Runtime blue aim line in `FireFixScene`; other FX deferred | Soft non-flashing FX sprites | Placeholder in code; production needed |
+| P1 | FX | Reuse Workshop invention payoffs | Runtime sparkle bursts and text test messages in `RecyclingRunScene` | Animated bubble sprinkler, moon chime, garden rocket, and crinkle kite payoff sprites/FX | Needed after tracer bullet proves fun |
 | P1 | Audio | Button pop, chime, boop, star, fanfare | Muted placeholder or approved royalty-free SFX | Cohesive short non-annoying SFX pack | Needed |
 | P2 | Audio | Theme music loop | Audio settings show backlog status; no imported music | Human-generated loop exists in 4 segments; splice later, then record source/license notes before import | Backlog; keep outside repo |
 | P2 | Fonts | Child-friendly readable font | System font | Licensed/open font with strong readability | Needed |

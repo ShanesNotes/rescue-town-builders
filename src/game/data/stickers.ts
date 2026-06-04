@@ -26,9 +26,9 @@ export type StickerDefinition = {
 export const STICKER_DEFINITIONS: StickerDefinition[] = [
   {
     id: 'recycling-run-starter',
-    title: 'Rivet Finds Homes',
-    childPoem: 'Little things wandered far from their friends\nRivet listens where they belong\nPaper with paper, green with the earth\nThe town tucks them in with a song',
-    parentNote: 'A quiet celebration of noticing what is out of place and giving it a gentle place to rest. The kind of helping that makes the world feel cared-for.',
+    title: 'Rivet Makes Wonders',
+    childPoem: 'Little scraps whisper what they might be\nRivet listens, then starts to build\nA bottle rains bubbles, a can sings moonlight\nOld things wake up wonderfully willed',
+    parentNote: 'A quiet celebration of reuse as imagination: noticing hidden possibility in old things and making something helpful, funny, and new.',
     icon: 'hl.ui.recycle',
     source: { kind: 'mission', id: 'recycling-run' },
   },

@@ -25,13 +25,14 @@ async function press(page: Page, testId: string, sceneAfter?: string): Promise<v
 }
 
 async function completeRecycling(page: Page): Promise<void> {
-  // The item order is data-driven, so press the helper bins in alternation until the
-  // mission completes. A wrong bin only gives a hint (No-Fail), so this always finishes.
-  const bins = ['recycling.bin.trash', 'recycling.bin.paper'];
+  // The active blueprint slot is data-driven, so rotate through the three rescued
+  // item cards until the workshop completes. Wrong pieces become decoration and
+  // Helper Mode snaps in the needed part after repeated misses (No-Fail).
+  const choices = ['recycling.choice.0', 'recycling.choice.1', 'recycling.choice.2'];
   for (let i = 0; i < 40; i += 1) {
     const scene = await page.evaluate(() => window.__RTB_E2E__?.currentSceneKey);
     if (scene !== 'RecyclingRunScene') break;
-    await page.evaluate((id) => window.__RTB_E2E__?.pressButton(id), bins[i % 2]);
+    await page.evaluate((id) => window.__RTB_E2E__?.pressButton(id), choices[i % choices.length]);
   }
   await waitForScene(page, 'MissionCompleteScene');
   await press(page, 'mission.complete.back-to-map', 'TownMapScene');

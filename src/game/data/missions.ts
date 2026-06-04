@@ -3,14 +3,14 @@ import type { MissionDefinition } from '../types';
 export const missionDefinitions: MissionDefinition[] = [
   {
     id: 'recycling-run',
-    title: "Rivet's Recycling Run",
+    title: "Rivet's Reuse Workshop",
     characterId: 'rivet',
     mapNodeId: 'recycling-center',
     introPanels: [
       {
         icon: '♻️',
-        title: 'Sort the town treasures',
-        text: 'Help Rivet send each item to the right bin.',
+        title: 'Build with town treasures',
+        text: 'Help Rivet turn rescued scraps into clever inventions.',
       },
     ],
     minAge: 4,
