@@ -85,7 +85,8 @@ export class StickerBookScene extends Phaser.Scene {
     } else {
       frame = this.add.rectangle(x, y, 124, 124, unlocked ? 0x1b2a41 : 0x101a2e, 0.9).setStrokeStyle(4, 0xffc857).setDepth(6);
     }
-    this.add.text(x, y - 6, unlocked ? icon : '?', { fontSize: unlocked ? '48px' : '44px', color: unlocked ? '#ffffff' : '#7e8cab' }).setOrigin(0.5).setDepth(7);
+    if (unlocked) this.add.image(x, y - 6, icon).setDisplaySize(62, 62).setDepth(7);
+    else this.add.text(x, y - 6, '?', { fontSize: '44px', color: '#7e8cab' }).setOrigin(0.5).setDepth(7);
     this.add
       .text(x, y + 56, unlocked ? title : 'waiting', { fontFamily: FONTS.display, fontSize: '15px', color: unlocked ? '#FFE2A6' : '#7e8cab', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 3, align: 'center', wordWrap: { width: 200 } })
       .setOrigin(0.5)
@@ -103,7 +104,7 @@ export class StickerBookScene extends Phaser.Scene {
 
     this.add.rectangle(480, 300, 700, 420, 0x16243a, 0.86).setStrokeStyle(4, 0xffc857, 0.85).setDepth(2);
     if (hasTexture(this, 'hl.ui.stickerFrame')) this.add.image(480, 150, 'hl.ui.stickerFrame').setDisplaySize(118, 118).setDepth(5);
-    this.add.text(480, 144, sticker.icon, { fontSize: '60px' }).setOrigin(0.5).setDepth(6);
+    this.add.image(480, 146, sticker.icon).setDisplaySize(84, 84).setDepth(6);
     this.add
       .text(480, 232, sticker.title, { fontFamily: FONTS.display, fontSize: '30px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 6 })
       .setOrigin(0.5)
@@ -116,7 +117,6 @@ export class StickerBookScene extends Phaser.Scene {
       .text(480, 416, sticker.parentNote, { fontFamily: FONTS.label, fontSize: '13px', color: '#9DB4C0', align: 'center', lineSpacing: 6, wordWrap: { width: 600 } })
       .setOrigin(0.5)
       .setDepth(6);
-
-    addIconButton(this, { x: 640, y: 500, size: 64, key: 'hl.ui.back', caption: 'Town', onPress: () => returnToTownMap(this), testId: 'stickerbook.back-to-map' }).setDepth(40);
+    // Single, unambiguous exit: the top-left arrow (→ the grid). The grid has its own to-map back.
   }
 }

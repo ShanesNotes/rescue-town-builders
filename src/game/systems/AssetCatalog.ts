@@ -271,9 +271,9 @@ export const assetCatalog = [
   {
     key: 'audio.theme-loop',
     kind: 'audio',
-    status: 'production',
-    description: "Shane's recorded theme, normalised to OGG (assets/audio/Rescue-town-builders.ogg).",
-    notes: 'Live: looped behind MusicSystem via createHtmlAudioMusicSink. Source WAV in docs/audio-source/.',
+    status: 'backlog',
+    description: "Shane's ORIGINAL recorded theme, normalised to OGG (assets/audio/Rescue-town-builders.ogg).",
+    notes: 'Live via MusicSystem (createHtmlAudioMusicSink), NOT through this CC0 catalog loader — so it stays out of the CC0-source gate (it is original-authored, not CC0-sourced). Source WAV in docs/audio-source/.',
   },
 ] satisfies AssetNeed[];
 

@@ -8,7 +8,7 @@ import { returnToTownMap } from '../systems/SceneNavigation';
 import { STICKER_DEFINITIONS } from '../data/stickers';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
-import { motionAllowed } from '../ui/Sprite';
+import { hasTexture, motionAllowed } from '../ui/Sprite';
 
 const PLACE: Record<string, string> = {
   'recycling-run': 'recycling yard',
@@ -95,10 +95,13 @@ export class MissionCompleteScene extends Phaser.Scene {
 
   private paintWorld(): void {
     this.add.image(480, 270, 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
-    this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.32).setDepth(1);
-    // A warm bloom — a window just lit because of the child.
-    const bloom = this.add.circle(480, 300, 260, 0xffd98a, 0.14).setBlendMode(Phaser.BlendModes.ADD).setDepth(1);
-    if (motionAllowed()) this.tweens.add({ targets: bloom, scale: 1.1, alpha: 0.08, duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    // A gentle edge vignette that stays CLEAR in the centre, so the light reads as the brightest point.
+    this.add.rectangle(480, 30, 960, 80, 0x101b2e, 0.34).setDepth(1);
+    this.add.rectangle(480, 510, 960, 80, 0x101b2e, 0.34).setDepth(1);
+    // A warm bloom — a window just lit because of the child — the brightest, warmest point.
+    const bloom = this.add.circle(480, 300, 280, 0xffd98a, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(1);
+    this.add.circle(480, 300, 150, 0xffe6a3, 0.16).setBlendMode(Phaser.BlendModes.ADD).setDepth(1);
+    if (motionAllowed()) this.tweens.add({ targets: bloom, scale: 1.1, alpha: 0.1, duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   private heroEntrance(key: string, x: number, feetY: number): void {
@@ -138,15 +141,25 @@ export class MissionCompleteScene extends Phaser.Scene {
     if (!id) return;
     const def = STICKER_DEFINITIONS.find((s) => s.id === id);
     const delay = 260 + starCount * 240 + 220;
-    const frame = this.add.image(x, y, 'hl.prop.star').setDisplaySize(96, 96).setDepth(16).setTint(0xfff0c2);
+    // Show the ACTUAL sticker just earned (frame + its real icon), so the payoff has its subject.
+    const frame = this.add.image(x, y, 'hl.ui.stickerFrame').setDisplaySize(110, 110).setDepth(16);
+    const icon = def && hasTexture(this, def.icon) ? this.add.image(x, y - 4, def.icon).setDisplaySize(58, 58).setDepth(17) : null;
     const title = this.add
-      .text(x, y + 64, def?.title ?? 'New sticker!', { fontFamily: FONTS.display, fontSize: '20px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 5, align: 'center', wordWrap: { width: 280 } })
+      .text(x, y + 70, def?.title ?? 'New sticker!', { fontFamily: FONTS.display, fontSize: '20px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 5, align: 'center', wordWrap: { width: 280 } })
       .setOrigin(0.5)
-      .setDepth(16);
+      .setDepth(17);
     if (!motionAllowed()) return;
-    [frame, title].forEach((o) => o.setScale(0));
-    this.tweens.add({ targets: [frame, title], scale: 1, ease: 'Back.easeOut', duration: 420, delay, onStart: () => getSfx().play('secret') });
-    this.tweens.add({ targets: frame, angle: { from: -6, to: 6 }, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: delay + 420 });
+    // Pop each in to its OWN base display-scale (images keep their setDisplaySize size).
+    const items: Array<{ o: Phaser.GameObjects.Image | Phaser.GameObjects.Text; base: number }> = [
+      { o: frame, base: frame.scale },
+      { o: title, base: 1 },
+      ...(icon ? [{ o: icon, base: icon.scale }] : []),
+    ];
+    items.forEach(({ o, base }, i) => {
+      o.setScale(0);
+      this.tweens.add({ targets: o, scale: base, ease: 'Back.easeOut', duration: 420, delay, onStart: i === 0 ? () => getSfx().play('secret') : undefined });
+    });
+    this.tweens.add({ targets: [frame, ...(icon ? [icon] : [])], angle: { from: -5, to: 5 }, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: delay + 420 });
   }
 
   private sparkle(x: number, y: number): void {

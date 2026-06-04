@@ -29,7 +29,7 @@ export const STICKER_DEFINITIONS: StickerDefinition[] = [
     title: 'Rivet Finds Homes',
     childPoem: 'Little things wandered far from their friends\nRivet listens where they belong\nPaper with paper, green with the earth\nThe town tucks them in with a song',
     parentNote: 'A quiet celebration of noticing what is out of place and giving it a gentle place to rest. The kind of helping that makes the world feel cared-for.',
-    icon: '♻️',
+    icon: 'hl.ui.recycle',
     source: { kind: 'mission', id: 'recycling-run' },
   },
   {
@@ -37,7 +37,7 @@ export const STICKER_DEFINITIONS: StickerDefinition[] = [
     title: 'Brick Builds a Home',
     childPoem: 'A patch of earth waits with open arms\nBrick chooses the pieces with care\nWalls rise like a story being told\nA roof closes it warm, and a light appears there',
     parentNote: 'It honors the patient joy of building something real, one thoughtful choice at a time, so someone else has a safe place to be.',
-    icon: '🏠',
+    icon: 'hl.ui.build',
     source: { kind: 'mission', id: 'house-builder' },
   },
   {
@@ -45,7 +45,7 @@ export const STICKER_DEFINITIONS: StickerDefinition[] = [
     title: "Ember's Gentle Spray",
     childPoem: 'The little flames forgot they were visitors\nEmber offers cool silver rain\nThe fire curls small like a sleepy kitten\nNow the picnic can laugh and play again',
     parentNote: 'Reminds us that a small worry, met with calm and steady kindness, shrinks until the fun can return for everyone.',
-    icon: '💦',
+    icon: 'hl.ui.fire',
     source: { kind: 'mission', id: 'fire-fix' },
   },
   {
@@ -53,7 +53,7 @@ export const STICKER_DEFINITIONS: StickerDefinition[] = [
     title: 'A Friend Appears',
     childPoem: 'In the quiet corner where no one rushed\nYou came back, and came back again\nA tiny whiskered face learned your name\nA friend was waiting for someone who stays',
     parentNote: 'Some friendships begin only when we keep returning to the places others pass by. This sticker remembers the child who notices the unnoticed.',
-    icon: '🐭',
+    icon: 'hl.ui.heart',
     source: { kind: 'secret', id: 'secret-friend' },
   },
   {
@@ -61,7 +61,7 @@ export const STICKER_DEFINITIONS: StickerDefinition[] = [
     title: 'Light Holds Love',
     childPoem: 'When the day is folded away and the room is still\nA single spark remembers your name\nIt was placed there by hands that love you\nSo even in the dark, you are held in light',
     parentNote: 'The sticker that carries a parent\'s own words of love. The grown-up can replace the default with a private message that waits like a firefly for the child who finds the quiet spot.',
-    icon: '✨',
+    icon: 'hl.fx.lightBurst',
     source: { kind: 'secret', id: 'hidden-light' },
   },
   {
@@ -69,7 +69,7 @@ export const STICKER_DEFINITIONS: StickerDefinition[] = [
     title: "Cluckle's Small Town",
     childPoem: 'Cluckle tucks the whole wide world under her wing\nRoofs and rivers, friends and trees\nAll of it glowing, small as a heartbeat\nHeld safe inside one dreaming hen\'s dream — and now yours too',
     parentNote: 'The wonder that the entire town — every mission, every secret — can live inside one small, sleeping heart. Cluckle is the secret keeper; the child who finds her becomes one too.',
-    icon: '🐔',
+    icon: 'hl.char.cluckle',
     source: { kind: 'secret', id: 'cluckle-dream' },
   },
 ];

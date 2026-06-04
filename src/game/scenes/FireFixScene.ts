@@ -115,12 +115,14 @@ export class FireFixScene extends Phaser.Scene {
       if (!flame) continue;
       if (fire.health <= 0) {
         out += 1;
-        flame.setTexture(hasTexture(this, 'hl.prop.embers') ? 'hl.prop.embers' : 'hl.prop.campfire').setDisplaySize(46, 40).setAlpha(0.7).clearTint();
-        smoke?.setAlpha(0.28);
+        // Unmistakably COLD + safe: small, faint, cool-teal tint, with a calm rising steam curl.
+        flame.setTexture(hasTexture(this, 'hl.prop.embers') ? 'hl.prop.embers' : 'hl.prop.campfire').setDisplaySize(42, 38).setAlpha(0.35).setTint(0x6fd3e0);
+        smoke?.setAlpha(0.6).setPosition(fire.x, fire.y - 26);
       } else {
         const size = 52 + fire.health * 22;
+        // Danger reads WARM-orange (no bright white rim); only slightly cooler as it shrinks.
         flame.setTexture('hl.prop.campfire').setDisplaySize(size, size).setAlpha(1);
-        flame.setTint(fire.health >= fire.maxHealth ? 0xffffff : 0xffd9a0); // cooler as it shrinks
+        flame.setTint(fire.health >= fire.maxHealth ? 0xffb24a : 0xffd9a0);
         smoke?.setAlpha(0.5).setPosition(fire.x, fire.y - size * 0.7);
       }
     }
@@ -185,10 +187,10 @@ export class FireFixScene extends Phaser.Scene {
 
   private buildControls(): void {
     // D-pad cluster (bottom-left), spray (centre), back (top-left). All icon-coins.
-    this.arrowCoin(160, 432, '↑', { x: 0, y: -1 }, 'fire.move.up');
-    this.arrowCoin(108, 484, '←', { x: -1, y: 0 }, 'fire.move.left');
-    this.arrowCoin(212, 484, '→', { x: 1, y: 0 }, 'fire.move.right');
-    this.arrowCoin(160, 510, '↓', { x: 0, y: 1 }, 'fire.move.down');
+    this.arrowCoin(160, 410, '↑', { x: 0, y: -1 }, 'fire.move.up');
+    this.arrowCoin(104, 478, '←', { x: -1, y: 0 }, 'fire.move.left');
+    this.arrowCoin(216, 478, '→', { x: 1, y: 0 }, 'fire.move.right');
+    this.arrowCoin(160, 514, '↓', { x: 0, y: 1 }, 'fire.move.down');
     const spray = addIconButton(this, {
       x: 520,
       y: 486,

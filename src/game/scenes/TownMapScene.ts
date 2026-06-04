@@ -102,10 +102,10 @@ export class TownMapScene extends Phaser.Scene {
       .setOrigin(0.5, 1)
       .setDisplaySize(150, 150)
       .setDepth(6);
-    // A home still waiting to be rescued sleeps under a cool moonlit tint, so lighting it
-    // (full warm colour + bloom) is a visible "you brought it to life" moment.
-    if (!node.completed) house.setTint(0x8a98ba);
+    // The houseDark art already reads "asleep"; a rescued home swaps to the lit art + bloom.
     house.setInteractive({ useHandCursor: true }).on('pointerup', () => this.startMission(node.missionId));
+    // A faint light-beam ties the floating coin to its home, so it reads as "this house's job".
+    this.add.rectangle(x, 256, 7, 96, 0xffd98a, 0.1).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
 
     this.starRow(x, 412, node.bestStars);
 
