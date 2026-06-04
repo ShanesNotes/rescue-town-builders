@@ -118,7 +118,10 @@ export class MatchMissionScene extends Phaser.Scene {
       const bounds = new Phaser.Geom.Rectangle(x - 80, y - 74, 160, 150);
       const glow = this.add.rectangle(x, y, 168, 158, 0xffc857, 0).setDepth(8).setBlendMode(Phaser.BlendModes.ADD);
       const panel = this.add.rectangle(x, y, 160, 150, 0x16243a, 0.84).setStrokeStyle(4, 0xffc857, 0.85).setDepth(9);
-      if (hasTexture(this, t.icon)) this.add.image(x, y - 8, t.icon).setDisplaySize(80, 80).setDepth(10);
+      if (hasTexture(this, t.icon)) {
+        this.add.circle(x, y - 8, 42, 0xf2f0e6, 0.12).setBlendMode(Phaser.BlendModes.ADD).setDepth(9); // soft backing so low-contrast icons pop
+        this.add.image(x, y - 8, t.icon).setDisplaySize(80, 80).setDepth(10);
+      }
       this.add.text(x, y + 52, t.label, { fontFamily: FONTS.display, fontSize: '17px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 4 }).setOrigin(0.5).setDepth(11);
       panel.setInteractive({ useHandCursor: true }).on('pointerup', () => !isMissionExitOpen(this) && this.attempt(t.id));
       registerE2EButton({ testId: `${this.missionId}.target.${t.id}`, label: t.label, sceneKey: this.scene.key, press: () => this.attempt(t.id) });
