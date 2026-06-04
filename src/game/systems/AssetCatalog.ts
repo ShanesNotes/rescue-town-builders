@@ -271,9 +271,9 @@ export const assetCatalog = [
   {
     key: 'audio.theme-loop',
     kind: 'audio',
-    status: 'backlog',
-    description: 'Generated theme music loop currently in four segments that need splicing.',
-    notes: 'Do not import yet. Keep Slice 0 silent/minimal until audio settings and license/source notes exist.',
+    status: 'ready',
+    description: "Shane's recorded theme, normalised to OGG (assets/audio/Rescue-town-builders.ogg).",
+    notes: 'Live: looped behind MusicSystem via createHtmlAudioMusicSink. Source WAV in docs/audio-source/.',
   },
 ] satisfies AssetNeed[];
 
