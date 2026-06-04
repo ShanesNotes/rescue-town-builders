@@ -42,17 +42,23 @@ export type AimState = {
 
 export type AimOutcome = { state: AimState; hit: boolean; completed: boolean };
 
-export function createAimState(targets: AimTarget[], config: AimConfig = DEFAULT_AIM_CONFIG): AimState {
+export type AimStateOverrides = Partial<Omit<AimState, 'targets' | 'config'>>;
+
+export function createAimState(
+  targets: AimTarget[],
+  config: AimConfig = DEFAULT_AIM_CONFIG,
+  overrides: AimStateOverrides = {},
+): AimState {
   if (targets.length === 0) throw new Error('An aim mission needs at least one target.');
   return withCompletion({
-    player: { ...config.start },
-    aim: { x: 1, y: 0 },
+    player: overrides.player ? { ...overrides.player } : { ...config.start },
+    aim: overrides.aim ?? { x: 1, y: 0 },
     targets: targets.map((t) => ({ ...t })),
-    acts: 0,
-    hits: 0,
-    assists: 0,
-    completed: false,
-    lastMessage: 'Get close, aim, and go. There is no way to lose.',
+    acts: overrides.acts ?? 0,
+    hits: overrides.hits ?? 0,
+    assists: overrides.assists ?? 0,
+    completed: overrides.completed ?? false,
+    lastMessage: overrides.lastMessage ?? 'Get close, aim, and go. There is no way to lose.',
     config,
   });
 }

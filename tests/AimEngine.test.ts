@@ -33,6 +33,23 @@ describe('AimEngine', () => {
     expect(state.targets.every((t) => t.health === 0)).toBe(true);
   });
 
+  it('can hydrate an existing mission adapter state without resetting progress', () => {
+    const state = createAimState(TARGETS, undefined, {
+      player: { x: 340, y: 260 },
+      aim: { x: 1, y: 0 },
+      acts: 3,
+      hits: 1,
+      assists: 1,
+      lastMessage: 'Adapter state preserved.',
+    });
+
+    expect(state.player).toEqual({ x: 340, y: 260 });
+    expect(state.acts).toBe(3);
+    expect(state.hits).toBe(1);
+    expect(state.assists).toBe(1);
+    expect(state.lastMessage).toBe('Adapter state preserved.');
+  });
+
   it('scores stars and unlocks the sticker only on completion', () => {
     let state = createAimState(TARGETS);
     state = act(state).state;

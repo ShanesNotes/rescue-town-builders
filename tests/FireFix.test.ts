@@ -39,6 +39,17 @@ describe('FireFix', () => {
     expect(result.stats.firesOut).toBe(1);
   });
 
+  it('keeps a completed state stable if Spray is pressed again', () => {
+    let state = createFireFixState([{ id: 'barrel-fire', label: 'Barrel fire', x: 360, y: 260, health: 1, maxHealth: 1 }]);
+    state = moveFirefighter(state, { x: 1, y: 0 });
+    state = sprayWater(state).state;
+    const afterDone = sprayWater(state);
+
+    expect(afterDone.hit).toBe(false);
+    expect(afterDone.completed).toBe(true);
+    expect(afterDone.state).toBe(state);
+  });
+
   it('uses a helper drone when fire pressure stays child-unfriendly', () => {
     const state = createFireFixState([{ id: 'bush-fire', label: 'Bush fire', x: 360, y: 260, health: 5, maxHealth: 5 }]);
     const assisted = applyHelperDrone(state);

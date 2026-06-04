@@ -1,15 +1,11 @@
 import type { MissionResult } from '../types';
 import { clampStars } from './StarScoring';
+import { act, applyAssist, createAimState, moveAimer, type AimState, type AimTarget, type AimVec } from './AimEngine';
 
-export type Direction = { x: -1 | 0 | 1; y: -1 | 0 | 1 };
+export type Direction = AimVec;
 
-export type FireObject = {
-  id: string;
+export type FireObject = AimTarget & {
   label: string;
-  x: number;
-  y: number;
-  health: number;
-  maxHealth: number;
 };
 
 export type FireFixState = {
@@ -29,78 +25,41 @@ export type SprayOutcome = {
   completed: boolean;
 };
 
-const START = { x: 260, y: 260 };
-const STEP = 80;
-const SPRAY_RANGE = 190;
-
 export function createFireFixState(fires: FireObject[]): FireFixState {
-  if (fires.length === 0) {
-    throw new Error('Fire Fix needs at least one cartoon fire.');
-  }
-  return withCompletion({
-    player: START,
-    aim: { x: 1, y: 0 },
-    fires: fires.map((fire) => ({ ...fire })),
-    sprays: 0,
-    hits: 0,
-    helperAssists: 0,
-    completed: false,
-    lastMessage: 'Move close, aim, and spray. There is no fail state.',
-  });
+  return fromAimState(createAimState(fires), 'Move close, aim, and spray. There is no fail state.');
 }
 
 export function moveFirefighter(state: FireFixState, direction: Direction): FireFixState {
-  if (direction.x === 0 && direction.y === 0) return state;
-  return {
-    ...state,
-    player: {
-      x: clamp(state.player.x + direction.x * STEP, 120, 840),
-      y: clamp(state.player.y + direction.y * STEP, 160, 390),
-    },
-    aim: direction,
-    lastMessage: 'Aim set. Spray when Ember is close to a fire.',
-  };
+  const moved = moveAimer(toAimState(state), direction);
+  return fromAimState(moved, 'Aim set. Spray when Ember is close to a fire.');
 }
 
 export function sprayWater(state: FireFixState): SprayOutcome {
   if (state.completed) return { state, hit: false, completed: true };
 
-  const targetIndex = state.fires.findIndex((fire) => fire.health > 0 && isInSprayCone(state, fire));
-  if (targetIndex < 0) {
-    const missed = {
-      ...state,
-      sprays: state.sprays + 1,
-      lastMessage: 'Water missed. Move closer or aim at a fire.',
-    };
-    const assisted = maybeAssist(missed);
-    return { state: assisted, hit: false, completed: assisted.completed };
-  }
+  const beforeAssists = state.helperAssists;
+  const beforeFiresOut = countFiresOut(state.fires);
+  const outcome = act(toAimState(state));
+  const nextFires = outcome.state.targets as FireObject[];
+  const afterFiresOut = countFiresOut(nextFires);
+  const assisted = outcome.state.assists > beforeAssists;
+  const message = assisted
+    ? 'Helper drone sprayed too. Keep going!'
+    : outcome.hit && afterFiresOut > beforeFiresOut
+      ? 'Fire out. Great helping!'
+      : outcome.hit
+        ? 'The fire shrank. Spray again.'
+        : 'Water missed. Move closer or aim at a fire.';
 
-  const fires = state.fires.map((fire, index) =>
-    index === targetIndex ? { ...fire, health: Math.max(0, fire.health - 1) } : fire,
-  );
-  const nextState = withCompletion({
-    ...state,
-    fires,
-    sprays: state.sprays + 1,
-    hits: state.hits + 1,
-    lastMessage: fires[targetIndex]?.health === 0 ? 'Fire out. Great helping!' : 'The fire shrank. Spray again.',
-  });
-
-  return { state: nextState, hit: true, completed: nextState.completed };
+  return { state: fromAimState(outcome.state, message), hit: outcome.hit, completed: outcome.completed };
 }
 
 export function applyHelperDrone(state: FireFixState): FireFixState {
-  return withCompletion({
-    ...state,
-    fires: state.fires.map((fire) => ({ ...fire, health: Math.max(0, fire.health - 1) })),
-    helperAssists: state.helperAssists + 1,
-    lastMessage: 'Helper drone sprayed too. Keep going!',
-  });
+  return fromAimState(applyAssist(toAimState(state)), 'Helper drone sprayed too. Keep going!');
 }
 
 export function getFireFixResult(state: FireFixState): MissionResult {
-  const firesOut = state.fires.filter((fire) => fire.health === 0).length;
+  const firesOut = countFiresOut(state.fires);
   const penalty = Math.floor(state.sprays / 8) + state.helperAssists;
   return {
     missionId: 'fire-fix',
@@ -117,38 +76,31 @@ export function getFireFixResult(state: FireFixState): MissionResult {
   };
 }
 
-function maybeAssist(state: FireFixState): FireFixState {
-  const remainingPressure = state.fires.reduce((total, fire) => total + fire.health, 0);
-  if (remainingPressure === 0) return state;
-  // Early nudge: one drone pass once a child has sprayed a while with heavy fire left.
-  if (state.sprays >= 5 && remainingPressure >= 5 && state.helperAssists === 0) {
-    return applyHelperDrone(state);
-  }
-  // No-Fail floor: after enough missed sprays with ANY fire left, the drone helps on
-  // every miss until the mission can finish — a spray-only child is never stranded.
-  if (state.sprays >= 8) {
-    return applyHelperDrone(state);
-  }
-  return state;
+function toAimState(state: FireFixState): AimState {
+  return createAimState(state.fires, undefined, {
+    player: state.player,
+    aim: state.aim,
+    acts: state.sprays,
+    hits: state.hits,
+    assists: state.helperAssists,
+    completed: state.completed,
+    lastMessage: state.lastMessage,
+  });
 }
 
-function isInSprayCone(state: FireFixState, fire: FireObject): boolean {
-  const dx = fire.x - state.player.x;
-  const dy = fire.y - state.player.y;
-  const distance = Math.hypot(dx, dy);
-  if (distance > SPRAY_RANGE) return false;
-  const horizontalOk = state.aim.x === 0 || Math.sign(dx) === state.aim.x;
-  const verticalOk = state.aim.y === 0 || Math.sign(dy) === state.aim.y;
-  return horizontalOk && verticalOk;
-}
-
-function withCompletion(state: FireFixState): FireFixState {
+function fromAimState(state: AimState, lastMessage = state.lastMessage): FireFixState {
   return {
-    ...state,
-    completed: state.fires.every((fire) => fire.health === 0),
+    player: state.player,
+    aim: state.aim,
+    fires: state.targets as FireObject[],
+    sprays: state.acts,
+    hits: state.hits,
+    helperAssists: state.assists,
+    completed: state.completed,
+    lastMessage,
   };
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
+function countFiresOut(fires: FireObject[]): number {
+  return fires.filter((fire) => fire.health === 0).length;
 }
