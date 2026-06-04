@@ -3,15 +3,14 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, startParentSettingsGate, startScene } from '../systems/SceneNavigation';
 import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
 import { getSaveSystem } from '../systems/GameServices';
-import { addButton } from '../ui/Button';
-import { addBody, addTitle } from '../ui/SceneText';
-import { addHelperAvatar, addSprite, type HelperCharacterId } from '../ui/Sprite';
+import { addIconButton } from '../ui/Button';
+import { FONTS } from '../ui/typography';
+import { motionAllowed } from '../ui/Sprite';
 
 type ProfileAction = { type: 'select'; profileId: string } | { type: 'create' } | { type: 'settings' } | { type: 'back' };
 
-// Only the three live, IP-reviewed MVP helpers ship. Roadmap characters stay out
-// of the bundle until ADR-0006's expansion gate opens. The modulo wrap at the use
-// site means profiles 4-5 simply reuse a vetted avatar — no crash, no new strings.
+// Only the three live, IP-reviewed MVP helpers ship. Roadmap characters stay out of the bundle
+// until ADR-0006's expansion gate opens. The modulo wrap means profiles 4-5 reuse a vetted avatar.
 const AVATARS = ['rivet', 'brick', 'ember'];
 
 export class ProfileScene extends Phaser.Scene {
@@ -24,102 +23,124 @@ export class ProfileScene extends Phaser.Scene {
 
   create(): void {
     fadeInScene(this);
-    this.cameras.main.setBackgroundColor('#fff7dc');
     const saves = getSaveSystem();
     const profiles = saves.getProfiles();
     this.actions = [];
-    this.selectedIndex = Math.min(this.selectedIndex, Math.max(0, profiles.length));
 
-    addTitle(this, 'Choose a Helper Profile');
-    addBody(this, 118, 'Create up to five local profiles. No accounts, no network, no child-facing links.');
+    this.paintWorld();
+    this.paintHeader('CHOOSE A HELPER');
+
+    // Slots = each profile (a portrait coin) + an Add coin (until 5). Laid out as a centered row.
+    const canAdd = profiles.length < 5;
+    const slotCount = profiles.length + (canAdd ? 1 : 0);
+    const spacing = Math.min(168, 780 / Math.max(slotCount, 1));
+    const startX = 480 - ((slotCount - 1) * spacing) / 2;
+    const rowY = 250;
 
     profiles.forEach((profile, index) => {
+      const actionIndex = this.actions.length;
       this.actions.push({ type: 'select', profileId: profile.id });
-      const selected = index === this.selectedIndex ? '▶ ' : '';
-      const avatar = profile.avatarId.charAt(0).toUpperCase() + profile.avatarId.slice(1);
-      const y = 175 + index * 62;
-      addHelperAvatar(this, helperForAvatar(profile.avatarId), 180, y, 46, {
-        idle: index === this.selectedIndex,
-        pop: index === this.selectedIndex,
-      });
-      addSprite(this, {
-        key: 'kenney.ui.star-yellow',
-        x: 750,
-        y,
-        width: 30,
-        height: 30,
-        alpha: profile.progress.totalStars > 0 ? 1 : 0.36,
-      });
-      addButton(this, {
-        x: 480,
-        y,
-        width: 520,
-        height: 54,
-        label: `${selected}${profile.name} • ${avatar} • ${profile.progress.totalStars} ⭐`,
-        fill: index === this.selectedIndex ? 0xfff4bf : 0x9be7c4,
-        onPress: () => this.choose({ type: 'select', profileId: profile.id }),
-        testId: `profile.select.${profile.id}`,
-      });
+      this.profileCoin(profile, startX + index * spacing, rowY, actionIndex === this.selectedIndex);
     });
 
-    if (profiles.length === 0) {
-      AVATARS.forEach((avatar, index) => {
-        addHelperAvatar(this, helperForAvatar(avatar), 390 + index * 90, 310, 64, { idle: true, pop: true });
-      });
-    }
-
-    if (profiles.length < 5) {
+    if (canAdd) {
       const actionIndex = this.actions.length;
       this.actions.push({ type: 'create' });
-      addButton(this, {
-        x: 480,
-        y: 175 + actionIndex * 62,
-        width: 520,
-        height: 54,
-        label: `${actionIndex === this.selectedIndex ? '▶ ' : ''}Add Profile (${profiles.length}/5)`,
-        fill: actionIndex === this.selectedIndex ? 0xfff4bf : 0xb7e6ff,
-        onPress: () => this.choose({ type: 'create' }),
-        testId: 'profile.add',
-      });
+      this.addCoin(startX + profiles.length * spacing, rowY, actionIndex === this.selectedIndex);
     }
 
-    this.actions.push({ type: 'settings' }, { type: 'back' });
-    addButton(this, {
-      x: 750,
-      y: 490,
-      width: 280,
-      height: 58,
-      label: 'Parent Settings',
-      fill: 0xffffff,
-      onPress: () => this.choose({ type: 'settings' }),
-      testId: 'profile.parent-settings',
-    });
-    addButton(this, {
-      x: 140,
-      y: 490,
-      width: 190,
-      height: 58,
-      label: 'Back',
-      fill: 0xffffff,
-      onPress: () => this.choose({ type: 'back' }),
-      testId: 'profile.back',
-    });
+    // First run (no profiles yet): the three helpers wait on the cobbles to be chosen.
+    if (profiles.length === 0) {
+      const heroes = ['hl.char.rivet', 'hl.char.brick', 'hl.char.ember'];
+      heroes.forEach((key, i) => this.plantCharacter(key, 300 + i * 180, 470, 104, i));
+    }
 
-    addBody(this, 435, 'Gamepad: D-pad chooses • A selects • B goes back');
+    // Nav coins (icon-first; same destinations + testIds as before).
+    this.actions.push({ type: 'settings' }, { type: 'back' });
+    addIconButton(this, { x: 52, y: 46, size: 58, key: 'hl.ui.back', onPress: () => this.choose({ type: 'back' }), testId: 'profile.back' }).setDepth(30);
+    addIconButton(this, { x: 908, y: 46, size: 58, key: 'hl.ui.settings', onPress: () => this.choose({ type: 'settings' }), testId: 'profile.parent-settings' }).setDepth(30);
+
     this.bindInput();
+  }
+
+  private profileCoin(
+    profile: { id: string; name: string; avatarId: string; progress: { totalStars: number } },
+    x: number,
+    y: number,
+    selected: boolean,
+  ): void {
+    const avatar = AVATARS.includes(profile.avatarId) ? profile.avatarId : 'rivet';
+    addIconButton(this, {
+      x,
+      y,
+      size: 110,
+      key: `hl.char.${avatar}`,
+      caption: profile.name,
+      onPress: () => this.choose({ type: 'select', profileId: profile.id }),
+      testId: `profile.select.${profile.id}`,
+      pulse: selected,
+    }).setDepth(20);
+    this.starTag(x, y + 92, profile.progress.totalStars);
+  }
+
+  private addCoin(x: number, y: number, selected: boolean): void {
+    const coin = addIconButton(this, {
+      x,
+      y,
+      size: 110,
+      key: '__add__', // no texture → falls back to a candle-gold coin we mark with a +
+      caption: 'New',
+      onPress: () => this.choose({ type: 'create' }),
+      testId: 'profile.add',
+      pulse: selected,
+    });
+    coin.setDepth(20);
+    coin.add(
+      this.add.text(0, 0, '+', { fontFamily: FONTS.display, fontSize: '64px', color: '#2A1606', fontStyle: 'bold' }).setOrigin(0.5),
+    );
+  }
+
+  private starTag(x: number, y: number, total: number): void {
+    if (total <= 0) return;
+    this.add.image(x - 14, y, 'hl.prop.star').setDisplaySize(24, 24).setDepth(21);
+    this.add
+      .text(x + 4, y, `${total}`, { fontFamily: FONTS.display, fontSize: '22px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 4 })
+      .setOrigin(0, 0.5)
+      .setDepth(21);
+  }
+
+  private paintWorld(): void {
+    this.add.image(480, 270, 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
+    this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.28).setDepth(1);
+    this.add.rectangle(480, 270, 960, 540, 0xf2b45a, 0.05).setBlendMode(Phaser.BlendModes.ADD).setDepth(1);
+    this.add.rectangle(480, 32, 960, 92, 0x101b2e, 0.42).setDepth(1);
+  }
+
+  private paintHeader(text: string): void {
+    this.add
+      .text(480, 34, text, { fontFamily: FONTS.display, fontSize: '34px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 7 })
+      .setOrigin(0.5)
+      .setDepth(30);
+  }
+
+  private plantCharacter(key: string, x: number, feetY: number, size: number, index: number): void {
+    this.add.ellipse(x, feetY + 2, size * 0.7, size * 0.18, 0x0a1322, 0.5).setDepth(9);
+    const sprite = this.add.image(x, feetY, key).setOrigin(0.5, 1).setDisplaySize(size, size).setDepth(11).setAlpha(0.92);
+    if (!motionAllowed()) return;
+    const baseScaleY = sprite.scaleY;
+    this.tweens.add({ targets: sprite, scaleY: baseScaleY * 1.03, duration: 1200 + index * 130, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: index * 160 });
   }
 
   private bindInput(): void {
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       const intent = inputIntentFromKeyboard(event.key);
-      if (intent?.type === 'move') this.moveSelection(intent.y);
+      if (intent?.type === 'move') this.moveSelection(intent.x || intent.y);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.choose(this.actions[this.selectedIndex]);
       if (intent?.type === 'back') this.choose({ type: 'back' });
     });
-
     this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
       const intent = inputIntentFromGamepadButton(button.index);
-      if (intent?.type === 'move') this.moveSelection(intent.y);
+      if (intent?.type === 'move') this.moveSelection(intent.x || intent.y);
       if (intent?.type === 'confirm' || intent?.type === 'action') this.choose(this.actions[this.selectedIndex]);
       if (intent?.type === 'back') this.choose({ type: 'back' });
     });
@@ -141,10 +162,7 @@ export class ProfileScene extends Phaser.Scene {
     }
     if (action.type === 'create') {
       const nextNumber = saves.getProfiles().length + 1;
-      saves.createProfile({
-        name: `Player ${nextNumber}`,
-        avatarId: AVATARS[(nextNumber - 1) % AVATARS.length] ?? 'rivet',
-      });
+      saves.createProfile({ name: `Player ${nextNumber}`, avatarId: AVATARS[(nextNumber - 1) % AVATARS.length] ?? 'rivet' });
       startScene(this, SCENE_KEYS.townMap);
       return;
     }
@@ -154,9 +172,4 @@ export class ProfileScene extends Phaser.Scene {
     }
     startScene(this, SCENE_KEYS.start);
   }
-}
-
-function helperForAvatar(avatarId: string): HelperCharacterId {
-  if (avatarId === 'brick' || avatarId === 'ember' || avatarId === 'rivet') return avatarId;
-  return 'rivet';
 }
