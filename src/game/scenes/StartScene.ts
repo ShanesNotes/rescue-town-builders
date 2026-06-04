@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, startScene } from '../systems/SceneNavigation';
-import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { bindIntents } from '../systems/bindIntents';
 import { getMusic } from '../systems/GameServices';
 import { addIconButton } from '../ui/Button';
 import { motionAllowed } from '../ui/Sprite';
@@ -42,14 +42,7 @@ export class StartScene extends Phaser.Scene {
 
     // Music begins on the first real gesture (browser autoplay policy), then plays on.
     this.input.once('pointerdown', () => getMusic().start());
-    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-      const intent = inputIntentFromKeyboard(event.key);
-      if (intent?.type === 'confirm' || intent?.type === 'action') this.begin();
-    });
-    this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
-      const intent = inputIntentFromGamepadButton(button.index);
-      if (intent?.type === 'confirm' || intent?.type === 'action') this.begin();
-    });
+    bindIntents(this, { onConfirm: () => this.begin() });
   }
 
   private paintWorld(): void {

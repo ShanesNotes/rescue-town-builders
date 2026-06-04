@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, startParentSettingsGate, startScene } from '../systems/SceneNavigation';
-import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { bindIntents } from '../systems/bindIntents';
 import { getSaveSystem } from '../systems/GameServices';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
@@ -132,17 +132,10 @@ export class ProfileScene extends Phaser.Scene {
   }
 
   private bindInput(): void {
-    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-      const intent = inputIntentFromKeyboard(event.key);
-      if (intent?.type === 'move') this.moveSelection(intent.x || intent.y);
-      if (intent?.type === 'confirm' || intent?.type === 'action') this.choose(this.actions[this.selectedIndex]);
-      if (intent?.type === 'back') this.choose({ type: 'back' });
-    });
-    this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
-      const intent = inputIntentFromGamepadButton(button.index);
-      if (intent?.type === 'move') this.moveSelection(intent.x || intent.y);
-      if (intent?.type === 'confirm' || intent?.type === 'action') this.choose(this.actions[this.selectedIndex]);
-      if (intent?.type === 'back') this.choose({ type: 'back' });
+    bindIntents(this, {
+      onMove: (x, y) => this.moveSelection(x || y),
+      onConfirm: () => this.choose(this.actions[this.selectedIndex]),
+      onBack: () => this.choose({ type: 'back' }),
     });
   }
 

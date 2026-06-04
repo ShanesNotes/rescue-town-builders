@@ -1,8 +1,37 @@
 import Phaser from 'phaser';
 import { MIN_TOUCH_TARGET } from '../systems/AccessibilityRules';
 import { registerE2EButton, registerE2EScene } from '../systems/E2EBridge';
+import { getSfx } from '../systems/GameServices';
 import { hasTexture, motionAllowed } from './Sprite';
 import { FONTS } from './typography';
+
+// A child needs the audio "I pressed it" signal on the most-pressed control in the game.
+function playTap(): void {
+  try {
+    getSfx().play('tap');
+  } catch {
+    /* audio is a bonus, never required (No-Fail) */
+  }
+}
+
+/**
+ * Robust press model: confirm on pointerUP, but only when a pointerDOWN began on THIS target.
+ * pointerdown-to-confirm (the old model) fired at touch-start, so drags, scrolls, and taps that
+ * landed mid-teardown registered spuriously — the "buttons sometimes don't work" bug. Releasing
+ * elsewhere never confirms; pressing-and-releasing on the control always does.
+ */
+function bindPress(target: Phaser.GameObjects.GameObject, handlers: { onDown?: () => void; onConfirm: () => void }): void {
+  let armed = false;
+  target.on('pointerdown', () => {
+    armed = true;
+    handlers.onDown?.();
+  });
+  target.on('pointerup', () => {
+    if (!armed) return;
+    armed = false;
+    handlers.onConfirm();
+  });
+}
 
 export type IconButtonOptions = {
   x: number;
@@ -47,11 +76,14 @@ export function addIconButton(scene: Phaser.Scene, options: IconButtonOptions): 
   const hit = Math.max(size + 16, MIN_TOUCH_TARGET);
   container.setSize(hit, hit);
   container.setInteractive({ useHandCursor: true });
-  container.on('pointerdown', () => {
-    if (motionAllowed()) {
-      scene.tweens.add({ targets: coin, scale: baseScale * 0.9, duration: 70, yoyo: true, ease: 'Quad.easeOut' });
-    }
-    options.onPress();
+  bindPress(container, {
+    onDown: () => {
+      playTap();
+      if (motionAllowed()) {
+        scene.tweens.add({ targets: coin, scale: baseScale * 0.9, duration: 70, yoyo: true, ease: 'Quad.easeOut' });
+      }
+    },
+    onConfirm: options.onPress,
   });
   container.on('pointerover', () => coin.setScale(baseScale * 1.06));
   container.on('pointerout', () => coin.setScale(baseScale));
@@ -105,7 +137,7 @@ export function addButton(scene: Phaser.Scene, options: ButtonOptions): Phaser.G
   container.add(panelArt ? [panel, panelArt, label] : [panel, label]);
   container.setSize(width, height);
   container.setInteractive({ useHandCursor: true });
-  container.on('pointerdown', options.onPress);
+  bindPress(container, { onDown: () => playTap(), onConfirm: options.onPress });
   if (options.testId) {
     registerE2EButton({
       testId: options.testId,

@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionId } from '../types';
 import { getSaveSystem, missionRegistry } from '../systems/GameServices';
-import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { bindIntents } from '../systems/bindIntents';
 import { SCENE_KEYS, sceneKeyForMission, startParentSettingsGate, startScene, startStickerBook } from '../systems/SceneNavigation';
 import { projectTownMapNodes, type TownMapNode } from '../systems/TownMapProgress';
 import { addIconButton } from '../ui/Button';
@@ -145,21 +145,10 @@ export class TownMapScene extends Phaser.Scene {
   }
 
   private bindKeys(nodes: TownMapNode[]): void {
-    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-      const intent = inputIntentFromKeyboard(event.key);
-      if (intent?.type === 'move') this.moveSelection(intent.x || intent.y, nodes.length);
-      if (intent?.type === 'confirm' || intent?.type === 'action') {
-        this.startMission(nodes[this.selectedIndex]?.missionId ?? 'recycling-run');
-      }
-      if (intent?.type === 'back') startScene(this, SCENE_KEYS.profile);
-    });
-    this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
-      const intent = inputIntentFromGamepadButton(button.index);
-      if (intent?.type === 'move') this.moveSelection(intent.x || intent.y, nodes.length);
-      if (intent?.type === 'confirm' || intent?.type === 'action') {
-        this.startMission(nodes[this.selectedIndex]?.missionId ?? 'recycling-run');
-      }
-      if (intent?.type === 'back') startScene(this, SCENE_KEYS.profile);
+    bindIntents(this, {
+      onMove: (x, y) => this.moveSelection(x || y, nodes.length),
+      onConfirm: () => this.startMission(nodes[this.selectedIndex]?.missionId ?? 'recycling-run'),
+      onBack: () => startScene(this, SCENE_KEYS.profile),
     });
   }
 

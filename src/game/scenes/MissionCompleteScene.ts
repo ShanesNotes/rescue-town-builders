@@ -3,7 +3,7 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionResult } from '../types';
 import { createCelebrationPlan } from '../systems/Celebration';
 import { getSaveSystem, missionRegistry, getSfx } from '../systems/GameServices';
-import { inputIntentFromGamepadButton, inputIntentFromKeyboard } from '../systems/InputIntent';
+import { bindIntents } from '../systems/bindIntents';
 import { returnToTownMap } from '../systems/SceneNavigation';
 import { STICKER_DEFINITIONS } from '../data/stickers';
 import { addIconButton } from '../ui/Button';
@@ -90,14 +90,7 @@ export class MissionCompleteScene extends Phaser.Scene {
       this.cameras.main.zoomTo(1, 360, 'Sine.easeOut');
     }
 
-    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-      const intent = inputIntentFromKeyboard(event.key);
-      if (intent?.type === 'confirm' || intent?.type === 'action' || intent?.type === 'back') returnToTownMap(this);
-    });
-    this.input.gamepad?.on('down', (_pad: unknown, button: { index: number }) => {
-      const intent = inputIntentFromGamepadButton(button.index);
-      if (intent?.type === 'confirm' || intent?.type === 'action' || intent?.type === 'back') returnToTownMap(this);
-    });
+    bindIntents(this, { onConfirm: () => returnToTownMap(this), onBack: () => returnToTownMap(this) });
   }
 
   private paintWorld(): void {
