@@ -114,6 +114,25 @@ test('captures every screen and stays error-free across a full playthrough', asy
   await tap(page, 'mission.complete.back-to-map');
   await scene(page, 'TownMapScene');
 
+  // A Journey mission (Scooter Roundup) — verify the JourneyMissionScene waypoint flow.
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await tap(page, 'townmap.next');
+  await scene(page, 'TownMapScene');
+  await tap(page, 'townmap.mission.scooter-roundup');
+  await scene(page, 'JourneyMissionScene');
+  await shot(page, '12-scooter-roundup');
+  await clearMission(page, 'JourneyMissionScene', [
+    'scooter-roundup.waypoint.w0',
+    'scooter-roundup.waypoint.w1',
+    'scooter-roundup.waypoint.w2',
+    'scooter-roundup.waypoint.w3',
+  ], 40);
+  await tap(page, 'mission.complete.back-to-map');
+  await scene(page, 'TownMapScene');
+
   await tap(page, 'townmap.sticker-book');
   await scene(page, 'StickerBookScene');
   await shot(page, '08-stickers');
