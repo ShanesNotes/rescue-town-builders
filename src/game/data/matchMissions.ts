@@ -10,6 +10,8 @@ export type MatchMissionData = {
   coinKey: string;
   targets: MatchTarget[];
   prompts: MatchPrompt[];
+  /** Shuffle prompt order each play (replay variety) — off for order-meaningful missions (recipes). */
+  shuffle?: boolean;
 };
 
 const P = 'hl.prop.';
@@ -20,6 +22,7 @@ export const matchMissions: Partial<Record<MissionId, MatchMissionData>> = {
     backdrop: 'hl.bg.inverseDream',
     stickerId: 'inverse-dream-starter',
     coinKey: 'hl.char.cluckle',
+    shuffle: true,
     targets: [
       { id: 'moon', label: 'Moon', icon: `${P}inverseMoon` },
       { id: 'cold', label: 'Cold', icon: `${P}inverseColdSnowflake` },
@@ -40,6 +43,7 @@ export const matchMissions: Partial<Record<MissionId, MatchMissionData>> = {
     backdrop: 'hl.bg.dreamStatues',
     stickerId: 'dream-statues-starter',
     coinKey: 'hl.char.merry',
+    shuffle: true,
     targets: [
       { id: 'hen', label: 'Hen', icon: `${P}plinthHen` },
       { id: 'cloud', label: 'Cloud', icon: `${P}plinthCloud` },
@@ -58,6 +62,7 @@ export const matchMissions: Partial<Record<MissionId, MatchMissionData>> = {
     backdrop: 'hl.bg.recycledInventions',
     stickerId: 'recycled-inventions-starter',
     coinKey: 'hl.char.reed',
+    shuffle: true,
     targets: [
       { id: 'gear', label: 'Gear', icon: `${P}gadgetSlotGear` },
       { id: 'spring', label: 'Spring', icon: `${P}gadgetSlotSpring` },

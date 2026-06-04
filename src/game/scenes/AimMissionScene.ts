@@ -63,7 +63,7 @@ export class AimMissionScene extends Phaser.Scene {
     this.hero = this.add.image(0, 0, hasTexture(this, `hl.char.${cfg.characterId}`) ? `hl.char.${cfg.characterId}` : 'hl.char.ember').setOrigin(0.5, 1).setDisplaySize(92, 92).setDepth(15);
 
     this.message = this.add
-      .text(480, 96, '', { fontFamily: FONTS.display, fontSize: '18px', color: '#FFE2A6', stroke: '#2A1606', strokeThickness: 4, align: 'center', wordWrap: { width: 600 } })
+      .text(480, 96, this.state.lastMessage, { fontFamily: FONTS.display, fontSize: '18px', color: '#FFE2A6', stroke: '#2A1606', strokeThickness: 4, align: 'center', wordWrap: { width: 600 } })
       .setOrigin(0.5)
       .setDepth(30);
 

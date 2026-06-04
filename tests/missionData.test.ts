@@ -8,7 +8,7 @@ import { missionDefinitions } from '../src/game/data/missions';
 // Static integrity for every roadmap mission's content: a typo'd texture key or a match prompt
 // pointing at a non-existent target would only surface at runtime, so guard it here. Combined with
 // the per-archetype e2e and the engine No-Fail unit tests, this confirms all 14 missions are sound.
-const keys = new Set(HEARTHLIGHT_ASSETS.map((asset) => asset.key));
+const keys = new Set<string>(HEARTHLIGHT_ASSETS.map((asset) => asset.key));
 
 describe('roadmap mission data integrity', () => {
   it('Match: every prompt maps to a real target, and all icons/backdrops are real textures', () => {

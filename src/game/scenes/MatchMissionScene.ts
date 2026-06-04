@@ -15,6 +15,16 @@ import type { MissionId } from '../types';
 
 const HOME = { x: 480, y: 210 };
 
+// Fisher-Yates copy — replay variety for order-independent Match missions.
+function shuffled<T>(items: T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
+}
+
 type TargetView = { id: string; x: number; bounds: Phaser.Geom.Rectangle; glow: Phaser.GameObjects.Rectangle; panel: Phaser.GameObjects.Rectangle };
 
 // One reusable scene for every Match mission (Inverse Dream, Dream Statues, Recycled Inventions,
@@ -49,7 +59,8 @@ export class MatchMissionScene extends Phaser.Scene {
       return;
     }
     this.stickerId = cfg.stickerId;
-    this.state = createMatchState(cfg.targets, cfg.prompts);
+    const prompts = cfg.shuffle ? shuffled(cfg.prompts) : cfg.prompts;
+    this.state = createMatchState(cfg.targets, prompts);
     this.targets = [];
     this.pips = [];
     this.selected = 0;

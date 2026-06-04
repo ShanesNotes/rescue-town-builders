@@ -16,16 +16,10 @@ export type AimMissionData = {
   targets: AimTarget[];
 };
 
-// Spread across the playfield (within AimEngine bounds x:120–840, y:160–390); proven reachable.
-const POS: Array<[number, number, number]> = [
-  [360, 250, 2],
-  [540, 210, 1],
-  [690, 300, 2],
-  [770, 220, 1],
-  [450, 350, 2],
-];
-function targets(): AimTarget[] {
-  return POS.map(([x, y, health], i) => ({ id: `t${i}`, x, y, health, maxHealth: health }));
+// Each mission has its own target layout + count (within AimEngine bounds x:120–840, y:160–390),
+// so the three Aim missions don't feel identical.
+function targetsAt(points: Array<[number, number, number]>): AimTarget[] {
+  return points.map(([x, y, health], i) => ({ id: `t${i}`, x, y, health, maxHealth: health }));
 }
 
 export const aimMissions: Partial<Record<MissionId, AimMissionData>> = {
@@ -38,7 +32,7 @@ export const aimMissions: Partial<Record<MissionId, AimMissionData>> = {
     actIconKey: 'hl.prop.grumbleSpray',
     targetKey: 'hl.prop.gooBlobLarge',
     clearedKey: 'hl.prop.cleanPatch',
-    targets: targets(),
+    targets: targetsAt([[330, 260, 2], [540, 210, 1], [700, 300, 2], [420, 360, 2], [630, 370, 1]]),
   },
   'frog-flight': {
     characterId: 'wings',
@@ -49,7 +43,7 @@ export const aimMissions: Partial<Record<MissionId, AimMissionData>> = {
     actIconKey: 'hl.prop.leafGlider',
     targetKey: 'hl.prop.skyRing',
     clearedKey: 'hl.prop.rescueBasket',
-    targets: targets(),
+    targets: targetsAt([[300, 330, 1], [470, 260, 1], [650, 220, 1], [800, 280, 1]]),
   },
   'asteroid-blaster': {
     characterId: 'nova',
@@ -60,6 +54,6 @@ export const aimMissions: Partial<Record<MissionId, AimMissionData>> = {
     actIconKey: 'hl.prop.foamStar',
     targetKey: 'hl.prop.asteroidLarge',
     clearedKey: 'hl.prop.asteroidSmall',
-    targets: targets(),
+    targets: targetsAt([[320, 230, 1], [490, 300, 2], [640, 210, 1], [760, 330, 2], [560, 370, 1], [830, 250, 1]]),
   },
 };

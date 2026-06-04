@@ -64,7 +64,7 @@ export class JourneyMissionScene extends Phaser.Scene {
     cfg.waypoints.forEach((w, i) => {
       const isFinal = i === cfg.waypoints.length - 1;
       const key = isFinal && cfg.finalKey && hasTexture(this, cfg.finalKey) ? cfg.finalKey : cfg.waypointKey;
-      const glow = this.add.circle(w.x, w.y, 46, 0xffd98a, 0).setBlendMode(Phaser.BlendModes.ADD).setDepth(9);
+      const glow = this.add.circle(w.x, w.y, 62, 0xffd98a, 0).setBlendMode(Phaser.BlendModes.ADD).setDepth(9);
       const img = this.add.image(w.x, w.y, hasTexture(this, key) ? key : 'hl.prop.star').setDisplaySize(70, 70).setDepth(10);
       img.setInteractive({ useHandCursor: true }).on('pointerup', () => !isMissionExitOpen(this) && this.visit(w.id));
       registerE2EButton({ testId: `${this.missionId}.waypoint.${w.id}`, label: w.label, sceneKey: this.scene.key, press: () => this.visit(w.id) });
@@ -149,10 +149,14 @@ export class JourneyMissionScene extends Phaser.Scene {
         glow.setAlpha(0);
       } else if (i === next) {
         marker.clearTint().setAlpha(1);
-        if (motionAllowed()) this.tweens.add({ targets: glow, alpha: 0.26, duration: 850, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-        else glow.setAlpha(0.2);
+        if (motionAllowed()) {
+          this.tweens.add({ targets: glow, alpha: 0.6, duration: 750, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+          this.tweens.add({ targets: marker, scale: marker.scale * 1.12, duration: 750, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+        } else {
+          glow.setAlpha(0.45);
+        }
       } else {
-        marker.setTint(0x7e8cab).setAlpha(0.55);
+        marker.setTint(0x9aa6c8).setAlpha(0.78);
         glow.setAlpha(0);
       }
     });
