@@ -49,14 +49,13 @@ play-test evidence); only Claude merges to `main`.
 Status: ☐ todo · ◐ in flight · ☑ done. Owner in **bold**.
 
 ### EPIC A — Hearthlight across every surface  *(Claude code · Codex art)*
-- ☑ **A0** Title reborn — pixel font, grounded heroes, heroic glow. *(done f243cd2)*
-- ◐ **A1** Town Map reborn — dusk-town hub; lit/dark house mission nodes; icon-coins; parallax;
-  **windows light up as missions are completed** (the core loop made visible). *(Claude, now)*
-- ☐ **A2** Profile select — character portraits as the choice; icon-first; warm.
-- ☐ **A3** Recycling Run — a composed recycling yard; bins + items as art; sorting juice.
-- ☐ **A4** House Builder — construction lot; blueprint ghost; part-snap feedback; dust/confetti.
-- ☐ **A5** Fire Fix — dusk picnic; hose spray + water particles; ember "health" that calms.
-- ☐ **A6** Mission Complete — celebration: stars pop, sticker reveal, confetti, music swell.
+- ☑ **A0** Title reborn — pixel font, grounded heroes, heroic glow. *(f243cd2)*
+- ☑ **A1** Town Map reborn — dusk-town hub; icon-coins; heroes + lanterns that light on rescue. *(e657779)*
+- ☑ **A2** Profile select — hero portrait coins; "+ New"; icon corners. *(committed)*
+- ◐ **A3** Recycling Run — composed yard (backdrop landed); needs drag-to-bin + juice. *(next)*
+- ☐ **A4** House Builder — construction lot (backdrop landed); drag-snap parts + dust/confetti.
+- ☐ **A5** Fire Fix — dusk picnic (backdrop landed); real-time spray + water particles.
+- ☑ **A6** Mission Complete — "A Window Glows": stars cascade, sticker pop, confetti, sound. *(committed)*
 - ☐ **A7** Sticker Book — a Hearthlight album you want to fill.
 - ☐ **A8** Parent Settings (+ gate) — calm, icon-first.
 
@@ -67,10 +66,9 @@ Status: ☐ todo · ◐ in flight · ☑ done. Owner in **bold**.
 - ☐ **B4** Sprite helper: load sheet + play named anim, honoring `motionAllowed`.
 
 ### EPIC C — Game feel & mechanics depth  *(Claude)*
-- ☐ **C1** Light-from-darkness progression — completing a mission lights its house; the town
-  brightens as the child rescues. (The soul, made playable.)
-- ☐ **C2** Juice kit — hit-stop, gentle shake, squash/stretch, particle bursts, scene wipes,
-  camera ease; one shared `Juice` helper.
+- ◐ **C1** Light-from-darkness progression — lantern-lights-on-rescue seeded on the Town Map;
+  still to do: town opens dim → warms as more are saved; lit-house bloom.
+- ☑ **C2** Juice kit — `Juice.ts`: punch/squashStretch/shake/burst/confetti, reduced-motion safe. *(4002578)*
 - ☐ **C3** Mechanic depth per mission — drag/snap feel, encouraging feedback, no-fail nudges,
   a satisfying "completion" beat. Make each loop *fun to repeat*.
 - ☐ **C4** Audio — convert `Rescue-town-builders.wav` → OGG, swap behind `MusicSystem`; build a
@@ -81,8 +79,8 @@ Status: ☐ todo · ◐ in flight · ☑ done. Owner in **bold**.
 - ☐ **D2** Framed 9-slice panel kit for dialogs + HUD.
 - ☐ **D3** HUD — stars/progress as icons, consistent placement per scene.
 - ☐ **D4** De-wordify pass — every scene legible to a pre-reader (Grok copy).
-- ☐ **D5** Robust input — pointerup model, generous fixed hit areas, **regression test for the
-  intermittent button bug (P0)**.
+- ☑ **D5** Robust input — pointerup-guarded press model + `bindIntents` listener-leak fix + tap
+  SFX; unit test locks it. The P0 button bug is fixed. *(4002578)*
 
 ### EPIC E — The soul  *(Claude · Shane owns the words)*
 - ☐ **E1** Art-direct the three secret reveals (Cluckle's microcosm, Hidden Light, Secret Friend).
