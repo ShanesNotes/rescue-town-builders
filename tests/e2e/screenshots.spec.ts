@@ -61,7 +61,7 @@ test('captures every screen and stays error-free across a full playthrough', asy
   await tap(page, 'townmap.mission.recycling-run');
   await scene(page, 'RecyclingRunScene');
   await shot(page, '04-recycling');
-  await clearMission(page, 'RecyclingRunScene', ['recycling.bin.trash', 'recycling.bin.paper'], 40);
+  await clearMission(page, 'RecyclingRunScene', ['recycling.choice.0', 'recycling.choice.1', 'recycling.choice.2'], 40);
   await shot(page, '05-complete');
   await tap(page, 'mission.complete.back-to-map');
   await scene(page, 'TownMapScene');

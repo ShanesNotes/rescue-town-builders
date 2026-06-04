@@ -139,7 +139,7 @@ export const assetCatalog = [
     path: `assets/props/recycling-${category}.svg`,
     loadType: 'image' as const,
     source: originalCc0Source,
-    notes: 'Original category item art for Recycling Run; emoji/text remain fallback labels.',
+    notes: "Original rescued scrap art for Rivet's Reuse Workshop; emoji/text remain fallback labels.",
   })),
   ...(['foundation', 'walls', 'roof', 'door', 'decoration'] as const).map((part) => ({
     key: `props.house-${part}`,
