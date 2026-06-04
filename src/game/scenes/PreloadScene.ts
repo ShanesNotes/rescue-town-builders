@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
+import { HEARTHLIGHT_ASSETS, loadHearthlightAssets } from '../data/hearthlightAssets';
 import { assetCatalog, listLoadableAssets, resolveAssetPath } from '../systems/AssetCatalog';
-import { loadHearthlightAssets } from '../data/hearthlightAssets';
+import { registerE2ETextureInfo } from '../systems/E2EBridge';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, startScene } from '../systems/SceneNavigation';
 import { FONTS } from '../ui/typography';
@@ -26,6 +27,20 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
+    registerE2ETextureInfo(() =>
+      HEARTHLIGHT_ASSETS.map((asset) => {
+        const exists = this.textures.exists(asset.key);
+        const frame = exists ? (this.textures.getFrame(asset.key, 0) ?? this.textures.getFrame(asset.key)) : null;
+        const texture = exists ? this.textures.get(asset.key) : null;
+        return {
+          key: asset.key,
+          exists,
+          width: frame?.width ?? 0,
+          height: frame?.height ?? 0,
+          frameTotal: texture?.getFrameNames(false).length ?? 0,
+        };
+      }),
+    );
     fadeInScene(this);
     this.cameras.main.setBackgroundColor('#1B2A41');
     this.add

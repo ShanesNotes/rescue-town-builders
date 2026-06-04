@@ -7,10 +7,19 @@ export type E2EButton = {
   press: () => void;
 };
 
+export type E2ETextureInfo = {
+  key: string;
+  exists: boolean;
+  width: number;
+  height: number;
+  frameTotal: number;
+};
+
 export type RescueTownE2EBridge = {
   currentSceneKey: string;
   getSaveData: () => SaveData | null;
   getVisibleButtons: () => Array<Pick<E2EButton, 'testId' | 'label' | 'sceneKey'>>;
+  getTextureInfo: () => E2ETextureInfo[];
   pressButton: (testId: string) => boolean;
   waitForScene: (sceneKey: string, timeoutMs?: number) => Promise<void>;
 };
@@ -28,6 +37,7 @@ const state: BridgeState = {
   currentSceneKey: '',
   buttons: [],
 };
+let textureInfoGetter: (() => E2ETextureInfo[]) | null = null;
 
 function readSaveData(): SaveData | null {
   try {
@@ -54,6 +64,7 @@ function ensureBridge(): RescueTownE2EBridge | null {
     },
     getSaveData: readSaveData,
     getVisibleButtons: () => state.buttons.map(({ testId, label, sceneKey }) => ({ testId, label, sceneKey })),
+    getTextureInfo: () => textureInfoGetter?.() ?? [],
     pressButton: (testId: string) => {
       const button = state.buttons.find((candidate) => candidate.testId === testId);
       if (!button) return false;
@@ -95,6 +106,12 @@ export function registerE2EButton(button: E2EButton): void {
   registerE2EScene(button.sceneKey);
   state.buttons = state.buttons.filter((candidate) => candidate.testId !== button.testId);
   state.buttons.push(button);
+}
+
+export function registerE2ETextureInfo(getter: () => E2ETextureInfo[]): void {
+  if (!isE2EEnabled()) return;
+  textureInfoGetter = getter;
+  ensureBridge();
 }
 
 declare global {
