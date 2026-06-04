@@ -32,11 +32,18 @@ export type MatchOutcome = {
 export function createMatchState(targets: MatchTarget[], prompts: MatchPrompt[]): MatchState {
   if (targets.length === 0) throw new Error('A match mission needs at least one target.');
   if (prompts.length === 0) throw new Error('A match mission needs at least one prompt.');
+  const targetIds = new Set(targets.map((target) => target.id));
+  const orphanPrompt = prompts.find((prompt) => !targetIds.has(prompt.correctTargetId));
+  if (orphanPrompt) {
+    throw new Error(`Match prompt ${orphanPrompt.id} points at missing target: ${orphanPrompt.correctTargetId}`);
+  }
+  const targetCopies = targets.map((target) => ({ ...target }));
+  const promptCopies = prompts.map((prompt) => ({ ...prompt }));
   return {
-    targets,
-    prompts,
+    targets: targetCopies,
+    prompts: promptCopies,
     currentIndex: 0,
-    currentPrompt: prompts[0] ?? null,
+    currentPrompt: promptCopies[0] ?? null,
     solved: 0,
     attempts: 0,
     correct: 0,

@@ -21,3 +21,8 @@ Date: 2026-06-04
 - **Browser E2E remains environment-gated**: unit/build checks pass, but Playwright browser binaries are not available in this container. Full screenshot and smoke capture need a browser-enabled runner.
 - **Scene code is intentionally lightweight**: ADR-0007 still argues against a heavyweight shared mission runtime; the current best return is small shared seams and pure-system tests.
 - **Next optimization target**: Fire Fix's core is now aligned with `AimEngine`; the next high-value pass is flavor/visual payoff: turn extinguished flames into harmless picnic payoffs while preserving the spray-only No-Fail floor.
+
+## Mad bug hunt loop — 2026-06-04 follow-up
+
+- **MatchEngine validation**: `createMatchState` now rejects prompts that point at missing target ids, catching data-entry bugs before a child gets an impossible prompt.
+- **MatchEngine snapshots**: target/prompt arrays are copied on create so caller-side data mutation cannot rewrite an in-progress match mission.

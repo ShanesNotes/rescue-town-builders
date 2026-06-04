@@ -25,6 +25,19 @@ describe('MatchEngine', () => {
     expect(b.state.solved).toBe(2);
   });
 
+  it('validates prompt targets and snapshots source data on create', () => {
+    expect(() => createMatchState(TARGETS, [{ id: 'fog', label: 'Fog', icon: 'x', correctTargetId: 'missing' }])).toThrow(/missing target/);
+
+    const targets = [{ id: 'a', label: 'A', icon: 'one' }];
+    const prompts = [{ id: 'p', label: 'Prompt', icon: 'two', correctTargetId: 'a' }];
+    const state = createMatchState(targets, prompts);
+    targets[0]!.label = 'Mutated';
+    prompts[0]!.label = 'Mutated';
+
+    expect(state.targets[0]?.label).toBe('A');
+    expect(state.currentPrompt?.label).toBe('Prompt');
+  });
+
   it('No-Fail: a wrong pick only hints — never advances, blocks, or completes', () => {
     const state = createMatchState(TARGETS, PROMPTS);
     const wrong = chooseMatch(state, 'hot'); // ice does not go in hot
