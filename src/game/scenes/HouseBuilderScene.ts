@@ -49,6 +49,8 @@ export class HouseBuilderScene extends Phaser.Scene {
   private state!: HouseBuilderState;
   private slots = new Map<HousePartId, Phaser.GameObjects.Image>();
   private telegraph!: Phaser.GameObjects.Rectangle;
+  private title!: Phaser.GameObjects.Text;
+  private wish!: Phaser.GameObjects.Text;
   private hint!: Phaser.GameObjects.Text;
   private pips: Phaser.GameObjects.Arc[] = [];
   private selected = 0;
@@ -68,6 +70,7 @@ export class HouseBuilderScene extends Phaser.Scene {
 
     this.paintWorld();
     this.buildPips();
+    this.buildStoryLabels();
 
     // A blueprint pad behind the build area — reads "build here, here's the plan" against the busy lot.
     this.add.rectangle(480, 252, 372, 360, 0x0e1a2e, 0.5).setDepth(3);
@@ -114,6 +117,17 @@ export class HouseBuilderScene extends Phaser.Scene {
     this.add.image(480, 270, 'hl.bg.build').setDisplaySize(960, 540).setDepth(0);
     this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.2).setDepth(1);
     this.add.rectangle(480, 30, 960, 70, 0x101b2e, 0.4).setDepth(1);
+  }
+
+  private buildStoryLabels(): void {
+    this.title = this.add
+      .text(480, 76, '', { fontFamily: FONTS.display, fontSize: '26px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 5 })
+      .setOrigin(0.5)
+      .setDepth(21);
+    this.wish = this.add
+      .text(480, 106, '', { fontFamily: FONTS.display, fontSize: '17px', color: '#EBDDDA', stroke: '#2A1606', strokeThickness: 4, align: 'center', wordWrap: { width: 560 } })
+      .setOrigin(0.5)
+      .setDepth(21);
   }
 
   private buildPips(): void {
@@ -178,40 +192,50 @@ export class HouseBuilderScene extends Phaser.Scene {
 
   private placePart(id: HousePartId | undefined): void {
     if (!id || this.done) return;
-    const prevHouses = this.state.housesBuilt;
-    const placedId = this.state.currentPart?.id;
     const outcome = placeHousePart(this.state, id);
     this.state = outcome.state;
 
-    if (!outcome.correct) {
+    if (outcome.decorated) this.addYardDecoration(id, outcome.assisted);
+
+    if (!outcome.correct && !outcome.assisted) {
       getSfx().play('try-again');
-      this.hint.setText('Almost — try the glowing piece.');
+      this.hint.setText(outcome.message || 'Almost — that piece can decorate the yard.');
+      this.render();
       return;
     }
 
-    getSfx().play('place');
-    this.hint.setText('');
-    if (placedId) this.snapSlot(placedId);
+    getSfx().play(outcome.assisted ? 'correct' : 'place');
+    this.hint.setText(outcome.completedHouse?.completionLine ?? outcome.message ?? '');
+    if (outcome.placedPartId) this.snapSlot(outcome.placedPartId, outcome.assisted);
 
-    const houseFinished = this.state.housesBuilt > prevHouses;
-    if (houseFinished) this.celebrateHouse();
+    if (outcome.completedHouse) this.celebrateHouse(outcome.completedHouse.completionLine);
     this.render();
 
     if (outcome.completed) {
       this.done = true;
-      this.time.delayedCall(motionAllowed() ? 420 : 0, () => completeMission(this, getHouseBuilderResult(this.state)));
+      this.time.delayedCall(motionAllowed() ? 520 : 0, () => completeMission(this, getHouseBuilderResult(this.state)));
     }
   }
 
-  private snapSlot(id: HousePartId): void {
+  private addYardDecoration(id: HousePartId, assisted: boolean): void {
+    const key = hasTexture(this, PART_KEY[id]) ? PART_KEY[id] : FALLBACK_KEY[id];
+    const index = this.state.decorativeTries;
+    const x = 318 + (index % 6) * 58;
+    const y = 350 + (index % 2) * 22;
+    const deco = this.add.image(x, y, key).setDisplaySize(30, 30).setDepth(12).setAlpha(assisted ? 0.95 : 0.78);
+    if (motionAllowed()) this.tweens.add({ targets: deco, angle: assisted ? -12 : 12, yoyo: true, repeat: 2, duration: 120 });
+  }
+
+  private snapSlot(id: HousePartId, assisted = false): void {
     const slot = this.slots.get(id);
     if (!slot) return;
     slot.clearTint().setAlpha(1);
     Juice.squashStretch(this, slot, 0.18, 150);
-    Juice.burst(this, slot.x, slot.y, { color: 0xd9c2a0, count: 7, radius: 36 });
+    Juice.burst(this, slot.x, slot.y, { color: assisted ? 0xf4a24c : 0xd9c2a0, count: assisted ? 10 : 7, radius: 36 });
   }
 
-  private celebrateHouse(): void {
+  private celebrateHouse(message?: string): void {
+    if (message) this.hint.setText(message);
     if (!motionAllowed()) return;
     const glow = this.add.circle(480, 260, 150, 0xffc14a, 0.26).setBlendMode(Phaser.BlendModes.ADD).setDepth(8);
     this.tweens.add({ targets: glow, scale: 1.3, alpha: 0, duration: 700, ease: 'Quad.easeOut', onComplete: () => glow.destroy() });
@@ -227,13 +251,15 @@ export class HouseBuilderScene extends Phaser.Scene {
 
   // Slots show built parts solid; not-yet-built parts sleep faint + cool. The next part glows.
   private render(): void {
-    const placed = this.state.currentPartIndex;
+    const placed = this.state.completed ? ORDER.length : this.state.currentPartIndex;
     ORDER.forEach((id, i) => {
       const slot = this.slots.get(id);
       if (!slot) return;
       if (i < placed) slot.clearTint().setAlpha(1);
       else slot.setTint(0x9aa6c8).setAlpha(0.4);
     });
+    this.title.setText(this.state.currentHouse ? `${this.state.currentHouse.title} for ${this.state.currentHouse.resident}` : 'Brick built every cozy home!');
+    this.wish.setText(this.state.currentHouse?.wish ?? 'The block is glowing with new neighbors.');
     this.updatePips();
     this.placeTelegraph(placed);
   }

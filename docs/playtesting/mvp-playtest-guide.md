@@ -43,9 +43,10 @@ For each mission, record:
 
 ### Brick's House Builder
 
-- Does the child understand the build order?
+- Does the child understand the current neighbor wish and next glowing piece?
 - Are house pieces easy to compare?
-- Does placing a wrong piece still feel safe?
+- Does a wrong piece becoming yard decoration/scaffold feel funny and safe?
+- After repeated misses, does Brick's helper snap-in feel supportive rather than like a correction?
 
 ### Ember's Fire Fix
 
