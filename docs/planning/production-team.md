@@ -1,12 +1,16 @@
 # Production team — Rescue Town Builders as a complete, masterpiece-grade game
 
-> **Mandate (Shane, 2026-06-04):** the title direction is locked and loved. Now *go hard* and
-> apply it to every working surface, **lean hard into the game mechanics** for satisfying,
-> robust gameplay, and **do not stop until the game is complete.** Run this like a full
-> production game studio: Claude orchestrates and calls every shot; Codex (`$ultragoal`) and
-> Grok run equally long, deep lanes and are **redelegated** with fresh briefs after each wave;
-> a roster of specialized subagents covers art, UI, research, QA, child-playtest, design
-> critique, simplification, architecture, and review.
+> **Mandate (Shane, 2026-06-04, expanded):** apply the locked Hearthlight direction + satisfying
+> mechanics to the **ENTIRE game** — every scene AND the **full PRD v0.1.0 roadmap characters**
+> (Epic H). **No more checkpoints** — keep working until the game is done and polished. **Push to
+> the GitHub remote continuously** as work lands. Run like a full studio: Claude orchestrates;
+> Codex (`$ultragoal`) + Grok run long lanes, redelegated in waves; PixelLab animates; a roster of
+> subagents covers art, UI, research, QA, child-playtest, critique, simplification, architecture.
+>
+> **ADR-0006 update (Shane, 2026-06-04):** Shane (the human gate-holder) has explicitly opened the
+> roadmap — the backlogged characters/missions may now be BUILT, not just concepted. The No-Fail,
+> IP-safe, and pre-reader guardrails still hold. Polish the 3-mission core to "done" first, then
+> expand mission-by-mission on the reusable framework.
 
 This file is the durable spine. It extends — does not replace —
 [long-running-plan.md](long-running-plan.md) (ratified tri-model loop + file-ownership manifest
@@ -94,9 +98,25 @@ Status: ☐ todo · ◐ in flight · ☑ done. Owner in **bold**.
 - ☐ **F4** Codebase simplification + `/improve-codebase-architecture` pass.
 - ☐ **F5** Code review per integration.
 
-### EPIC G — Future content  *(Grok concept + research · GATED by ADR-0006)*
+### EPIC G — Future content  *(Grok concept + research)*
 - ☐ **G1** OSS/GitHub feature research → concept backlog (mechanics/juice patterns).
-- ☐ **G2** New mission concepts — **concept-only** until Willem's recorded play-test evidence.
+- ☑ **G2** ADR-0006 opened by Shane (2026-06-04) — roadmap may now be built (see Epic H).
+
+### EPIC H — The full PRD roadmap  *(authorized 2026-06-04; build on the reusable framework)*
+Reuse the 4 proven mechanic archetypes so new missions are mostly art + data + a thin scene:
+**sort** (Recycling), **build-sequence** (House), **move-aim-spray** (Fire), **match/place** (new).
+- ☐ **H1** Frog Flight — *Wings* — fly through rings, rescue a frog (move-aim archetype).
+- ☐ **H2** Scooter Bear Roundup — *Scoot* — gentle herding (move archetype).
+- ☐ **H3** Safety Lights Chase — *Dash* — traffic-light timing + soft grapple.
+- ☐ **H4** Recycled Inventions — *Reed* — combine parts into gadgets (build archetype).
+- ☐ **H5** Bike Explorer — *Milo* — neighborhood map exploration.
+- ☐ **H6** Goo Cleanup — *Mayor Grumble* — spray/clean goo (move-aim archetype).
+- ☐ **H7** Dream Statues — *Mayor Merry* — whimsical statue placement (place archetype).
+- ☐ **H8** Chicken Inverse Dream — *Cluckle* — opposite/inverse matching (the soul hen plays!).
+- ☐ **H9** Treasure Boat — *Captain Coral* — boat movement + open treasure.
+- ☐ **H10** Bakery Bread Rush — *Baker Benny* — recipe sequencing (build archetype).
+- ☐ **H11** Asteroid Blaster — *Nova Noodle* — aim foam stars (move-aim archetype).
+Each: Grok identity+lore → Codex character + scene art → Claude scene on the framework → No-Fail + juice.
 
 ---
 
