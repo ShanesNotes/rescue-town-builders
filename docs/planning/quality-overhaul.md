@@ -341,3 +341,13 @@ asteroid-blaster (Aim) + bread-rush (Match). **The two remaining steps are human
   that lived in the deleted scene are not lost. Still on shared engines: Aim (frog-flight,
   asteroid-blaster) + Match (bread-rush) — Shane's content call.
 - Gates: GREEN — typecheck clean, **168/168** unit (one journey-data test removed), build ok, **e2e 8/8**.
+
+### Cycle 18 — Polish: optimize the heavy build-lot backdrop
+- Pillow (10.2.0, from the sprite pipeline) is available, so the deferred 988KB `v2/build-lot.png` got
+  compressed: 960×540 RGB → adaptive 256-colour palette + optimize = **264KB (−73%)**, no visible
+  banding (it's a painted backdrop behind game elements). e2e proves it still loads non-blank + the
+  full playthrough renders error-free.
+- Gates: GREEN — typecheck clean, **168/168** unit, build ok, **e2e 8/8**.
+- *Honest note:* the clearly-high-value structural work is now complete (overhaul + consolidation +
+  cleanup + docs + this asset trim). Remaining is genuine polish (per-mission level variety so captured
+  missions feel distinct, audio, town-map cohesion) or the human steps (merge + Willem playtest).
