@@ -5,11 +5,11 @@ import { bindIntents } from '../systems/bindIntents';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { motionAllowed } from '../ui/Sprite';
+import { createHoldGate } from '../ui/HoldGate';
 
 // A child-safe wall, parent-only passage: hold for 3 seconds (a young child won't sustain it).
 export class ParentSettingsGateScene extends Phaser.Scene {
   private returnScene: ParentSettingsReturnScene = SCENE_KEYS.profile;
-  private holdTimer: Phaser.Time.TimerEvent | null = null;
   private status!: Phaser.GameObjects.Text;
   private fill!: Phaser.GameObjects.Arc;
 
@@ -40,9 +40,6 @@ export class ParentSettingsGateScene extends Phaser.Scene {
     this.fill = this.add.circle(480, 290, 78, 0xffc857, 0.32).setScale(0).setDepth(6);
     const key = this.add.text(480, 290, '⚿', { fontFamily: FONTS.display, fontSize: '54px', color: '#FFE2A6' }).setOrigin(0.5).setDepth(7);
     const hit = this.add.circle(480, 290, 92, 0xffffff, 0.001).setDepth(8).setInteractive({ useHandCursor: true });
-    hit.on('pointerdown', () => this.startHold());
-    hit.on('pointerup', () => this.cancelHold());
-    hit.on('pointerout', () => this.cancelHold());
     if (motionAllowed()) this.tweens.add({ targets: key, scale: 1.06, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
     this.status = this.add
@@ -52,26 +49,17 @@ export class ParentSettingsGateScene extends Phaser.Scene {
 
     addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => returnToParentScene(this, this.returnScene), testId: 'parent.gate.back' }).setDepth(40);
 
-    bindIntents(this, { onConfirm: () => this.startHold(), onBack: () => returnToParentScene(this, this.returnScene) });
-    this.input.keyboard?.on('keyup', () => this.cancelHold());
-  }
-
-  private startHold(): void {
-    if (this.holdTimer) return;
-    this.status.setText('Holding... keep going.');
-    if (motionAllowed()) this.tweens.add({ targets: this.fill, scale: 1, duration: 3000, ease: 'Linear' });
-    this.holdTimer = this.time.delayedCall(3000, () => {
-      this.holdTimer = null;
-      startScene(this, SCENE_KEYS.parentSettings, { returnScene: this.returnScene });
+    // Back-intent only — confirm must NOT start the hold (a single key/gamepad press would walk
+    // through). The sustained-hold controller owns all down/up parity across pointer/keyboard/pad.
+    bindIntents(this, { onBack: () => returnToParentScene(this, this.returnScene) });
+    createHoldGate({
+      scene: this,
+      hit,
+      fill: this.fill,
+      durationMs: 3000,
+      onStart: () => this.status.setText('Holding... keep going.'),
+      onCancel: () => this.status.setText('Cancelled. Ready when you are.'),
+      onComplete: () => startScene(this, SCENE_KEYS.parentSettings, { returnScene: this.returnScene }),
     });
-  }
-
-  private cancelHold(): void {
-    if (!this.holdTimer) return;
-    this.holdTimer.remove(false);
-    this.holdTimer = null;
-    this.tweens.killTweensOf(this.fill);
-    this.fill.setScale(0);
-    this.status.setText('Cancelled. Ready when you are.');
   }
 }

@@ -6,6 +6,7 @@ import { getSaveSystem, getSfx } from '../systems/GameServices';
 import { bindIntents } from '../systems/bindIntents';
 import { SCENE_KEYS, returnToParentScene, startScene, type ParentSettingsReturnScene } from '../systems/SceneNavigation';
 import { addIconButton } from '../ui/Button';
+import { openChoiceModal } from '../ui/ChoiceModal';
 import { FONTS } from '../ui/typography';
 
 const DIFFICULTY_ORDER: Difficulty[] = ['helper', 'easy', 'normal'];
@@ -16,6 +17,7 @@ export class ParentSettingsScene extends Phaser.Scene {
   private returnScene: ParentSettingsReturnScene = SCENE_KEYS.profile;
   private labels: Record<string, Phaser.GameObjects.Text> = {};
   private profile!: PlayerProfile;
+  private resetModalOpen = false;
 
   constructor() {
     super('ParentSettingsScene');
@@ -67,13 +69,49 @@ export class ParentSettingsScene extends Phaser.Scene {
     this.pill('quiet', 270, 334, () => 'Calm night (soft sounds)', 0x76b3e6, () =>
       this.applySetting({ musicVolume: 0, sfxVolume: 0.4, audioMuted: false }),
     );
-    this.pill('reset', 690, 334, () => 'Start fresh', 0xe8946a, () => {
-      saves.reset();
-      startScene(this, SCENE_KEYS.profile);
-    });
+    this.pill('reset', 690, 334, () => 'Start fresh', 0xe8946a, () => this.confirmReset());
 
     addIconButton(this, { x: 480, y: 452, size: 76, key: 'hl.ui.back', caption: 'Done', onPress: () => returnToParentScene(this, this.returnScene), testId: 'parent.done' }).setDepth(40);
-    bindIntents(this, { onBack: () => returnToParentScene(this, this.returnScene) });
+    bindIntents(this, {
+      onBack: () => {
+        if (this.resetModalOpen) return; // the modal owns Back while it's up (Escape = cancel)
+        returnToParentScene(this, this.returnScene);
+      },
+    });
+  }
+
+  // "Start fresh" wipes ALL profiles/stars/stickers irreversibly — never on one tap. Gate it
+  // behind the shared child-safe choice modal whose SAFE default (focused, Escape/B) is cancel.
+  private confirmReset(): void {
+    if (this.resetModalOpen) return;
+    this.resetModalOpen = true;
+    openChoiceModal(this, {
+      title: 'Start fresh?',
+      subtitle: 'This erases every friend, star, and sticker on this device. It cannot be undone.',
+      buttons: [
+        {
+          icon: '✕',
+          caption: 'Keep Everything',
+          fill: 0x9be7c4,
+          safe: true,
+          testId: 'parent.reset.cancel',
+          onPress: () => {
+            this.resetModalOpen = false;
+          },
+        },
+        {
+          icon: '🗑',
+          caption: 'Erase All',
+          fill: 0xffb3c6,
+          testId: 'parent.reset.confirm',
+          onPress: () => {
+            this.resetModalOpen = false;
+            getSaveSystem().reset();
+            startScene(this, SCENE_KEYS.profile);
+          },
+        },
+      ],
+    });
   }
 
   private pill(key: string, x: number, y: number, label: () => string, color: number, onPress: () => void): void {

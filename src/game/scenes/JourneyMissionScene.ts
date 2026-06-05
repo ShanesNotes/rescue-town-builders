@@ -28,6 +28,8 @@ export class JourneyMissionScene extends Phaser.Scene {
   private pips: Phaser.GameObjects.Arc[] = [];
   private hint!: Phaser.GameObjects.Text;
   private done = false;
+  private cursor!: Phaser.GameObjects.Arc;
+  private highlightIndex = 0;
 
   constructor() {
     super('JourneyMissionScene');
@@ -76,6 +78,10 @@ export class JourneyMissionScene extends Phaser.Scene {
     this.heroShadow = this.add.ellipse(cfg.start.x, cfg.start.y + 2, 64, 16, 0x0a1322, 0.5).setDepth(13);
     this.hero = this.add.image(cfg.start.x, cfg.start.y, hasTexture(this, `hl.char.${cfg.characterId}`) ? `hl.char.${cfg.characterId}` : 'hl.char.rivet').setOrigin(0.5, 1).setDisplaySize(92, 92).setDepth(14);
 
+    // Keyboard/gamepad cursor ring — shows which stop d-pad/arrows have highlighted, so confirm
+    // visits THAT stop (not always the correct id). Pointer children never need it.
+    this.cursor = this.add.circle(0, 0, 50, 0x000000, 0).setStrokeStyle(5, 0x9be7ff, 1).setDepth(12).setVisible(false);
+
     this.hint = this.add
       .text(480, 92, 'Tap the glowing stop!', { fontFamily: FONTS.display, fontSize: '18px', color: '#FFE2A6', stroke: '#2A1606', strokeThickness: 4 })
       .setOrigin(0.5)
@@ -84,7 +90,8 @@ export class JourneyMissionScene extends Phaser.Scene {
     addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => this.requestExit(), testId: `${this.missionId}.back-to-map` }).setDepth(40);
 
     bindIntents(this, {
-      onConfirm: () => !isMissionExitOpen(this) && this.visit(this.state.currentPrompt?.correctTargetId ?? ''),
+      onMove: (x, y) => !isMissionExitOpen(this) && this.moveHighlight(x || y),
+      onConfirm: () => !isMissionExitOpen(this) && this.visitHighlighted(),
       onBack: () => this.requestExit(),
     });
 
@@ -97,6 +104,30 @@ export class JourneyMissionScene extends Phaser.Scene {
     for (let i = 0; i < total; i += 1) {
       this.pips.push(this.add.circle(startX + i * gap, 40, 7, 0x3a4a66).setStrokeStyle(2, 0x1b2a41).setDepth(20));
     }
+  }
+
+  // Keyboard/gamepad: cycle the highlight cursor through the remaining (unvisited) stops only.
+  private moveHighlight(delta: number): void {
+    if (delta === 0 || this.done) return;
+    const next = this.state.currentIndex;
+    const last = this.waypoints.length - 1;
+    this.highlightIndex = Math.max(next, Math.min(last, this.highlightIndex + delta));
+    this.positionCursor();
+  }
+
+  // Confirm visits the HIGHLIGHTED stop — not always the correct id. Wrong picks still No-Fail-hint.
+  private visitHighlighted(): void {
+    const wp = this.waypoints[Math.max(this.state.currentIndex, this.highlightIndex)];
+    if (wp) this.visit(wp.id);
+  }
+
+  private positionCursor(): void {
+    const wp = this.waypoints[this.highlightIndex];
+    if (!wp) {
+      this.cursor.setVisible(false);
+      return;
+    }
+    this.cursor.setPosition(wp.x, wp.y).setVisible(true);
   }
 
   private visit(waypointId: string): void {
@@ -139,12 +170,17 @@ export class JourneyMissionScene extends Phaser.Scene {
   // Visited stops stay lit; the next stop glows; future stops wait dim.
   private render(): void {
     const next = this.state.currentIndex;
+    // Keep the keyboard/gamepad highlight on (or ahead of) the next stop after each visit.
+    this.highlightIndex = Math.max(next, this.highlightIndex);
+    this.positionCursor();
     this.waypoints.forEach((w, i) => {
       const marker = this.markers.get(w.id);
       const glow = this.glows.get(w.id);
       if (!marker || !glow) return;
       this.tweens.killTweensOf(glow);
       if (i < next) {
+        // A passed stop must never fire the wrong-answer bonk (P2-05): drop its interactivity.
+        marker.disableInteractive();
         marker.clearTint().setAlpha(1);
         glow.setAlpha(0);
       } else if (i === next) {

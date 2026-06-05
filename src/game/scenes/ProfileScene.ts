@@ -7,7 +7,7 @@ import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
 
-type ProfileAction = { type: 'select'; profileId: string } | { type: 'create' } | { type: 'settings' } | { type: 'back' };
+type ProfileAction = { type: 'select'; profileId: string } | { type: 'create' };
 
 // Only the three live, IP-reviewed MVP helpers ship. Roadmap characters stay out of the bundle
 // until ADR-0006's expansion gate opens. The modulo wrap means profiles 4-5 reuse a vetted avatar.
@@ -55,8 +55,9 @@ export class ProfileScene extends Phaser.Scene {
       heroes.forEach((key, i) => this.plantCharacter(key, 300 + i * 180, 470, 104, i));
     }
 
-    // Nav coins (icon-first; same destinations + testIds as before).
-    this.actions.push({ type: 'settings' }, { type: 'back' });
+    // Corner utility coins (icon-first; same destinations + testIds as before). Pointer-only: they
+    // are deliberately NOT in `this.actions`, so keyboard/gamepad nav can never silently land on a
+    // coin with no highlight and accidentally open the parent gate (P2-06).
     addIconButton(this, { x: 52, y: 46, size: 58, key: 'hl.ui.back', onPress: () => this.choose({ type: 'back' }), testId: 'profile.back' }).setDepth(30);
     addIconButton(this, { x: 908, y: 46, size: 58, key: 'hl.ui.settings', onPress: () => this.choose({ type: 'settings' }), testId: 'profile.parent-settings' }).setDepth(30);
 
@@ -146,7 +147,7 @@ export class ProfileScene extends Phaser.Scene {
     this.scene.restart();
   }
 
-  private choose(action: ProfileAction | undefined): void {
+  private choose(action: ProfileAction | { type: 'settings' } | { type: 'back' } | undefined): void {
     if (!action) return;
     const saves = getSaveSystem();
     if (action.type === 'select') {

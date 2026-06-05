@@ -39,7 +39,7 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 ## Wave plan (the `/loop` walks these in order)
 
 - **Wave 1 — Touch-critical safety** ✅ DONE: P0-01, P0-02, P1-01.
-- **Wave 2 — Input parity & safety** (the shared child-safe modal/focus controller): P0-03, P0-04, P1-11, P2-06, P2-05, P2-09.
+- **Wave 2 — Input parity & safety** (shared child-safe modal/focus controller) ✅ DONE: P0-03, P0-04, P1-11, P2-05, P2-06, P2-09.
 - **Wave 3 — Non-reader onboarding**: P1-03, P1-02, P1-06, P2-04, P3-02, P3-09.
 - **Wave 4 — No-Fail floors & Aim clarity**: P1-09, P1-12, P3-05, P3-04, P1-08.
 - **Wave 5 — Reward loop**: P2-01, P2-02, P1-10, P1-07, P2-08, P3-08.
@@ -53,8 +53,8 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 
 - [x] **P0-01 (S)** Town node fired `startMission` twice + launched on stray drag (unguarded house `pointerup`). → *Removed the house's interactivity; the pulsing coin is the sole launch target.* `TownMapScene.ts`
 - [x] **P0-02 (S)** `bindPress` never disarmed on `pointerout`/`pointercancel` — stale ghost tap on touch. → *Added `disarm` on both.* `ui/Button.ts`
-- [ ] **P0-03 (M)** `confirmMissionExit` modal is pointer-only → keyboard/gamepad child who presses Back mid-mission can **soft-lock**. *Fix:* shared modal owns focus — Left/Right select, Enter/A activate, Escape/B default to keep-playing, visible pulsing focus ring. `confirmMissionExit.ts` + the 6 mission scenes.
-- [ ] **P0-04 (M)** Parent gate bypassable by gamepad (confirm starts the hold with no button-up cancel). *Fix:* real hold controller for pointer+keyboard+gamepad down/up; second hold-to-reset inside settings. `ParentSettingsGateScene.ts`, `ParentSettingsScene.ts`, `bindIntents.ts`.
+- [x] **P0-03 (M)** `confirmMissionExit` modal is pointer-only → keyboard/gamepad child who presses Back mid-mission can **soft-lock**. *Fix:* shared modal owns focus — Left/Right select, Enter/A activate, Escape/B default to keep-playing, visible pulsing focus ring. `confirmMissionExit.ts` + the 6 mission scenes.
+- [x] **P0-04 (M)** Parent gate bypassable by gamepad (confirm starts the hold with no button-up cancel). *Fix:* real hold controller for pointer+keyboard+gamepad down/up; second hold-to-reset inside settings. `ParentSettingsGateScene.ts`, `ParentSettingsScene.ts`, `bindIntents.ts`.
 
 ## P1 — confusing for a non-reader
 
@@ -68,7 +68,7 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - [ ] **P1-08 (S)** Star scoring inverted: hardest-to-read missions punish a struggling child with 1 star. *Fix:* floor completed Match/Journey at 2 stars; reserve 3 for a gentle bonus. `MatchEngine.ts`, `StarScoring.ts`
 - [ ] **P1-09 (M)** Match (4) + Journey (4) have NO assist floor — a stuck child can tap wrong forever. *Fix:* per-prompt miss counter; escalate telegraph, then helper hops over and places the answer. `MatchEngine.ts`, `MatchMissionScene.ts`, `JourneyMissionScene.ts`
 - [ ] **P1-10 (S)** Locked sticker cells show a hand cursor + fire on tap but do nothing — dead taps across the album. *Fix:* gentle 'not yet' wiggle + muted tick; drop `useHandCursor` when locked. `StickerBookScene.ts`
-- [ ] **P1-11 (S)** 'Start fresh' wipes ALL saves instantly, no confirm — catastrophic footgun. *Fix:* gate behind the existing 3-second hold-ring / two-step confirm. `ParentSettingsScene.ts`
+- [x] **P1-11 (S)** 'Start fresh' wipes ALL saves instantly, no confirm — catastrophic footgun. *Fix:* gate behind the existing 3-second hold-ring / two-step confirm. `ParentSettingsScene.ts`
 - [ ] **P1-12 (M)** Aim dead-zone: after the 1–2 reachable targets, the big pulsing Act button gives SILENT misses for ~3 taps before help. *Fix:* never-silent miss (whiff SFX + puff + nudge arrow); lower `assistFloorAt`≈3, drop `remaining>=5` gate; auto-pan hero toward nearest live target. `AimEngine.ts`, `AimMissionScene.ts`
 
 ## P2 — polish / juice
@@ -77,17 +77,17 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - [ ] **P2-02 (S)** No path from celebration to the just-earned sticker. *Fix:* make the popped sticker interactive → open its reading page (pass `readingId`). `MissionCompleteScene.ts`, `StickerBookScene.ts`
 - [ ] **P2-03 (M)** Instant hard-cut to white between every scene (no fade-out). *Fix:* `fadeOutAndStart` (~140–160ms), warm cream not pure white, gated on `motionAllowed`. `SceneTransitions.ts`, `SceneNavigation.ts`
 - [ ] **P2-04 (S)** Match wrong-tap gives a non-reader nothing actionable (springHome HOME→HOME, no panel reaction). *Fix:* shake/dim wrong panel + pulse correct target bigger; read the engine's dead `lastHint`. `MatchMissionScene.ts`
-- [ ] **P2-05 (S)** Journey: tapping a passed stop plays the wrong-answer bonk; keyboard confirm auto-skips the whole mission. *Fix:* `disableInteractive` visited waypoints; bind `onMove` to a highlighted waypoint cursor, confirm visits the highlighted one. `JourneyMissionScene.ts`
-- [ ] **P2-06 (S)** Profile keyboard nav can land on Settings/Back with zero highlight → opens parent gate by accident. *Fix:* exclude corner utilities from the navigable array (or bind their pulse). `ProfileScene.ts`
+- [x] **P2-05 (S)** Journey: tapping a passed stop plays the wrong-answer bonk; keyboard confirm auto-skips the whole mission. *Fix:* `disableInteractive` visited waypoints; bind `onMove` to a highlighted waypoint cursor, confirm visits the highlighted one. `JourneyMissionScene.ts`
+- [x] **P2-06 (S)** Profile keyboard nav can land on Settings/Back with zero highlight → opens parent gate by accident. *Fix:* exclude corner utilities from the navigable array (or bind their pulse). `ProfileScene.ts`
 - [ ] **P2-07 (M)** TownMap/Profile keyboard+page nav uses `scene.restart()` per arrow press → white-fade strobe + teardown cost. *Fix:* re-render selection highlight in-place; restart only on real page change. `TownMapScene.ts`, `ProfileScene.ts`
 - [ ] **P2-08 (S)** Pre-threshold secret taps give ZERO feedback — child thinks the spot is dead. *Fix:* ascending tick + inner-glow pulse per tap so each visibly 'charges'. `secretHotspot.ts`
-- [ ] **P2-09 (S)** Mission-exit modal is text-only + warns about losing a 'sticker' — unreadable anxiety. *Fix:* picture-first choices (green ▶ keep coin + hero face; map icon to leave); soften subtitle; `FONTS.display`. `confirmMissionExit.ts`
+- [x] **P2-09 (S)** Mission-exit modal is text-only + warns about losing a 'sticker' — unreadable anxiety. *Fix:* picture-first choices (green ▶ keep coin + hero face; map icon to leave); soften subtitle; `FONTS.display`. `confirmMissionExit.ts`
 - [ ] **P2-10 (S)** Bread Rush trains tap-position memory, not the recipe (fixed positions + identical icons). *Fix:* keep recipe ORDER but shuffle TARGET positions; add a filling-bowl→loaf payoff. `matchMissions.ts`, `MatchMissionScene.ts`
 
 ## P3 — missing delight
 
 - [ ] **P3-01 (S→M)** Fanfare is thin and the sticker cue == secret chime. *Fix:* richer celebratory fanfare (chord pad + sparkle + a ringing note as long as the confetti) + a dedicated warm 'sticker' cue; reserve the shimmer for true secret discoveries. *(audio — Claude lane)*
-- [ ] **P3-02 (S)** Secret reveal + exit modal render in Arial, not the pixel storybook font. *Fix:* `FONTS.display`/`FONTS.label`. `secretHotspot.ts`, `confirmMissionExit.ts`
+- [ ] **P3-02 (S)** Secret reveal + exit modal render in Arial, not the pixel storybook font. *Fix:* `FONTS.display`/`FONTS.label`. `secretHotspot.ts`, `confirmMissionExit.ts` — *(exit modal ✅ Wave 2; `secretHotspot.ts` reveal remains for Wave 3)*
 - [ ] **P3-03 (M)** House Builder + Match variants feel identical (no title shown, same orderedParts). *Fix:* 1.5s title card + preview silhouette + distinct accent color per house; fold Match into the P1-03 intro. `HouseBuilderScene.ts`, `houseBlueprints.ts`
 - [ ] **P3-04 (M)** Aim/Fire assist is an invisible teal dot flying the wrong way — a No-Fail mercy reads as nothing. *Fix:* real helper sprite flies TO the assisted target, sprays it, waves, warm chime. `AimMissionScene.ts`, `FireFixScene.ts`
 - [ ] **P3-05 (M)** No visible aim indicator (beam alpha 0.16) — child mashes Act blind. *Fix:* bold opaque directional cone + pulsing ring on in-cone targets + ground arrow. `AimMissionScene.ts`

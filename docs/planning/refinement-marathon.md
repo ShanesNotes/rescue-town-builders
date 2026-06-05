@@ -62,8 +62,9 @@ call, which stays Shane's reserved nudge.
 | Wave | Focus | Items | Gates | Commit |
 | --- | --- | --- | --- | --- |
 | 0 | Pull latest (ff to 824f67d, folded Reuse Workshop #20), baseline, plan, 14-agent analysis + Codex audit → 37-item backlog | — | typecheck✓ test✓(113) e2e✓(6) | docs only |
-| 1 | Touch-critical safety: P0-01 house ghost-tap, P0-02 bindPress disarm, P1-01 music-not-silent | 3 | typecheck✓ test✓(114) build✓ e2e✓(6) | (this commit) |
+| 1 | Touch-critical safety: P0-01 house ghost-tap, P0-02 bindPress disarm, P1-01 music-not-silent | 3 | typecheck✓ test✓(114) build✓ e2e✓(6) | 2e0e584 |
+| 2 | Input parity & safety: new ChoiceModal + HoldGate controllers → P0-03 exit soft-lock, P0-04 gamepad gate bypass, P1-11 one-tap save-wipe, P2-05 journey keyboard, P2-06 profile keyboard, P2-09 picture-first exit (+font) | 6 | typecheck✓ test✓(114) build✓ e2e✓(6) | (this commit) |
 
-**Next:** Wave 2 — Input parity & safety (shared child-safe modal/focus controller per Codex): P0-03, P0-04, P1-11, P2-06, P2-05, P2-09. Then Waves 3–8 per [child-playthrough-backlog.md](./child-playthrough-backlog.md).
+**Next:** Wave 3 — Non-reader onboarding: P1-03 intro beat (all missions), P1-02 profile heroes tappable, P1-06 house tray highlight, P2-04 match wrong-tap guide, P3-02 secret-reveal font, P3-09 preload font. Then Waves 4–8 per [child-playthrough-backlog.md](./child-playthrough-backlog.md).
 
 **Multi-model engagement (per wave):** Codex (workspace-write, `/home/ark/rtb-codex`) → asset payoffs Waves 6+ (invention sprites, helper drone, house accents, diorama props) + independent re-audit. Grok (`/home/ark/rtb-grok`) → onboarding microcopy (Wave 3) + VO script (Wave 8). Claude owns all scene/system mechanics.
