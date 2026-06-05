@@ -71,7 +71,9 @@ export const MISSION_SCENE_KEYS: Partial<Record<MissionId, SceneKey>> = {
 const ARCHETYPE_SCENE_KEYS: Record<MissionArchetype, SceneKey> = {
   match: SCENE_KEYS.matchMission,
   aim: SCENE_KEYS.aimMission,
-  journey: SCENE_KEYS.journeyMission,
+  // All journey missions are captured into Town Ride (which reads init({missionId})); the old
+  // JourneyMissionScene is retired, so the journey archetype defaults here too.
+  journey: SCENE_KEYS.townRide,
 };
 
 export function sceneKeyForMission(missionId: MissionId, archetype?: MissionArchetype): SceneKey {

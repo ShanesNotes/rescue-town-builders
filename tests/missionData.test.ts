@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { HEARTHLIGHT_ASSETS } from '../src/game/data/hearthlightAssets';
 import { matchMissions } from '../src/game/data/matchMissions';
 import { aimMissions } from '../src/game/data/aimMissions';
-import { journeyMissions } from '../src/game/data/journeyMissions';
 import { missionDefinitions } from '../src/game/data/missions';
 
 // Static integrity for every roadmap mission's content: a typo'd texture key or a match prompt
@@ -42,21 +41,16 @@ describe('roadmap mission data integrity', () => {
     }
   });
 
-  it('Journey: waypoint/final/backdrop textures are all real', () => {
-    for (const [id, m] of Object.entries(journeyMissions)) {
-      expect(keys.has(m.backdrop), `${id}: backdrop`).toBe(true);
-      expect(keys.has(m.waypointKey), `${id}: waypoint`).toBe(true);
-      if (m.finalKey) expect(keys.has(m.finalKey), `${id}: final`).toBe(true);
-      expect(m.waypoints.length).toBeGreaterThan(0);
-    }
-  });
+  // (Journey missions are now Town Ride hero-game variants — no shared journey-engine data file.)
 
   it('every roadmap mission has matching engine data + a real character portrait', () => {
     for (const def of missionDefinitions) {
       if (!def.archetype) continue;
-      const data =
-        def.archetype === 'match' ? matchMissions[def.id] : def.archetype === 'aim' ? aimMissions[def.id] : journeyMissions[def.id];
-      expect(data, `${def.id}: has ${def.archetype} data`).toBeTruthy();
+      // Journey missions were captured into Town Ride and no longer carry shared journey-engine data.
+      if (def.archetype !== 'journey') {
+        const data = def.archetype === 'match' ? matchMissions[def.id] : aimMissions[def.id];
+        expect(data, `${def.id}: has ${def.archetype} data`).toBeTruthy();
+      }
       expect(keys.has(`hl.char.${def.characterId}`), `${def.id}: portrait hl.char.${def.characterId}`).toBe(true);
     }
   });

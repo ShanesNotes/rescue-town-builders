@@ -103,7 +103,7 @@ test('captures every screen and stays error-free across a full playthrough', asy
   await tap(page, 'mission.complete.back-to-map');
   await scene(page, 'TownMapScene');
 
-  // A Journey mission (Scooter Roundup) — verify the JourneyMissionScene waypoint flow.
+  // Scooter Roundup — captured into Town Ride (the journey missions' hero game).
   await tap(page, 'townmap.next');
   await scene(page, 'TownMapScene');
   await tap(page, 'townmap.next');

@@ -331,3 +331,13 @@ asteroid-blaster (Aim) + bread-rush (Match). **The two remaining steps are human
   accurate — they already defer mechanics to the ADRs). Added the **Overhaul summary** section above.
 - Final verification: all gates GREEN — typecheck clean, **169/169** unit, build ok, **e2e 8/8**.
 - The build work is done; the outstanding steps are human (merge to `main` + Willem's playtest).
+
+### Cycle 17 — Cleanup: retire the now-dead Journey engine
+- All 4 journey missions are captured into Town Ride, so `JourneyMissionScene` was unreachable. Repointed
+  `ARCHETYPE_SCENE_KEYS['journey']` → Town Ride (sensible default + keeps the type valid), then deleted
+  `scenes/JourneyMissionScene.ts` + `data/journeyMissions.ts`, removed the GameConfig wiring, and trimmed
+  `missionData.test.ts` (dropped the journey-textures test; journey missions no longer carry shared
+  engine data). Town Ride already carries each journey's secret (RIDE_SECRET), so the JOURNEY_SECRETS
+  that lived in the deleted scene are not lost. Still on shared engines: Aim (frog-flight,
+  asteroid-blaster) + Match (bread-rush) — Shane's content call.
+- Gates: GREEN — typecheck clean, **168/168** unit (one journey-data test removed), build ok, **e2e 8/8**.
