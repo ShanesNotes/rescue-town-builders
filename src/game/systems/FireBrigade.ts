@@ -1,4 +1,4 @@
-import type { MissionResult } from '../types';
+import type { MissionId, MissionResult } from '../types';
 import { clampStars } from './StarScoring';
 
 // Pure, Phaser-free logic for Ember's Fire Brigade — the Arcade water-arc firefighter that replaces
@@ -70,16 +70,18 @@ export function applyHelper(state: FireBrigadeState): FireBrigadeState {
   return withCompletion({ ...state, fires, helperAssists: state.helperAssists + 1 });
 }
 
-export function getFireBrigadeResult(state: FireBrigadeState): MissionResult {
+// Parameterized by the launching missionId so one spray scene can serve several "douse the targets"
+// missions (fire-fix + the captured goo-cleanup), each unlocking its own '<missionId>-starter' sticker.
+export function getFireBrigadeResult(state: FireBrigadeState, missionId: MissionId = 'fire-fix'): MissionResult {
   const firesOut = state.fires.filter((f) => f.heat === 0).length;
   // Arc-shooting throws many droplets, so spray count is loose; a clean, helper-free win is 3 stars.
   const penalty = Math.floor(state.sprays / 18) + state.helperAssists;
   return {
-    missionId: 'fire-fix',
+    missionId,
     completed: state.completed,
     stars: clampStars(3 - penalty),
     score: Math.max(0, 1000 - state.helperAssists * 120 - state.sprays * 8),
-    stickersUnlocked: state.completed ? ['fire-fix-starter'] : [],
+    stickersUnlocked: state.completed ? [`${missionId}-starter`] : [],
     stats: {
       firesOut,
       sprays: state.sprays,

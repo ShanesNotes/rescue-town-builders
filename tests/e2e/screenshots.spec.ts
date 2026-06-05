@@ -91,15 +91,15 @@ test('captures every screen and stays error-free across a full playthrough', asy
   await tap(page, 'mission.complete.back-to-map');
   await scene(page, 'TownMapScene');
 
-  // An Aim mission (Goo Cleanup) — verify the AimMissionScene + No-Fail drone floor.
+  // Goo Cleanup — captured into Ember's water-arc scene (water rinses the goo).
   await tap(page, 'townmap.next');
   await scene(page, 'TownMapScene');
   await tap(page, 'townmap.next');
   await scene(page, 'TownMapScene');
   await tap(page, 'townmap.mission.goo-cleanup');
-  await scene(page, 'AimMissionScene');
+  await scene(page, 'EmberBrigadeScene');
   await shot(page, '11-goo-cleanup');
-  await clearMission(page, 'AimMissionScene', ['goo-cleanup.act'], 40);
+  await clearMission(page, 'EmberBrigadeScene', ['fire.spray'], 70);
   await tap(page, 'mission.complete.back-to-map');
   await scene(page, 'TownMapScene');
 

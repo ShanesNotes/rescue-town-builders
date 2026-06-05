@@ -288,3 +288,16 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
 - **e2e now 8/8.** goo-cleanup → Ember deferred to next cycle (it's e2e-played + needs a target-skin
   param, so it warrants its own focused cycle).
 - Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 8/8**.
+
+### Cycle 15 — Consolidation: capture goo-cleanup into Ember (water cleans goo)
+- Parameterized EmberBrigadeScene by missionId (`init({missionId})`) with a per-mission **target skin**
+  (fire-fix → campfire/embers + smoke; goo-cleanup → `hl.prop.gooBlobLarge` → `hl.prop.cleanPatch`,
+  no tint, no smoke), per-mission backdrop, and a per-mission secret map (fire-fix → secret-friend;
+  goo-cleanup → none). Same douse mechanic + 3 waves. `getFireBrigadeResult` parameterized by missionId.
+- Rerouted `MISSION_SCENE_KEYS['goo-cleanup']` → emberBrigade; updated the SceneNavigation unit test +
+  the screenshots e2e (goo-cleanup now plays EmberBrigadeScene via `fire.spray`, loop 70 for 3 waves).
+- **Screenshot-verified: it renders great** — Ember rinsing five smiley goo-blobs across the goo town
+  square. Natural fit, not forced.
+- **Hero games now serve 11 of 14 missions.** Left on shared engines (no clean hero fit): frog-flight,
+  asteroid-blaster (Aim) + bread-rush (Match) — they still work; not worth forcing.
+- Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 8/8**.

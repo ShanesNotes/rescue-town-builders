@@ -21,14 +21,29 @@ import {
 } from '../systems/FireBrigade';
 import { addIconButton } from '../ui/Button';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
+import type { MissionId } from '../types';
+import type { SecretId } from '../systems/Secrets';
 
-// Ember's Fire Brigade — Arcade water-arc firefighting (replaces the move-and-cone Fire Fix).
-// The child points; water LAUNCHES on a visible ballistic arc and lands where they touch (forgiving
-// aim — teaches trajectory by sight, never a hidden cone). Fires shrink to a curl of steam as they
-// cool. No-fail: unlimited water, no player damage, and a friendly helper cools the weakest fire if
-// the child stalls — the round always converges. Reuses missionId 'fire-fix' (FireBrigade.ts).
+// Ember's water-arc spray scene — the child points; water LAUNCHES on a visible ballistic arc and
+// lands where they touch (forgiving aim — never a hidden cone). It serves the "douse the targets"
+// missions: fire-fix (cool the fires) and the captured goo-cleanup (rinse the goo). Reads its
+// launching missionId to pick the target skin, backdrop, secret, and sticker. No-fail: unlimited
+// water, no player damage, and a friendly helper clears the weakest target if the child stalls.
 
 type Drop = Phaser.Physics.Arcade.Image;
+
+// Per-mission "target skin" so the same douse mechanic reads as fire OR goo.
+type Skin = { bg: string; litTex: string; outTex: string; tintHot: number; tintCool: number; outTint: number; smoke: boolean };
+const SKIN: Partial<Record<MissionId, Skin>> = {
+  'fire-fix': { bg: 'hl.bg.fire', litTex: 'hl.prop.campfire', outTex: 'hl.prop.embers', tintHot: 0xffb24a, tintCool: 0xffd9a0, outTint: 0x6fd3e0, smoke: true },
+  // Goo blobs (natural green sprite — no tint), rinsed to a clean patch; no smoke.
+  'goo-cleanup': { bg: 'hl.bg.gooCleanup', litTex: 'hl.prop.gooBlobLarge', outTex: 'hl.prop.cleanPatch', tintHot: 0xffffff, tintCool: 0xffffff, outTint: 0xffffff, smoke: false },
+};
+const FIRE_SKIN = SKIN['fire-fix']!;
+// Only fire-fix hosts a secret (the shy Secret Friend); goo-cleanup has none.
+const EMBER_SECRET: Partial<Record<MissionId, { id: SecretId; x: number; y: number }>> = {
+  'fire-fix': { id: 'secret-friend', x: 822, y: 438 },
+};
 
 const NOZZLE = { x: 196, y: 408 };
 const GROUND_Y = 506;
@@ -47,6 +62,8 @@ export class EmberBrigadeScene extends Phaser.Scene {
   private lastSprayAt = 0;
   private hitsAtLastTick = 0;
   private waveIndex = 0;
+  private missionId: MissionId = 'fire-fix';
+  private skin: Skin = FIRE_SKIN;
   private done = false;
 
   constructor() {
@@ -54,6 +71,11 @@ export class EmberBrigadeScene extends Phaser.Scene {
       key: 'EmberBrigadeScene',
       physics: { default: 'arcade', arcade: { gravity: { x: 0, y: GRAVITY_Y } } },
     });
+  }
+
+  init(data: { missionId?: MissionId }): void {
+    this.missionId = data.missionId ?? 'fire-fix';
+    this.skin = SKIN[this.missionId] ?? FIRE_SKIN;
   }
 
   create(): void {
@@ -78,9 +100,9 @@ export class EmberBrigadeScene extends Phaser.Scene {
 
     addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => this.requestExit(), testId: 'fire.back-to-map' }).setDepth(40);
 
-    // Secret Friend: a shy creature for the patient child (3 touches), bottom-right, off the playfield.
-    const secrets = createSecretsForProfile();
-    addSecretHotspot(this, secrets, 'secret-friend', 822, 438);
+    // Secret Friend (fire-fix only): a shy creature for the patient child (3 touches), off the playfield.
+    const secret = EMBER_SECRET[this.missionId];
+    if (secret) addSecretHotspot(this, createSecretsForProfile(), secret.id, secret.x, secret.y);
 
     // Spray button (keyboard/gamepad + E2E). In E2E it deterministically cools the weakest fire so the
     // harness never depends on physics timing; in real play it auto-aims a burst at the nearest fire.
@@ -121,7 +143,7 @@ export class EmberBrigadeScene extends Phaser.Scene {
   }
 
   private paintWorld(): void {
-    this.add.image(480, 270, hasTexture(this, 'hl.bg.fire') ? 'hl.bg.fire' : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
+    this.add.image(480, 270, hasTexture(this, this.skin.bg) ? this.skin.bg : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
     // Lighter than the old scene — arcade-bright, not an ominous dusk.
     this.add.rectangle(480, 270, 960, 540, 0x2a3a52, 0.12).setDepth(1);
     if (hasTexture(this, 'hl.prop.hydrant')) this.add.image(120, 446, 'hl.prop.hydrant').setOrigin(0.5, 1).setDisplaySize(64, 78).setDepth(9);
@@ -158,14 +180,17 @@ export class EmberBrigadeScene extends Phaser.Scene {
 
   private buildFires(): void {
     for (const fire of this.state.fires) {
-      const smoke = this.add.image(fire.x, fire.y - 36, hasTexture(this, 'hl.prop.smokeWisp') ? 'hl.prop.smokeWisp' : '__drop').setDisplaySize(40, 48).setDepth(11).setAlpha(0.45);
-      this.fireSmoke.set(fire.id, smoke);
-      const flame = this.add.image(fire.x, fire.y, hasTexture(this, 'hl.prop.campfire') ? 'hl.prop.campfire' : '__drop').setOrigin(0.5, 1).setDepth(12);
+      if (this.skin.smoke) {
+        const smoke = this.add.image(fire.x, fire.y - 36, hasTexture(this, 'hl.prop.smokeWisp') ? 'hl.prop.smokeWisp' : '__drop').setDisplaySize(40, 48).setDepth(11).setAlpha(0.45);
+        this.fireSmoke.set(fire.id, smoke);
+        if (motionAllowed()) this.tweens.add({ targets: smoke, y: smoke.y - 12, alpha: 0.2, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      }
+      const litTex = hasTexture(this, this.skin.litTex) ? this.skin.litTex : '__drop';
+      const flame = this.add.image(fire.x, fire.y, litTex).setOrigin(0.5, 1).setDepth(12);
       this.fireSprites.set(fire.id, flame);
       this.renderFire(fire.id);
       if (motionAllowed()) {
         this.tweens.add({ targets: flame, scaleX: flame.scaleX * 1.08, scaleY: flame.scaleY * 0.94, duration: 220 + Math.random() * 120, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-        this.tweens.add({ targets: smoke, y: smoke.y - 12, alpha: 0.2, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
       }
     }
   }
@@ -176,17 +201,17 @@ export class EmberBrigadeScene extends Phaser.Scene {
     const smoke = this.fireSmoke.get(id);
     if (!fire || !flame) return;
     if (fire.heat <= 0) {
-      flame.setTexture(hasTexture(this, 'hl.prop.embers') ? 'hl.prop.embers' : flame.texture.key).setDisplaySize(40, 36).setTint(0x6fd3e0).setAlpha(0.4);
+      flame.setTexture(hasTexture(this, this.skin.outTex) ? this.skin.outTex : flame.texture.key).setDisplaySize(40, 36).setTint(this.skin.outTint).setAlpha(0.4);
       smoke?.setAlpha(0.55);
       this.tweens.killTweensOf(flame);
       return;
     }
     const t = fire.heat / fire.maxHeat;
     const size = 50 + t * 58;
-    // Reset to the flame texture (a re-lit fire in a new wave may be showing the doused embers).
-    flame.setTexture(hasTexture(this, 'hl.prop.campfire') ? 'hl.prop.campfire' : flame.texture.key);
+    // Reset to the lit texture (a re-lit target in a new wave may be showing its doused skin).
+    flame.setTexture(hasTexture(this, this.skin.litTex) ? this.skin.litTex : flame.texture.key);
     flame.setDisplaySize(size, size).clearTint().setAlpha(1);
-    flame.setTint(t > 0.6 ? 0xffb24a : 0xffd9a0);
+    flame.setTint(t > 0.6 ? this.skin.tintHot : this.skin.tintCool);
   }
 
   private buildEmber(): void {
@@ -377,7 +402,7 @@ export class EmberBrigadeScene extends Phaser.Scene {
     Juice.shake(this, 130, 0.0035);
     Juice.confetti(this, 28);
     getVoice().speak('mission-complete');
-    this.time.delayedCall(motionAllowed() ? 520 : 0, () => completeMission(this, getFireBrigadeResult(this.state)));
+    this.time.delayedCall(motionAllowed() ? 520 : 0, () => completeMission(this, getFireBrigadeResult(this.state, this.missionId)));
   }
 
   private overlayBusy(): boolean {

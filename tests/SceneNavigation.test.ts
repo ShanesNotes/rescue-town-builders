@@ -24,8 +24,9 @@ describe('SceneNavigation', () => {
       'recycling-run': SCENE_KEYS.recyclingRun,
       // The house-builder mission now routes to Brick's Tower (the physics-stacker rebuild).
       'house-builder': SCENE_KEYS.brickTower,
-      // The fire-fix mission now routes to Ember's Fire Brigade (the Arcade water-arc rebuild).
+      // Ember's water-arc scene serves fire-fix + the captured goo-cleanup.
       'fire-fix': SCENE_KEYS.emberBrigade,
+      'goo-cleanup': SCENE_KEYS.emberBrigade,
       // Dream Catch captures inverse-dream + dream-statues (Arcade catcher).
       'inverse-dream': SCENE_KEYS.dreamCatch,
       'dream-statues': SCENE_KEYS.dreamCatch,
