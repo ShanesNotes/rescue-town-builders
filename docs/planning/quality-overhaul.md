@@ -274,3 +274,17 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   backdrops load). **Hero games now serve 10 of 14 missions.** Shared engines now serve only 4:
   frog-flight / goo-cleanup / asteroid-blaster (Aim) + bread-rush (Match).
 - Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.
+
+### Cycle 14 — Verify the consolidation in-browser
+- New `tests/e2e/captured-missions.spec.ts`: pages the town-map roadmap (robust page-find: rewind to
+  page 0, advance until the node is visible) to the not-yet-played captured missions and proves each
+  **launches the right hero scene, completes via its deterministic button, and unlocks its OWN sticker**
+  — dream-statues → DreamCatchScene (`dream-statues-starter`), recycled-inventions → RecyclingRunScene
+  (`recycled-inventions-starter`), bike-explorer → TownRideScene (`bike-explorer-starter`, the journey
+  that carries the garden-cat secret). Asserts zero console errors. This de-risks the whole
+  consolidation (inverse-dream + scooter-roundup were already covered by screenshots.spec).
+- Gotcha: the project typecheck uses a Playwright type shim without `.toContain` — used
+  `(arr.includes(x)).toBe(true)` instead.
+- **e2e now 8/8.** goo-cleanup → Ember deferred to next cycle (it's e2e-played + needs a target-skin
+  param, so it warrants its own focused cycle).
+- Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 8/8**.
