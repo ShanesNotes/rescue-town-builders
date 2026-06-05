@@ -157,19 +157,34 @@ export function createWebAudioMusicSink(): MusicSink {
  * the track is already loudness-normalised to ~-16 LUFS) so it sits under the SFX. Any failure
  * is swallowed — music is a bonus and must never interrupt play (No-Fail). The `theme` arg is
  * unused here; this is the recorded swap-in behind the same MusicSink seam as the synth.
+ *
+ * If the OGG cannot load or play, `onFailure` fires once so a wrapping sink can fall back to the
+ * synth loop — music is never simply absent (No-Fail audio).
  */
-export function createHtmlAudioMusicSink(url: string): MusicSink {
+export function createHtmlAudioMusicSink(url: string, onFailure?: () => void): MusicSink {
   let audio: HTMLAudioElement | null = null;
   let timer: ReturnType<typeof setInterval> | null = null;
+  let failed = false;
   const CAP = 0.55; // music sits softly beneath the SFX
+
+  const fail = (): void => {
+    if (failed) return;
+    failed = true;
+    onFailure?.();
+  };
 
   return {
     start(_theme, level) {
       try {
-        if (typeof Audio === 'undefined') return;
+        if (typeof Audio === 'undefined') {
+          fail();
+          return;
+        }
         audio = new Audio(url);
         audio.loop = true;
         audio.volume = musicGainFromLevel(level()) * CAP;
+        // A bad source / decode error means the OGG will never play — fall back to the synth.
+        audio.addEventListener('error', fail, { once: true });
         void audio.play().catch(() => undefined); // autoplay may defer until the gesture resolves
         timer = setInterval(() => {
           if (!audio) return;
@@ -180,6 +195,7 @@ export function createHtmlAudioMusicSink(url: string): MusicSink {
         }, 250);
       } catch {
         // No-Fail: a music error must never interrupt the child's play.
+        fail();
       }
     },
     stop() {
@@ -189,6 +205,41 @@ export function createHtmlAudioMusicSink(url: string): MusicSink {
         audio.pause();
         audio = null;
       }
+    },
+  };
+}
+
+/**
+ * No-Fail audio guarantee: start the recorded OGG, but if it cannot play, hand off to the
+ * WebAudio synth loop so the town is never silent. Both are full MusicSinks behind the same
+ * seam; this composes them so a single `start()` covers the real theme with a synth safety net.
+ */
+export function createFallbackMusicSink(url: string): MusicSink {
+  const synth = createWebAudioMusicSink();
+  let activeTheme: MusicTheme | null = null;
+  let activeLevel: (() => number) | null = null;
+  let usingFallback = false;
+  let stopped = false;
+
+  const toSynth = (): void => {
+    if (usingFallback || stopped || !activeTheme || !activeLevel) return;
+    usingFallback = true;
+    synth.start(activeTheme, activeLevel);
+  };
+
+  const ogg = createHtmlAudioMusicSink(url, toSynth);
+
+  return {
+    start(theme, level) {
+      activeTheme = theme;
+      activeLevel = level;
+      stopped = false;
+      ogg.start(theme, level);
+    },
+    stop() {
+      stopped = true;
+      ogg.stop();
+      if (usingFallback) synth.stop();
     },
   };
 }

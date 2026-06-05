@@ -77,6 +77,8 @@ call, which stays Shane's reserved nudge.
 
 | 8 | Input parity & truthfulness (Codex final-QA CF-1..10): overlay input-lock, House confirm-glowing-part, **truthful Aim cone** (engine+view one source of truth, shown===hittable), Match alpha-reset + focus ring, reward keyboard nav, parent-gate hold-key (Enter/Space/A only), water-bottle→glass-bottle asset fix; +3 tests | 8 | typecheck✓ test✓(133) build✓ e2e✓(6) | (this commit) |
 
-**Next:** Wave 9 — Wow-factor: P4-01 living-diorama town growth (the single biggest swing) + CF-11 secret copy + CF-12 audio status. Then Wave 10 — P4-02 Grok-scripted spoken VO (Web Speech, parent-toggle) + P4-03 aim direct-touch + CF-8 pointerup hardening. Then the final summary + merge-to-`main` ship decision for Shane.
+| 9 | Living diorama (P4-01): the Town Map grows from dark-and-sparse to warm-and-bustling — deterministic per-mission life (rescued helper, chimney smoke, tree, flower box, flickering lamp, picnic blanket, birds), persists across visits, strictly behind interactive layers, motion-gated, one-shot reveal on celebrate-return; + CF-11 honest secret copy + CF-12 audio status/synth fallback; +9 tests | 3 | typecheck✓ test✓(142) build✓ e2e✓(6) | (this commit) |
+
+**Next:** Wave 10 — Voice & touch: P4-02 Grok-scripted spoken VO (Web Speech, parent-toggle) + P4-03 aim direct-touch. Then CF-8 pointerup hardening + the final summary + merge-to-`main` ship decision for Shane.
 
 **Multi-model engagement (per wave):** Codex (workspace-write, `/home/ark/rtb-codex`) → asset payoffs Waves 6+ (invention sprites, helper drone, house accents, diorama props) + independent re-audit. Grok (`/home/ark/rtb-grok`) → onboarding microcopy (Wave 3) + VO script (Wave 8). Claude owns all scene/system mechanics.

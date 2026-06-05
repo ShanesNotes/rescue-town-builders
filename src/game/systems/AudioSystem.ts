@@ -8,7 +8,7 @@ export type EffectiveAudioLevels = {
 export type ThemeLoopStatus = {
   imported: boolean;
   segmentCount: number;
-  status: 'backlog' | 'ready' | 'imported';
+  status: 'backlog' | 'ready' | 'imported' | 'production';
   note: string;
 };
 
@@ -24,10 +24,10 @@ export function getEffectiveAudioLevels(settings: Pick<ProfileSettings, 'musicVo
 
 export function getThemeLoopStatus(): ThemeLoopStatus {
   return {
-    imported: false,
+    imported: true,
     segmentCount: 4,
-    status: 'backlog',
-    note: 'Generated theme loop exists outside the repo in four segments; splice and record source notes before import.',
+    status: 'production',
+    note: "Shane's recorded theme is spliced and live as a single OGG (assets/audio/Rescue-town-builders.ogg), played on loop via MusicSystem; the WebAudio synth loop is the No-Fail fallback if the OGG cannot play.",
   };
 }
 

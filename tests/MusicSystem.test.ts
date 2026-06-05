@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { MusicSystem, MUSIC_THEME, musicGainFromLevel, type MusicSink, type MusicTheme } from '../src/game/systems/MusicSystem';
+import {
+  MusicSystem,
+  MUSIC_THEME,
+  musicGainFromLevel,
+  createHtmlAudioMusicSink,
+  createFallbackMusicSink,
+  type MusicSink,
+  type MusicTheme,
+} from '../src/game/systems/MusicSystem';
 
 function fakeSink() {
   const calls: { theme: MusicTheme; level: () => number }[] = [];
@@ -67,5 +75,25 @@ describe('musicGainFromLevel', () => {
     expect(musicGainFromLevel(-1)).toBe(0);
     expect(musicGainFromLevel(2)).toBe(1);
     expect(musicGainFromLevel(Number.NaN)).toBe(0);
+  });
+});
+
+describe('OGG fallback (No-Fail audio)', () => {
+  // In the node test environment there is no `Audio` constructor, so the OGG sink cannot play —
+  // exactly the case the fallback must cover. We assert it signals failure and never throws.
+  it('fires onFailure when the OGG cannot play (no Audio available)', () => {
+    let failed = false;
+    const ogg = createHtmlAudioMusicSink('theme.ogg', () => {
+      failed = true;
+    });
+    expect(() => ogg.start(MUSIC_THEME, () => 0.5)).not.toThrow();
+    expect(failed).toBe(true);
+    expect(() => ogg.stop()).not.toThrow();
+  });
+
+  it('start/stop on the fallback sink never throw even when the OGG is unavailable', () => {
+    const sink = createFallbackMusicSink('theme.ogg');
+    expect(() => sink.start(MUSIC_THEME, () => 0.5)).not.toThrow();
+    expect(() => sink.stop()).not.toThrow();
   });
 });

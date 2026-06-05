@@ -4,6 +4,7 @@ import { getSaveSystem, missionRegistry } from '../systems/GameServices';
 import { bindIntents } from '../systems/bindIntents';
 import { SCENE_KEYS, sceneKeyForMission, softStartScene, startParentSettingsGate, startScene, startStickerBook } from '../systems/SceneNavigation';
 import { projectTownMapNodes, type TownMapNode } from '../systems/TownMapProgress';
+import { ambientBirdCount, dioramaDetailsForNode, type DioramaDetail } from '../systems/TownMapDiorama';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
@@ -86,7 +87,24 @@ export class TownMapScene extends Phaser.Scene {
     this.add.image(480, 540, 'hl.map.nearPath').setOrigin(0.5, 1).setDepth(3);
     const warmth = total > 0 ? rescued / total : 0;
     this.add.rectangle(480, 270, 960, 540, 0xffb24a, 0.04 + warmth * 0.06).setBlendMode(Phaser.BlendModes.ADD).setDepth(4);
+    // Town-wide ambient life: a small flock that grows with everything the child has healed, so
+    // the whole town feels more alive on every page — not only the page whose nodes are lit (P4-01).
+    this.buildAmbientBirds(rescued);
     this.add.rectangle(480, 32, 960, 88, 0x101b2e, 0.42).setDepth(5);
+  }
+
+  // A deterministic drift of tiny birds across the upper sky, count scaling with rescues. Behind
+  // the header band + all interactive layers; motion-gated, with a static flock when motion is off.
+  private buildAmbientBirds(rescued: number): void {
+    const count = ambientBirdCount(rescued);
+    for (let i = 0; i < count; i += 1) {
+      const baseX = 150 + i * 150;
+      const y = 92 + (i % 3) * 26;
+      const bird = this.add.text(baseX, y, 'ᵛ', { fontFamily: FONTS.label, fontSize: '18px', color: '#caa86a' }).setOrigin(0.5).setDepth(2).setAlpha(0.55);
+      if (motionAllowed()) {
+        this.tweens.add({ targets: bird, x: baseX + 40, y: y - 8, duration: 4200 + i * 360, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      }
+    }
   }
 
   private paintHeader(): void {
@@ -118,7 +136,13 @@ export class TownMapScene extends Phaser.Scene {
 
     // Landing here straight from finishing this mission: a one-shot celebratory pulse on the
     // freshly-lit house so the child SEES the star/house they just earned (P2-01).
-    if (selected && this.celebrate && node.completed) this.celebrateNode(house, x, houseY);
+    const justEarned = selected && this.celebrate && node.completed;
+    if (justEarned) this.celebrateNode(house, x, houseY);
+
+    // The living diorama (P4-01): each completed mission's permanent life details slot beside the
+    // house, behind the house/stars/coin. On the return from the mission that earned it, the new
+    // details gently reveal themselves once so the town visibly gained a bit of life.
+    this.buildDioramaForNode(node, x, justEarned);
 
     this.starRow(x, 412, node.bestStars);
 
@@ -159,6 +183,109 @@ export class TownMapScene extends Phaser.Scene {
     this.tweens.add({ targets: house, scale: base * 1.12, duration: 320, yoyo: true, repeat: 1, ease: 'Sine.easeInOut' });
     const ring = this.add.circle(x, houseY - 52, 70, 0xffe2a6, 0.5).setBlendMode(Phaser.BlendModes.ADD).setDepth(7);
     this.tweens.add({ targets: ring, scale: 2, alpha: 0, duration: 900, ease: 'Quad.easeOut', onComplete: () => ring.destroy() });
+  }
+
+  // Render the permanent life details a completed mission left on its node (P4-01). Everything
+  // sits behind the house (depth 6), star row (12) and coin (20), so the interactive targets are
+  // never obscured. `reveal` is true only when the child just returned from earning these, giving
+  // a single gentle fade/rise-in; otherwise the grown town is simply present (incl. reduced-motion).
+  private buildDioramaForNode(node: TownMapNode, x: number, reveal: boolean): void {
+    dioramaDetailsForNode(node).forEach((detail, i) => {
+      const obj = this.buildDetail(detail, x);
+      if (obj && reveal) this.revealDetail(obj, i);
+    });
+  }
+
+  private buildDetail(detail: DioramaDetail, x: number): Phaser.GameObjects.GameObject | null {
+    const dx = x + detail.dx;
+    switch (detail.kind) {
+      case 'helper':
+      case 'prop':
+        return detail.textureKey && hasTexture(this, detail.textureKey)
+          ? this.detailSprite(detail.textureKey, dx, detail.y, detail.kind === 'helper' ? 56 : 40, detail.kind === 'helper')
+          : null;
+      case 'smoke':
+        return this.detailSmoke(dx, detail.y);
+      case 'tree':
+        return this.detailTree(dx, detail.y, detail.tint ?? 0x6fc28a);
+      case 'flowers':
+        return this.detailFlowers(dx, detail.y, detail.tint ?? 0xff9ec4);
+      case 'lamp':
+        return this.detailLamp(dx, detail.y, detail.tint ?? 0xffd98a);
+      case 'picnic':
+        return this.detailPicnic(dx, detail.y);
+    }
+  }
+
+  // A small rescued sprite (helper or mission prop), shadowed and gently bobbing when motion is on.
+  private detailSprite(key: string, x: number, y: number, size: number, bob: boolean): Phaser.GameObjects.Image {
+    this.add.ellipse(x, y + size * 0.42, size * 0.8, size * 0.26, 0x1b2a41, 0.28).setDepth(4);
+    const sprite = this.add.image(x, y, key).setDisplaySize(size, size).setOrigin(0.5, 1).setDepth(5);
+    if (bob && motionAllowed()) this.tweens.add({ targets: sprite, y: y - 4, duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    return sprite;
+  }
+
+  // Chimney smoke: three soft wisps rising from the lit house and fading.
+  private detailSmoke(x: number, y: number): Phaser.GameObjects.Container {
+    const smoke = this.add.container(x, y).setDepth(5);
+    for (let i = 0; i < 3; i += 1) {
+      const puff = this.add.circle(0, -i * 12, 6 - i, 0xeef2f6, 0.32 - i * 0.07);
+      smoke.add(puff);
+      if (motionAllowed()) this.tweens.add({ targets: puff, y: puff.y - 22, alpha: 0, duration: 2600, delay: i * 700, repeat: -1, ease: 'Sine.easeOut' });
+    }
+    return smoke;
+  }
+
+  // A planted tree: a trunk and a rounded canopy in a warm green.
+  private detailTree(x: number, y: number, tint: number): Phaser.GameObjects.Container {
+    const tree = this.add.container(x, y).setDepth(5);
+    tree.add(this.add.rectangle(0, 0, 6, 22, 0x8d6e63).setOrigin(0.5, 1));
+    tree.add(this.add.circle(0, -22, 15, tint).setStrokeStyle(2, 0x2c4a3a, 0.6));
+    tree.add(this.add.circle(-8, -16, 10, tint).setStrokeStyle(2, 0x2c4a3a, 0.5));
+    tree.add(this.add.circle(9, -16, 10, tint).setStrokeStyle(2, 0x2c4a3a, 0.5));
+    return tree;
+  }
+
+  // A flower box: a little planter with three blooms.
+  private detailFlowers(x: number, y: number, tint: number): Phaser.GameObjects.Container {
+    const box = this.add.container(x, y).setDepth(5);
+    box.add(this.add.rectangle(0, 0, 34, 12, 0x8d6e63).setOrigin(0.5, 1).setStrokeStyle(1, 0x5a4038));
+    for (let i = -1; i <= 1; i += 1) {
+      box.add(this.add.rectangle(i * 10, -10, 2, 10, 0x4f8a4f).setOrigin(0.5, 1));
+      box.add(this.add.circle(i * 10, -12, 4, tint).setStrokeStyle(1, 0xffffff, 0.5));
+    }
+    return box;
+  }
+
+  // A street lamp that flickers warmly on with a soft glow at its head.
+  private detailLamp(x: number, y: number, tint: number): Phaser.GameObjects.Container {
+    const lamp = this.add.container(x, y).setDepth(5);
+    lamp.add(this.add.rectangle(0, 0, 5, 34, 0x44546b).setOrigin(0.5, 1));
+    const glow = this.add.circle(0, -34, 9, tint, 0.85).setBlendMode(Phaser.BlendModes.ADD);
+    lamp.add(glow);
+    if (motionAllowed()) this.tweens.add({ targets: glow, alpha: 0.45, duration: 1700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    return lamp;
+  }
+
+  // A picnic blanket laid out on the grass — a checked patch.
+  private detailPicnic(x: number, y: number): Phaser.GameObjects.Container {
+    const picnic = this.add.container(x, y).setDepth(5);
+    picnic.add(this.add.rectangle(0, 0, 38, 22, 0xe8857a, 0.9).setStrokeStyle(2, 0xffffff, 0.5));
+    picnic.add(this.add.rectangle(-9, -5, 18, 10, 0xffffff, 0.35));
+    picnic.add(this.add.rectangle(9, 4, 18, 10, 0xffffff, 0.35));
+    return picnic;
+  }
+
+  // The one-time arrival of a freshly-earned detail: it fades in once, then rests as a permanent
+  // part of the town. Alpha-only so it never fights a detail's own bob/smoke/flicker tween.
+  // Motion-gated — reduced motion just shows it already settled.
+  private revealDetail(obj: Phaser.GameObjects.GameObject, index: number): void {
+    if (!motionAllowed()) return;
+    const target = obj as unknown as Phaser.GameObjects.Components.Alpha;
+    if (typeof target.alpha !== 'number') return;
+    const restAlpha = target.alpha;
+    target.setAlpha(0);
+    this.tweens.add({ targets: target, alpha: restAlpha, duration: 560, delay: 240 + index * 170, ease: 'Sine.easeOut' });
   }
 
   // Prev/next page coins + page dots (only when the town spans more than one screen).

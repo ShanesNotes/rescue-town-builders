@@ -46,7 +46,8 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - **Wave 6 — Variety & payoffs** ✅ DONE (procedural + existing art): P1-05, P1-04, P2-10, P3-07, P3-06, P3-03.
 - **Wave 7 — Polish & transitions** ✅ DONE: P2-03, P2-07, P3-01, P2-11, P3-10, P3-11.
 - **Wave 8 — Input parity & truthfulness** (Codex final-QA) ✅ DONE: CF-1 overlay input-lock, CF-2 House focus sync, CF-3 truthful Aim cone, CF-4 Match alpha-reset, CF-5 Match focus ring, CF-7 reward keyboard nav, CF-9 parent-gate hold-key, CF-10 water-bottle asset.
-- **Wave 9 — Wow factor** (Grok VO script ready at rtb-grok/docs/design/voice-and-copy.md): P4-01 living diorama, P4-02 spoken VO, P4-03 aim direct-touch; + CF-8/CF-11/CF-12 cleanup.
+- **Wave 9 — Living diorama** ✅ DONE: P4-01 town grows as missions complete; + CF-11 honest secret copy + CF-12 audio status/fallback.
+- **Wave 10 — Voice & touch** (Grok VO script at rtb-grok/docs/design/voice-and-copy.md): P4-02 spoken VO (Web Speech, parent-toggle), P4-03 aim direct-touch; + CF-8 pointerup hardening.
 
 ---
 
@@ -99,7 +100,7 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 
 ## P4 — wow-factor (the big swings toward "unbelievable")
 
-- [ ] **P4-01 (L)** **Living diorama:** each completed mission permanently adds a lit window / strolling rescued character / chimney smoke / planted tree / lamp, so the child literally SEES the town they healed grow from dark to warm-and-bustling. *The single biggest swing.* `TownMapScene.ts`, `TownMapProgress.ts`, Codex art.
+- [x] **P4-01 (L)** **Living diorama:** each completed mission permanently adds a lit window / strolling rescued character / chimney smoke / planted tree / lamp, so the child literally SEES the town they healed grow from dark to warm-and-bustling. *The single biggest swing.* `TownMapScene.ts`, `TownMapProgress.ts`, Codex art.
 - [ ] **P4-02 (L)** **Light spoken VO** for ~10 highest-value moments (pick a helper, well done, keep playing, found a secret, here's your sticker) so a non-reader plays fully solo. TTS stubs behind a parent toggle are fine to start. New `VoiceSystem` + Grok script copy.
 - [ ] **P4-03 (M)** **Aim direct-touch No-Fail layer:** tap the target to auto-walk the hero + spray it — collapses the most confusing loop into the one gesture every other mission uses. `AimMissionScene.ts`, `AimEngine.ts`
 

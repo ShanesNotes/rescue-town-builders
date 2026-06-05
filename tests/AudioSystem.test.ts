@@ -16,7 +16,7 @@ describe('AudioSystem', () => {
     });
   });
 
-  it('keeps the generated theme loop backlog-only until source notes and splicing exist', () => {
-    expect(getThemeLoopStatus()).toMatchObject({ imported: false, segmentCount: 4, status: 'backlog' });
+  it('reports the recorded theme as imported and in production now that the OGG is live', () => {
+    expect(getThemeLoopStatus()).toMatchObject({ imported: true, segmentCount: 4, status: 'production' });
   });
 });
