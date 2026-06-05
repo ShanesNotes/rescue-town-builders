@@ -92,12 +92,14 @@ export class TownMapScene extends Phaser.Scene {
       const glow = this.add.circle(x, houseY - 52, 84, 0xffc14a, 0.2).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
       if (motionAllowed()) this.tweens.add({ targets: glow, scale: 1.14, alpha: 0.1, duration: 1900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
-    const house = this.add
+    // The house is decorative only. The pulsing mission coin (below) is the single, obvious launch
+    // target — one tap per node. (Previously the house had a raw unguarded pointerup that
+    // double-fired with the coin and launched on stray drags — a No-Fail input-safety hole.)
+    this.add
       .image(x, houseY, node.completed ? 'hl.map.houseLit' : 'hl.map.houseDark')
       .setOrigin(0.5, 1)
       .setDisplaySize(150, 150)
       .setDepth(6);
-    house.setInteractive({ useHandCursor: true }).on('pointerup', () => this.startMission(node));
     this.add.rectangle(x, 256, 7, 96, 0xffd98a, 0.1).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
 
     this.starRow(x, 412, node.bestStars);

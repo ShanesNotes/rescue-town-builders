@@ -25,6 +25,13 @@ describe('SaveSystem', () => {
     expect(reloaded.getSelectedProfile()?.name).toBe('Player 1');
   });
 
+  it('starts a new profile with audible music (No-Fail: the world is never silent on first run)', () => {
+    const profile = new SaveSystem(memoryStorage()).createProfile({ name: 'Willem', avatarId: 'rivet' });
+    expect(profile.settings.musicVolume).toBeGreaterThan(0);
+    expect(profile.settings.musicVolume).toBe(0.35);
+    expect(profile.settings.audioMuted).toBe(false);
+  });
+
   it('limits local profiles to five', () => {
     const saves = new SaveSystem(memoryStorage());
 

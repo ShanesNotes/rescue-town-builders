@@ -50,7 +50,9 @@ const MAX_PROFILES = 5;
 function defaultSettings(): ProfileSettings {
   return {
     difficulty: 'helper',
-    musicVolume: 0,
+    // The world is never silent on first run — a non-reader reads silence as "broken/asleep".
+    // The synth lullaby is a gentle 0.05-peak loop; parents can still mute/adjust at the Grown-up gate.
+    musicVolume: 0.35,
     sfxVolume: 0.7,
     audioMuted: false,
   };

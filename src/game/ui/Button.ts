@@ -31,6 +31,13 @@ function bindPress(target: Phaser.GameObjects.GameObject, handlers: { onDown?: (
     armed = false;
     handlers.onConfirm();
   });
+  // Disarm if the finger slides off or the gesture is cancelled, so a later stray pointerup can
+  // never fire a "ghost tap" — the exact swipe-everything behavior a young child exhibits.
+  const disarm = (): void => {
+    armed = false;
+  };
+  target.on('pointerout', disarm);
+  target.on('pointercancel', disarm);
 }
 
 export type IconButtonOptions = {
