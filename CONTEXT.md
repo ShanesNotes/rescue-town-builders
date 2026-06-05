@@ -10,6 +10,7 @@
 - **Town Map Hub** — the mission-selection screen where each building or area opens a mini-game.
 - **Helper Character** — an original kid or animal helper associated with a mission. Avoid "pup" only when it creates third-party character confusion; the PRD's original helper names are allowed.
 - **Mission** — a short playable activity lasting roughly 60-180 seconds.
+- **Hero Game** — one of the 5 deep, arcade-energy, no-fail games the missions now run on (Brick's Tower, Ember's water-arc spray, Rivet's Recycle Snake, Cluckle's Dream Catch, Town Ride). Each plays ~3 ramping rounds and can serve several missions, reading its launching `missionId` for backdrop/skin/secret/sticker. See ADR-0009.
 - **Mission Framework** — the shared runtime expectations for starting, pausing, completing, scoring, saving, and returning from missions.
 - **Mission Definition** — data describing a mission's id, title, character, map node, intro panels, age target, and estimated duration.
 - **Mission Result** — the completion payload containing stars, score, unlocked stickers, and stats.
@@ -24,11 +25,23 @@
 - **Placeholder Asset** — temporary original or approved CC0/royalty-free art/audio used to keep engineering moving.
 - **Production Asset** — final or shippable art/audio with recorded source, license, and replacement notes.
 
-## Original MVP missions
+## Missions → hero games (ADR-0009)
 
-- **Rivet's Recycling Run** — sorting trash, paper, plastic, metal, and compost. Teaches categorization and visual discrimination.
-- **Brick's House Builder** — selecting house parts in order. Teaches sequencing and spatial matching.
-- **Ember's Fire Fix** — moving, aiming, and spraying water at cartoon fires. Teaches directional control, timing, and prioritization.
+The original sorting/aiming missions were rebuilt into 5 deep arcade physics **hero games** (the
+"go bigger" overhaul; full record in `docs/planning/quality-overhaul.md`). The 3 original MVP missions
+are now:
+
+- **Rivet's Recycling Run** → **Recycle Snake** — a no-fail Snake: drive Rivet's cart to scoop up
+  recyclables (it grows a tail), 3 yards. (Also serves recycled-inventions.)
+- **Brick's House Builder** → **Brick's Tower** — a Matter.js physics block-stacker: drop bricks that
+  fall and settle with real weight, 3 towers.
+- **Ember's Fire Fix** → **Ember's water-arc spray** — point and water LAUNCHES on a visible ballistic
+  arc to douse fires (3 waves). (Also serves goo-cleanup: water rinses goo.)
+
+The roadmap missions fold in too: inverse-dream/dream-statues → Dream Catch; the journeys
+(scooter-roundup/bike-explorer/safety-lights/treasure-boat) → Town Ride. **11 of 14 missions** run on
+hero games; frog-flight, asteroid-blaster, and bread-rush remain on the classic shared engines (no
+clean hero fit). Every game is no-fail, near-text-free, and physical.
 
 ## Safety and design constraints
 

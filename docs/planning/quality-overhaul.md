@@ -85,6 +85,27 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
 - Over-stimulation → every effect through Juice behind `motionAllowed()`; subtle flashes.
 - **Willem's real-tablet play-test remains the true gate** (merge-to-main awaits it).
 
+## Overhaul summary (cycles 1–15, 2026-06-05)
+
+The "go bigger" overhaul is structurally complete and documented in **ADR-0009**. What shipped, across
+15 verified cycles on `continuous-refinement` (every cycle green; **169 unit tests, e2e 8/8, zero
+console errors**):
+
+- **Music-at-menu bug fixed** + the shared juice kit grew (`hitStop`, `flashWhite`).
+- **5 deep arcade hero games**, each no-fail, near-text-free, physical, with **3 ramping rounds**:
+  Brick's Tower (Matter stacker), Ember's water-arc spray, Rivet's Recycle Snake, Cluckle's Dream
+  Catch, Town Ride.
+- **Consolidation:** hero games serve **11 of 14 missions** (each captured mission keeps its backdrop,
+  secret, and sticker via the `MISSION_SCENE_KEYS` override + `init({missionId})` + parameterized
+  `getXResult`). Proven in-browser by `captured-missions.spec`.
+- **Cleanup:** retired the 3 old bespoke verticals (12 files); added a real-Matter-physics smoke test.
+- **Soul intact:** every hidden secret carried into the hero scenes; one bright Codex backdrop wired
+  into Brick's Tower (the rest of the AI-art batch skipped as not-clear-upgrades).
+
+**Left on the classic shared engines (no clean hero fit, still functional):** frog-flight,
+asteroid-blaster (Aim) + bread-rush (Match). **The two remaining steps are human:** merge
+`continuous-refinement` → `main`, and **Willem's tablet playtest** (the true feel gate for the physics).
+
 ## Cycle ledger (append-only — newest at bottom)
 
 ### Cycle 1 — foundation: music bug + juice kit
@@ -301,3 +322,12 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
 - **Hero games now serve 11 of 14 missions.** Left on shared engines (no clean hero fit): frog-flight,
   asteroid-blaster (Aim) + bread-rush (Match) — they still work; not worth forcing.
 - Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 8/8**.
+
+### Cycle 16 — Documentation + final verification
+- Wrote **ADR-0009 — Hero-Games Overhaul** (decision, the 5 hero games + the missions each serves, the
+  routing/`init(missionId)`/parameterized-result pattern, no-fail/render-in-place/E2E-timing rules,
+  what's left + why; Accepted). Updated **CONTEXT.md** (new "Hero Game" glossary term + the
+  missions→hero-games mapping). design.md/creative-direction.md left untouched (feel docs, still
+  accurate — they already defer mechanics to the ADRs). Added the **Overhaul summary** section above.
+- Final verification: all gates GREEN — typecheck clean, **169/169** unit, build ok, **e2e 8/8**.
+- The build work is done; the outstanding steps are human (merge to `main` + Willem's playtest).
