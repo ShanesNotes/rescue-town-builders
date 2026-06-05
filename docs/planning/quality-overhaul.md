@@ -184,3 +184,19 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
 - Next: a POLISH/CLEANUP cycle — retire the now-unreachable old scenes (RecyclingRunScene,
   HouseBuilderScene, FireFixScene, + MatchMissionScene only for inverse-dream), optimize the 988KB
   build-lot.png, a real-physics dev-server smoke of Brick's Tower, cohesion fixes.
+
+### Cycle 7 — Polish & cleanup
+- **Retired 3 dead verticals** (replaced by hero games): deleted RecyclingRunScene/HouseBuilderScene/
+  FireFixScene + their systems (RecyclingRun/HouseBuilder/FireFix) + data (recyclingItems/
+  houseBlueprints/picnicFires) + unit tests = **12 files**. Each was referenced only within its own
+  vertical (grep-verified). Cleaned GameConfig imports + scene list. KEPT Match/Aim/Journey engines
+  (still serve dream-statues, recycled-inventions, bread-rush, goo-cleanup, the other journeys, etc.).
+  193 → 169 unit tests (removed tests covered removed code); bundle a touch smaller.
+- **Real Matter physics smoke**: added a non-gating `brick.drop.real` E2E hook + `tests/e2e/
+  physics-smoke.spec.ts` that spawns 5 REAL falling Matter bricks and asserts the spawn/settle/freeze
+  path raises ZERO runtime errors (no flaky settle assertions). Closes the one path e2e never covered.
+  Screenshot `brick-real-physics.png` shows a real settled brick stack — physics confirmed working.
+- **Image opt: SKIPPED** — no pngquant/optipng/sharp/convert available; declined to add a heavy build
+  dep for one asset. TODO: compress build-lot.png (988KB → <300KB) when a tool is on hand.
+- Cohesion: per-hero pip accent colours are intentional (each hero's theme) — left as-is.
+- Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.

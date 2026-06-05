@@ -3,9 +3,7 @@ import { BootScene } from './scenes/BootScene';
 import { BrickTowerScene } from './scenes/BrickTowerScene';
 import { DreamCatchScene } from './scenes/DreamCatchScene';
 import { EmberBrigadeScene } from './scenes/EmberBrigadeScene';
-import { FireFixScene } from './scenes/FireFixScene';
 import { AimMissionScene } from './scenes/AimMissionScene';
-import { HouseBuilderScene } from './scenes/HouseBuilderScene';
 import { JourneyMissionScene } from './scenes/JourneyMissionScene';
 import { MatchMissionScene } from './scenes/MatchMissionScene';
 import { MissionCompleteScene } from './scenes/MissionCompleteScene';
@@ -49,9 +47,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     ParentSettingsGateScene,
     ParentSettingsScene,
     RecycleSnakeScene,
-    HouseBuilderScene,
     BrickTowerScene,
-    FireFixScene,
     EmberBrigadeScene,
     DreamCatchScene,
     TownRideScene,

@@ -84,6 +84,9 @@ export class BrickTowerScene extends Phaser.Scene {
 
     // E2E: a deterministic drop so the physics never makes the harness flaky.
     registerE2EButton({ testId: 'brick.drop', label: 'drop brick', sceneKey: this.scene.key, press: () => this.onDrop() });
+    // E2E (non-gating): spawn a REAL falling Matter brick, so a smoke test can exercise the actual
+    // physics spawn/settle path (the deterministic path above never touches Matter bodies).
+    registerE2EButton({ testId: 'brick.drop.real', label: 'real drop', sceneKey: this.scene.key, press: () => this.spawnFallingBrick(this.preview.x) });
 
     bindIntents(this, {
       onMove: (x) => this.nudgePreview(x),
