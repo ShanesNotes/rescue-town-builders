@@ -17,6 +17,7 @@ import { ProfileScene } from './scenes/ProfileScene';
 import { RecycleSnakeScene } from './scenes/RecycleSnakeScene';
 import { StartScene } from './scenes/StartScene';
 import { StickerBookScene } from './scenes/StickerBookScene';
+import { TownRideScene } from './scenes/TownRideScene';
 import { TownMapScene } from './scenes/TownMapScene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
@@ -53,6 +54,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     FireFixScene,
     EmberBrigadeScene,
     DreamCatchScene,
+    TownRideScene,
     MatchMissionScene,
     AimMissionScene,
     JourneyMissionScene,

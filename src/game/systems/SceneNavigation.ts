@@ -16,6 +16,7 @@ export const SCENE_KEYS = {
   fireFix: 'FireFixScene',
   emberBrigade: 'EmberBrigadeScene',
   dreamCatch: 'DreamCatchScene',
+  townRide: 'TownRideScene',
   matchMission: 'MatchMissionScene',
   aimMission: 'AimMissionScene',
   journeyMission: 'JourneyMissionScene',
@@ -52,6 +53,8 @@ export const MISSION_SCENE_KEYS: Partial<Record<MissionId, SceneKey>> = {
   // Cluckle's Dream Catch (Arcade catcher) captures the Inverse Dream match mission (a bespoke
   // override of the generic match engine — see sceneKeyForMission).
   'inverse-dream': SCENE_KEYS.dreamCatch,
+  // Town Ride (momentum ride) captures the Scooter Roundup journey mission.
+  'scooter-roundup': SCENE_KEYS.townRide,
 };
 
 const ARCHETYPE_SCENE_KEYS: Record<MissionArchetype, SceneKey> = {

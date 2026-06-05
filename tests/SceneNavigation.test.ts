@@ -28,10 +28,14 @@ describe('SceneNavigation', () => {
       'fire-fix': SCENE_KEYS.emberBrigade,
       // The inverse-dream match mission now routes to Cluckle's Dream Catch (Arcade catcher).
       'inverse-dream': SCENE_KEYS.dreamCatch,
+      // The scooter-roundup journey mission now routes to Town Ride (momentum ride).
+      'scooter-roundup': SCENE_KEYS.townRide,
     });
     expect(sceneKeyForMission('fire-fix')).toBe(SCENE_KEYS.emberBrigade);
-    // A bespoke override wins over the archetype engine; a sibling match mission still uses it.
+    // A bespoke override wins over the archetype engine; a sibling mission still uses it.
     expect(sceneKeyForMission('inverse-dream', 'match')).toBe(SCENE_KEYS.dreamCatch);
     expect(sceneKeyForMission('dream-statues', 'match')).toBe(SCENE_KEYS.matchMission);
+    expect(sceneKeyForMission('scooter-roundup', 'journey')).toBe(SCENE_KEYS.townRide);
+    expect(sceneKeyForMission('bike-explorer', 'journey')).toBe(SCENE_KEYS.journeyMission);
   });
 });

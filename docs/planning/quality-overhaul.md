@@ -167,3 +167,20 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   wants a more careful pass or PixelLab characters, not flat drop-ins. Manifest kept for reference.
 - Screenshot verified (Cluckle dreaming, basket, sun/moon bins — on-theme + magical).
 - Gates: GREEN — typecheck clean, **187/187** unit, build ok, **e2e 6/6**.
+
+### Cycle 6 — Hero Game #5: Town Ride 🎉 (all 5 hero games complete)
+- New `systems/TownRide.ts` (pure no-fail round-up/bump/scoring; 6 unit tests) +
+  `data/townRideLevels.ts` (round up 5 friends) + `scenes/TownRideScene.ts` (kinematics — objects
+  scroll left, Scoot follows the steered lane). Steer up/down to scoop runaway friends (they ride a
+  trailing train) and bump past cones — a **bump only slows Scoot for a beat, never a fail**. Scrolling
+  dashed lane sells the speed; pen slides in on the win.
+- Integration: reuses `missionId: 'scooter-roundup'` + sticker. Reroute via the `MISSION_SCENE_KEYS`
+  override (bespoke-over-archetype). **Carried the `meadow-nest` secret** (the off-route wanderer's
+  glimmer) to its (110,180) coords. Updated SceneNavigation unit test + the screenshots e2e
+  (deterministic `ride.catch`).
+- Gates: GREEN — typecheck clean, **193/193** unit, build ok, **e2e 6/6**. Screenshot verified.
+- **MILESTONE: all 5 hero games shipped** — Brick's Tower, Ember's Fire Brigade, Rivet's Recycle Snake,
+  Cluckle's Dream Catch, Town Ride. The "collapse 14 → ~5 deep arcade games" mandate is met.
+- Next: a POLISH/CLEANUP cycle — retire the now-unreachable old scenes (RecyclingRunScene,
+  HouseBuilderScene, FireFixScene, + MatchMissionScene only for inverse-dream), optimize the 988KB
+  build-lot.png, a real-physics dev-server smoke of Brick's Tower, cohesion fixes.
