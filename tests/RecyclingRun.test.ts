@@ -37,6 +37,37 @@ describe('RecyclingRun reuse workshop', () => {
     expect(helperBlueprints.every((blueprint) => blueprint.slots.every((slot) => ['sheet', 'tube'].includes(slot.kind)))).toBe(true);
   });
 
+  it('helper mode yields two DISTINCT blueprint ids (no identical invention twice) (P1-04)', () => {
+    const helperBlueprints = chooseReuseBlueprints(reuseBlueprints, getActiveReusePartKinds('helper'), 2);
+    const ids = helperBlueprints.map((blueprint) => blueprint.id);
+    expect(new Set(ids).size).toBe(2);
+  });
+
+  it('does not always put the correct choice card at index 0 across slots (P1-05)', () => {
+    const blueprints = chooseReuseBlueprints(reuseBlueprints, getActiveReusePartKinds('helper'), 2);
+    let state = createRecyclingRunState('helper', chooseRecyclingItems(recyclingItems, ['paper', 'plastic'], 6), blueprints);
+
+    const matchIndices: number[] = [];
+    while (!state.completed) {
+      matchIndices.push(state.choices.findIndex((choice) => choice.isMatch));
+      const matchingChoice = state.choices.find((choice) => choice.isMatch)!;
+      state = tryReusePart(state, matchingChoice.id).state;
+    }
+
+    // The correct card must appear somewhere other than index 0 on at least one slot.
+    expect(matchIndices.length).toBeGreaterThan(1);
+    expect(matchIndices.every((index) => index === 0)).toBe(false);
+    expect(matchIndices.every((index) => index >= 0)).toBe(true);
+  });
+
+  it('shuffles choices deterministically — same slot yields the same order on a rebuilt run (P1-05)', () => {
+    const blueprints = chooseReuseBlueprints(reuseBlueprints, getActiveReusePartKinds('helper'), 2);
+    const items = chooseRecyclingItems(recyclingItems, ['paper', 'plastic'], 6);
+    const first = createRecyclingRunState('helper', items, blueprints);
+    const second = createRecyclingRunState('helper', items, blueprints);
+    expect(first.choices.map((choice) => choice.id)).toEqual(second.choices.map((choice) => choice.id));
+  });
+
   it('turns a matching rescued item into a placed invention part', () => {
     const blueprints = [reuseBlueprints.find((blueprint) => blueprint.id === 'bubble-sprinkler')!];
     let state = createRecyclingRunState('helper', chooseRecyclingItems(recyclingItems, ['paper', 'plastic'], 6), blueprints);

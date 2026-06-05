@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { houseBlueprints } from '../data/houseBlueprints';
 import { bindIntents } from '../systems/bindIntents';
-import { registerE2EButton } from '../systems/E2EBridge';
+import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
@@ -11,8 +11,8 @@ import { createSecretsForProfile, addSecretHotspot } from '../systems/secretHots
 import {
   createHouseBuilderState,
   getHouseBuilderResult,
-  housePartTray,
   placeHousePart,
+  type HouseBlueprint,
   type HouseBuilderState,
   type HousePartId,
 } from '../systems/HouseBuilder';
@@ -232,6 +232,7 @@ export class HouseBuilderScene extends Phaser.Scene {
     if (!id || this.done) return;
     const prevHouses = this.state.housesBuilt;
     const placedId = this.state.currentPart?.id;
+    const placedAccent = this.state.currentHouse?.accent; // capture BEFORE state advances to the next house
     const outcome = placeHousePart(this.state, id);
     this.state = outcome.state;
 
@@ -243,29 +244,39 @@ export class HouseBuilderScene extends Phaser.Scene {
 
     getSfx().play('place');
     this.hint.setText('');
-    if (placedId) this.snapSlot(placedId);
+    if (placedId) this.snapSlot(placedId, placedAccent);
 
     const houseFinished = this.state.housesBuilt > prevHouses;
-    if (houseFinished) this.celebrateHouse();
+    if (houseFinished) this.celebrateHouse(placedAccent);
     this.render();
 
     if (outcome.completed) {
       this.done = true;
       this.time.delayedCall(motionAllowed() ? 420 : 0, () => completeMission(this, getHouseBuilderResult(this.state)));
+      return;
     }
+    // Between houses, a short title card announces the next build (P3-03).
+    if (houseFinished && this.state.currentHouse) this.showHouseTitleCard(this.state.currentHouse);
   }
 
-  private snapSlot(id: HousePartId): void {
+  private snapSlot(id: HousePartId, accent: number | undefined): void {
     const slot = this.slots.get(id);
     if (!slot) return;
-    slot.clearTint().setAlpha(1);
+    this.applyAccent(slot, id, accent);
     Juice.squashStretch(this, slot, 0.18, 150);
-    Juice.burst(this, slot.x, slot.y, { color: 0xd9c2a0, count: 7, radius: 36 });
+    Juice.burst(this, slot.x, slot.y, { color: accent ?? 0xd9c2a0, count: 7, radius: 36 });
   }
 
-  private celebrateHouse(): void {
+  // Each house carries its own accent so they don't all look identical (P3-03): the roof + bloom take
+  // the house's tint; structural parts stay neutral so the cottage still reads as a house.
+  private applyAccent(slot: Phaser.GameObjects.Image, id: HousePartId, accent: number | undefined): void {
+    if (accent !== undefined && (id === 'roof' || id === 'decoration')) slot.setTint(accent).setAlpha(1);
+    else slot.clearTint().setAlpha(1);
+  }
+
+  private celebrateHouse(accent: number | undefined): void {
     if (!motionAllowed()) return;
-    const glow = this.add.circle(480, 260, 150, 0xffc14a, 0.26).setBlendMode(Phaser.BlendModes.ADD).setDepth(8);
+    const glow = this.add.circle(480, 260, 150, accent ?? 0xffc14a, 0.26).setBlendMode(Phaser.BlendModes.ADD).setDepth(8);
     this.tweens.add({ targets: glow, scale: 1.3, alpha: 0, duration: 700, ease: 'Quad.easeOut', onComplete: () => glow.destroy() });
     const ghostKey = hasTexture(this, 'hl.prop.housePreview') ? 'hl.prop.housePreview' : null;
     if (ghostKey) {
@@ -277,13 +288,57 @@ export class HouseBuilderScene extends Phaser.Scene {
     Juice.confetti(this, 28);
   }
 
+  // A short title card between houses so each variant feels like a fresh build, not a repeat (P3-03):
+  // "Now build: Rainbow Nook!" with a tiny accent-tinted preview silhouette + Brick pointing. Reuses
+  // the Wave-3 intro pattern (scrim + big title + helper). Never blocks logic; e2e skips it.
+  private showHouseTitleCard(house: HouseBlueprint): void {
+    if (isE2EEnabled()) return;
+    const depth = 800;
+    const objects: Phaser.GameObjects.GameObject[] = [];
+    objects.push(this.add.rectangle(480, 270, 960, 540, 0x10243a, 0.6).setDepth(depth).setInteractive());
+    objects.push(
+      this.add
+        .text(480, 168, 'Now build:', { fontFamily: FONTS.display, fontSize: '26px', color: '#EBDDDA', stroke: '#2A1606', strokeThickness: 5 })
+        .setOrigin(0.5)
+        .setDepth(depth + 1),
+    );
+    objects.push(
+      this.add
+        .text(480, 214, `${house.title}!`, { fontFamily: FONTS.display, fontSize: '42px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 7, align: 'center', wordWrap: { width: 760 } })
+        .setOrigin(0.5)
+        .setDepth(depth + 1),
+    );
+    // Tiny preview silhouette tinted with the house's accent so the child sees what's coming.
+    const previewKey = hasTexture(this, 'hl.prop.housePreview') ? 'hl.prop.housePreview' : null;
+    if (previewKey) {
+      const preview = this.add.image(480, 360, previewKey).setOrigin(0.5, 1).setDisplaySize(150, 150).setDepth(depth + 1);
+      if (house.accent !== undefined) preview.setTint(house.accent);
+      objects.push(preview);
+      if (motionAllowed()) this.tweens.add({ targets: preview, scale: preview.scale * 1.08, duration: 560, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+    // Brick hops in pointing at the next build.
+    const brick = this.add.image(720, 400, 'hl.char.brick').setOrigin(0.5, 1).setDisplaySize(120, 120).setDepth(depth + 1);
+    objects.push(brick);
+    if (motionAllowed()) this.tweens.add({ targets: brick, y: brick.y - 12, duration: 480, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    const dismiss = (): void => {
+      if (!motionAllowed()) {
+        objects.forEach((o) => o.destroy());
+        return;
+      }
+      this.tweens.add({ targets: objects, alpha: 0, duration: 240, ease: 'Sine.easeIn', onComplete: () => objects.forEach((o) => o.destroy()) });
+    };
+    this.time.delayedCall(1500, dismiss);
+  }
+
   // Slots show built parts solid; not-yet-built parts sleep faint + cool. The next part glows.
   private render(): void {
     const placed = this.state.currentPartIndex;
+    const accent = this.state.currentHouse?.accent;
     ORDER.forEach((id, i) => {
       const slot = this.slots.get(id);
       if (!slot) return;
-      if (i < placed) slot.clearTint().setAlpha(1);
+      if (i < placed) this.applyAccent(slot, id, accent);
       else slot.setTint(0x9aa6c8).setAlpha(0.4);
     });
     this.updatePips();

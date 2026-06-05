@@ -52,6 +52,17 @@ export const reuseBlueprints: ReuseBlueprint[] = [
     ],
   },
   {
+    id: 'rain-flute',
+    title: 'Rain Flute',
+    problem: 'The puddle band lost the tune that makes it rain-dance.',
+    invention: 'rain flute',
+    testMessage: 'Toot-toot! Happy raindrops hop along to the flute song.',
+    slots: [
+      { id: 'pipe', kind: 'tube', label: 'a tube to toot', x: 440, y: 218 },
+      { id: 'flag', kind: 'sheet', label: 'a flat song-flag', x: 520, y: 238 },
+    ],
+  },
+  {
     id: 'moon-chime',
     title: 'Moon Chime',
     problem: 'The town square needs a shiny bedtime song.',

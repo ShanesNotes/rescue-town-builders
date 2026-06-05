@@ -302,16 +302,44 @@ function withCurrent(state: RecyclingRunState): RecyclingRunState {
     ...state,
     currentBlueprint,
     currentSlot,
-    choices: !completed && currentSlot ? buildChoices(state.items, currentSlot.kind) : [],
+    choices:
+      !completed && currentSlot
+        ? buildChoices(state.items, currentSlot.kind, state.currentBlueprintIndex, state.currentSlotIndex)
+        : [],
     completed,
   };
 }
 
-function buildChoices(items: RecyclingItem[], matchingKind: ReusePartKind): ReuseChoice[] {
+function buildChoices(items: RecyclingItem[], matchingKind: ReusePartKind, blueprintIndex: number, slotIndex: number): ReuseChoice[] {
   const match = findFirstMatchingItem(items, matchingKind);
   const distractors = items.filter((item) => item.partKind !== matchingKind).slice(0, 2);
   const extras = items.filter((item) => item.id !== match.id && !distractors.some((distractor) => distractor.id === item.id));
-  return [match, ...distractors, ...extras].slice(0, 3).map((item) => ({ ...item, isMatch: item.partKind === matchingKind }));
+  const cards = [match, ...distractors, ...extras].slice(0, 3).map((item) => ({ ...item, isMatch: item.partKind === matchingKind }));
+  // Shuffle so the correct card isn't always leftmost ('tap left' would beat the look-and-pick).
+  // Deterministic + seeded by blueprint+slot: stable within a slot, varied across slots, no global RNG.
+  return shuffleSeeded(cards, hashSeed(blueprintIndex, slotIndex));
+}
+
+// Small integer hash of the slot coordinates → a stable per-slot seed (no wall-clock, no global RNG).
+function hashSeed(blueprintIndex: number, slotIndex: number): number {
+  let h = (blueprintIndex + 1) * 73856093 + (slotIndex + 1) * 19349663;
+  h = (h ^ (h >>> 13)) >>> 0;
+  return (h * 1274126177) >>> 0;
+}
+
+// Deterministic Fisher-Yates driven by a tiny LCG so the same seed always yields the same order.
+function shuffleSeeded<T>(items: T[], seed: number): T[] {
+  const out = [...items];
+  let s = seed >>> 0;
+  const next = (): number => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 0x100000000;
+  };
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(next() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
 }
 
 function findFirstMatchingItem(items: RecyclingItem[], matchingKind: ReusePartKind): RecyclingItem {

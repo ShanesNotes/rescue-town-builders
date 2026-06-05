@@ -44,6 +44,7 @@ export class JourneyMissionScene extends Phaser.Scene {
   private done = false;
   private cursor!: Phaser.GameObjects.Arc;
   private highlightIndex = 0;
+  private finalGlow: Phaser.GameObjects.Arc | null = null;
 
   constructor() {
     super('JourneyMissionScene');
@@ -66,6 +67,7 @@ export class JourneyMissionScene extends Phaser.Scene {
     this.glows = new Map();
     this.pips = [];
     this.done = false;
+    this.finalGlow = null;
 
     const targets: MatchTarget[] = cfg.waypoints.map((w) => ({ id: w.id, label: w.label, icon: cfg.waypointKey }));
     const prompts: MatchPrompt[] = cfg.waypoints.map((w, i) => ({ id: `go-${i}`, label: w.label, icon: cfg.waypointKey, correctTargetId: w.id }));
@@ -80,13 +82,19 @@ export class JourneyMissionScene extends Phaser.Scene {
     cfg.waypoints.forEach((w, i) => {
       const isFinal = i === cfg.waypoints.length - 1;
       const key = isFinal && cfg.finalKey && hasTexture(this, cfg.finalKey) ? cfg.finalKey : cfg.waypointKey;
-      const glow = this.add.circle(w.x, w.y, 62, 0xffd98a, 0).setBlendMode(Phaser.BlendModes.ADD).setDepth(9);
-      const img = this.add.image(w.x, w.y, hasTexture(this, key) ? key : 'hl.prop.star').setDisplaySize(70, 70).setDepth(10);
+      // The destination reads as THE goal from the start: a larger marker with a permanent warm halo.
+      const glowRadius = isFinal ? 80 : 62;
+      const glow = this.add.circle(w.x, w.y, glowRadius, 0xffd98a, 0).setBlendMode(Phaser.BlendModes.ADD).setDepth(9);
+      const img = this.add.image(w.x, w.y, hasTexture(this, key) ? key : 'hl.prop.star').setDisplaySize(isFinal ? 92 : 70, isFinal ? 92 : 70).setDepth(10);
       img.setInteractive({ useHandCursor: true }).on('pointerup', () => !isMissionExitOpen(this) && this.visit(w.id));
       registerE2EButton({ testId: `${this.missionId}.waypoint.${w.id}`, label: w.label, sceneKey: this.scene.key, press: () => this.visit(w.id) });
       this.markers.set(w.id, img);
       this.glows.set(w.id, glow);
-      this.add.text(w.x, w.y + 48, w.label, { fontFamily: FONTS.display, fontSize: '15px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 3 }).setOrigin(0.5).setDepth(11);
+      if (isFinal) {
+        this.finalGlow = this.add.circle(w.x, w.y, 96, 0xffc857, 0.12).setBlendMode(Phaser.BlendModes.ADD).setDepth(8);
+        if (motionAllowed()) this.tweens.add({ targets: this.finalGlow, alpha: 0.24, scale: 1.1, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      }
+      this.add.text(w.x, w.y + (isFinal ? 58 : 48), w.label, { fontFamily: FONTS.display, fontSize: isFinal ? '17px' : '15px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 3 }).setOrigin(0.5).setDepth(11);
     });
 
     this.heroShadow = this.add.ellipse(cfg.start.x, cfg.start.y + 2, 64, 16, 0x0a1322, 0.5).setDepth(13);
@@ -170,11 +178,12 @@ export class JourneyMissionScene extends Phaser.Scene {
     // The just-resolved stop is the prompt before the new currentIndex (auto-resolve advances state).
     const resolvedId = this.state.prompts[this.state.currentIndex - 1]?.correctTargetId ?? waypointId;
     const wp = this.waypoints.find((w) => w.id === resolvedId);
-    if (wp) this.travelTo(wp, outcome.autoResolved);
+    if (wp) this.travelTo(wp, outcome.autoResolved, outcome.completed);
 
     if (outcome.completed) {
       this.done = true;
-      this.time.delayedCall(motionAllowed() ? 520 : 0, () => completeMission(this, getMatchResult(this.state, this.missionId, this.stickerId)));
+      // The final arrival earns a longer beat to let the climax (chest open + hero hop + chime) land.
+      this.time.delayedCall(motionAllowed() ? 900 : 0, () => completeMission(this, getMatchResult(this.state, this.missionId, this.stickerId)));
       return;
     }
     this.render();
@@ -200,10 +209,14 @@ export class JourneyMissionScene extends Phaser.Scene {
     });
   }
 
-  private travelTo(wp: JourneyWaypoint, assisted = false): void {
+  private travelTo(wp: JourneyWaypoint, assisted = false, isFinal = false): void {
+    const marker = this.markers.get(wp.id);
+    if (isFinal) {
+      this.arriveAtDestination(wp, marker);
+      return;
+    }
     // Auto-resolve gets a warmer 'a friend helped' burst so the No-Fail mercy reads as a gift.
     Juice.burst(this, wp.x, wp.y, { color: 0xffe2a6, count: assisted ? 12 : 7, radius: assisted ? 52 : 34 });
-    const marker = this.markers.get(wp.id);
     if (marker) Juice.punch(this, marker, assisted ? 1.24 : 1.16, assisted ? 200 : 130);
     if (!motionAllowed()) {
       this.hero.setPosition(wp.x, wp.y + 30);
@@ -212,6 +225,35 @@ export class JourneyMissionScene extends Phaser.Scene {
     }
     this.tweens.add({ targets: this.hero, x: wp.x, y: wp.y + 30, duration: 420, ease: 'Sine.easeInOut' });
     this.tweens.add({ targets: this.heroShadow, x: wp.x, y: wp.y + 32, duration: 420, ease: 'Sine.easeInOut' });
+  }
+
+  // The climax (P3-06): arriving at THE destination is bigger than any stop — a gold burst, the
+  // finalKey marker squash-stretches open (the chest 'opens'), the hero hops, and a rising chime rings.
+  private arriveAtDestination(wp: JourneyWaypoint, marker: Phaser.GameObjects.Image | undefined): void {
+    getSfx().play('fanfare'); // an ascending C-E-G-C — the rising 'you made it' chime
+    Juice.burst(this, wp.x, wp.y, { color: 0xffc857, count: 22, radius: 72 });
+    Juice.burst(this, wp.x, wp.y, { color: 0xffe2a6, count: 14, radius: 44 });
+    if (this.finalGlow && motionAllowed()) {
+      this.tweens.killTweensOf(this.finalGlow);
+      this.finalGlow.setAlpha(0.4);
+      this.tweens.add({ targets: this.finalGlow, scale: 1.7, alpha: 0, duration: 760, ease: 'Quad.easeOut' });
+    }
+    if (!motionAllowed()) {
+      this.hero.setPosition(wp.x, wp.y + 30);
+      this.heroShadow.setPosition(wp.x, wp.y + 32);
+      if (marker) marker.setScale(marker.scale * 1.12);
+      return;
+    }
+    // Hero walks the last leg, then hops with joy at the destination.
+    this.tweens.add({ targets: this.hero, x: wp.x, y: wp.y + 30, duration: 420, ease: 'Sine.easeInOut', onComplete: () => {
+      this.tweens.add({ targets: this.hero, y: wp.y + 8, duration: 220, yoyo: true, repeat: 1, ease: 'Quad.easeOut' });
+    } });
+    this.tweens.add({ targets: this.heroShadow, x: wp.x, y: wp.y + 32, duration: 420, ease: 'Sine.easeInOut' });
+    // The chest/door 'opens': squash-stretch + a celebratory grow-settle.
+    if (marker) {
+      Juice.squashStretch(this, marker, 0.24, 200);
+      this.tweens.add({ targets: marker, scale: marker.scale * 1.22, duration: 260, delay: 200, yoyo: true, ease: 'Back.easeOut' });
+    }
   }
 
   // Visited stops stay lit; the next stop glows; future stops wait dim.

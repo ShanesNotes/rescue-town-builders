@@ -8,6 +8,7 @@ import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
 import { chooseMatch, createMatchState, getMatchResult, type MatchState } from '../systems/MatchEngine';
+import type { MatchPayoff } from '../data/matchMissions';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
@@ -47,6 +48,11 @@ export class MatchMissionScene extends Phaser.Scene {
   private helper: Phaser.GameObjects.Image | null = null;
   private helperHome = { x: 866, y: 360 };
   private busy = false; // input lock while the No-Fail helper places the answer (no mid-anim double-tap)
+  private payoff: MatchPayoff | null = null;
+  private bowl: Phaser.GameObjects.Arc | null = null; // recipe-progress fill (Bread Rush)
+  private bowlBase = 0;
+  private bowlSteps = 0;
+  private recipeTotal = 0;
 
   constructor() {
     super('MatchMissionScene');
@@ -71,6 +77,9 @@ export class MatchMissionScene extends Phaser.Scene {
     this.selected = 0;
     this.done = false;
     this.busy = false;
+    this.bowl = null;
+    this.bowlSteps = 0;
+    this.recipeTotal = 0;
 
     this.add.image(480, 270, hasTexture(this, cfg.backdrop) ? cfg.backdrop : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
     this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.22).setDepth(1);
@@ -83,7 +92,9 @@ export class MatchMissionScene extends Phaser.Scene {
       ? this.add.image(866, 360, `hl.char.${cfg.characterId}`).setOrigin(0.5, 1).setDisplaySize(96, 96).setDepth(10)
       : null;
 
-    this.buildTargets(cfg.targets);
+    this.buildTargets(cfg.targets, cfg.shuffleTargets ?? false);
+    this.payoff = cfg.payoff ?? null;
+    if (cfg.recipeBowl) this.buildRecipeBowl(cfg.prompts.length);
 
     this.hint = this.add
       .text(480, 322, '', { fontFamily: FONTS.display, fontSize: '20px', color: '#FFE2A6', stroke: '#2A1606', strokeThickness: 5, align: 'center', wordWrap: { width: 560 } })
@@ -118,10 +129,13 @@ export class MatchMissionScene extends Phaser.Scene {
     }
   }
 
-  private buildTargets(targets: { id: string; label: string; icon: string }[]): void {
-    const spacing = Math.min(190, 780 / targets.length);
-    const startX = 480 - ((targets.length - 1) * spacing) / 2;
-    targets.forEach((t, index) => {
+  private buildTargets(targets: { id: string; label: string; icon: string }[], shuffleRow: boolean): void {
+    // Recipe missions keep their prompt ORDER but shuffle WHERE each ingredient sits in the row, so a
+    // child can't win on tap-position memory — they must read the icon (P2-10).
+    const placed = shuffleRow ? shuffled(targets) : targets;
+    const spacing = Math.min(190, 780 / placed.length);
+    const startX = 480 - ((placed.length - 1) * spacing) / 2;
+    placed.forEach((t, index) => {
       const x = startX + index * spacing;
       const y = 446;
       const bounds = new Phaser.Geom.Rectangle(x - 80, y - 74, 160, 150);
@@ -137,6 +151,98 @@ export class MatchMissionScene extends Phaser.Scene {
       registerE2EButton({ testId: `${this.missionId}.target.${t.id}`, label: t.label, sceneKey: this.scene.key, press: () => this.attempt(t.id) });
       this.targets.push({ id: t.id, x, bounds, glow, panel, icon });
     });
+  }
+
+  // A mixing bowl by the baker that visibly FILLS with each correct ingredient, so the ordered recipe
+  // earns a payoff (P2-10). Pure shapes — no new art. The final add bakes it into a golden loaf.
+  private buildRecipeBowl(total: number): void {
+    const bx = 838;
+    const by = 188;
+    this.add.ellipse(bx, by + 26, 96, 22, 0x0a1322, 0.4).setDepth(13);
+    this.add.arc(bx, by, 50, 0, 180, false, 0xe8d4a8, 1).setDepth(14); // bowl shell
+    this.add.arc(bx, by, 50, 0, 180, false).setStrokeStyle(4, 0x8a6a3c).setDepth(16);
+    this.bowl = this.add.circle(bx, by, 4, 0xf4c97a, 0).setDepth(15); // the rising dough fill
+    this.bowlBase = 4;
+    this.add
+      .text(bx, by + 40, 'Recipe bowl', { fontFamily: FONTS.display, fontSize: '14px', color: '#FFE2A6', stroke: '#2A1606', strokeThickness: 3 })
+      .setOrigin(0.5)
+      .setDepth(16);
+    this.recipeTotal = total;
+  }
+
+  private fillRecipeBowl(): void {
+    if (!this.bowl) return;
+    this.bowlSteps += 1;
+    const isLoaf = this.bowlSteps >= this.recipeTotal;
+    const radius = this.bowlBase + (44 * this.bowlSteps) / Math.max(1, this.recipeTotal);
+    this.bowl.setRadius(radius).setFillStyle(isLoaf ? 0xe0a04a : 0xf4c97a, 1);
+    if (motionAllowed()) {
+      Juice.squashStretch(this, this.bowl, 0.2, 150);
+      Juice.burst(this, this.bowl.x, this.bowl.y, { color: 0xffe2a6, count: isLoaf ? 14 : 6, radius: isLoaf ? 50 : 30 });
+    }
+    if (isLoaf) {
+      // Bake: the fill becomes a rounded golden loaf with a little hop.
+      const loaf = this.add.ellipse(this.bowl.x, this.bowl.y - 6, 78, 48, 0xd98a3a, 1).setStrokeStyle(4, 0x8a4a1c).setDepth(17);
+      if (motionAllowed()) this.tweens.add({ targets: loaf, y: loaf.y - 14, duration: 260, yoyo: true, ease: 'Back.easeOut' });
+    }
+  }
+
+  // Per-mission 'lands and transforms' payoff on the matched target (P3-07). Reuses the target's own
+  // art + a themed tint/tween/particle beat so each Match mission feels distinct (no new assets).
+  private playPayoff(target: TargetView): void {
+    const theme = this.payoff;
+    if (!theme) {
+      // Default flourish (unchanged feel) when a mission has no payoff theme.
+      Juice.punch(this, target.panel, 1.1, 110);
+      Juice.burst(this, target.x, target.bounds.y, { color: 0xffe2a6, count: 8 });
+      this.flyAway(target);
+      return;
+    }
+    const ty = target.bounds.y + 70;
+    getSfx().play('place');
+    Juice.burst(this, target.x, ty, { color: theme.color, count: 14, radius: 56 });
+    if (!motionAllowed()) {
+      target.glow.setAlpha(0.5);
+      if (target.icon) target.icon.clearTint();
+      return;
+    }
+    Juice.punch(this, target.panel, 1.16, 160);
+    // The target lights up in its accent color, then settles.
+    this.tweens.add({ targets: target.glow, alpha: 0.7, duration: 200, yoyo: true, ease: 'Sine.easeInOut' });
+
+    switch (theme.kind) {
+      case 'plinth': {
+        // Engraved plinth lights and a tiny statue pops up off it with a cluck.
+        if (target.icon) {
+          target.icon.setScale(0);
+          this.tweens.add({ targets: target.icon, scale: 80 / target.icon.width, y: target.bounds.y + 62 - 8, duration: 360, ease: 'Back.easeOut', onComplete: () => this.tweens.add({ targets: target.icon, y: target.bounds.y + 62, duration: 160, ease: 'Quad.easeOut' }) });
+        }
+        break;
+      }
+      case 'gadget': {
+        // The gadget slot fills with the spinning part + a whirr.
+        if (target.icon) {
+          this.tweens.add({ targets: target.icon, angle: target.icon.angle + 360, duration: 520, ease: 'Cubic.easeOut' });
+          Juice.squashStretch(this, target.icon, 0.18, 180);
+        }
+        break;
+      }
+      case 'pour': {
+        // Flour/ingredient pours into the growing bowl off to the side.
+        this.fillRecipeBowl();
+        if (target.icon) Juice.punch(this, target.icon, 1.2, 200);
+        break;
+      }
+      case 'mirror': {
+        // Inverse: the answer flips bright (a dream becomes its opposite).
+        if (target.icon) {
+          this.tweens.add({ targets: target.icon, scaleX: -(80 / target.icon.width), duration: 220, yoyo: true, ease: 'Sine.easeInOut' });
+        }
+        break;
+      }
+    }
+    // The prompt still flies onto the target as before so the gesture reads "it landed here".
+    this.flyAway(target);
   }
 
   private wireDrag(): void {
@@ -189,9 +295,9 @@ export class MatchMissionScene extends Phaser.Scene {
       return;
     }
     if (placed) {
-      Juice.punch(this, placed.panel, 1.1, 110);
-      Juice.burst(this, placed.x, placed.bounds.y, { color: 0xffe2a6, count: 8 });
-      this.flyAway(placed);
+      // 'Lands and transforms' on the target (P3-07): each Match mission gets its own themed beat
+      // (plinth lights + statue pop, gadget slot spins, bowl fills, inverse flips) — not the same tiny pop.
+      this.playPayoff(placed);
     }
 
     if (outcome.completed) {
@@ -243,6 +349,7 @@ export class MatchMissionScene extends Phaser.Scene {
   private helperAssist(target: TargetView | undefined, completed: boolean): void {
     this.busy = true; // lock input until the answer is fully placed
     this.targets.forEach((t) => t.panel.setAlpha(1)); // undo any escalation dimming
+    if (this.payoff?.kind === 'pour') this.fillRecipeBowl(); // keep the recipe bowl rising even on a No-Fail assist
     const finish = (): void => {
       this.busy = false;
       if (completed) {

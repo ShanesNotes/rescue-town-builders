@@ -12,6 +12,24 @@ export type MatchMissionData = {
   prompts: MatchPrompt[];
   /** Shuffle prompt order each play (replay variety) — off for order-meaningful missions (recipes). */
   shuffle?: boolean;
+  /**
+   * Shuffle the TARGET ROW positions each play (keeps recipe ORDER but breaks tap-position memory, so
+   * a child must read the icon, not memorise where to tap). For order-meaningful missions (recipes).
+   */
+  shuffleTargets?: boolean;
+  /** Recipe-progress payoff: a bowl that visibly fills with each correct add, ending in a baked loaf. */
+  recipeBowl?: boolean;
+  /** Per-mission correct-match payoff theme (P3-07): the answer 'lands and transforms' on its target. */
+  payoff?: MatchPayoff;
+};
+
+// How a correct match resolves ON the target (per-mission soul, P3-07). Reuses existing per-mission
+// art — no new image assets; pure tint/tween/particle juice keyed by these themes.
+export type MatchPayoff = {
+  /** Burst + accent color for the landing flourish. */
+  color: number;
+  /** 'plinth' lights + statue pops (statues); 'gadget' slot fills + spins (inventions); 'pour' grows a bowl (bread); 'mirror' flips bright (inverse). */
+  kind: 'plinth' | 'gadget' | 'pour' | 'mirror';
 };
 
 const P = 'hl.prop.';
@@ -23,6 +41,7 @@ export const matchMissions: Partial<Record<MissionId, MatchMissionData>> = {
     stickerId: 'inverse-dream-starter',
     coinKey: 'hl.char.cluckle',
     shuffle: true,
+    payoff: { color: 0x9be7ff, kind: 'mirror' },
     targets: [
       { id: 'moon', label: 'Moon', icon: `${P}inverseMoon` },
       { id: 'cold', label: 'Cold', icon: `${P}inverseColdSnowflake` },
@@ -44,6 +63,7 @@ export const matchMissions: Partial<Record<MissionId, MatchMissionData>> = {
     stickerId: 'dream-statues-starter',
     coinKey: 'hl.char.merry',
     shuffle: true,
+    payoff: { color: 0xffd98a, kind: 'plinth' },
     targets: [
       { id: 'hen', label: 'Hen', icon: `${P}plinthHen` },
       { id: 'cloud', label: 'Cloud', icon: `${P}plinthCloud` },
@@ -63,6 +83,7 @@ export const matchMissions: Partial<Record<MissionId, MatchMissionData>> = {
     stickerId: 'recycled-inventions-starter',
     coinKey: 'hl.char.reed',
     shuffle: true,
+    payoff: { color: 0x43a29c, kind: 'gadget' },
     targets: [
       { id: 'gear', label: 'Gear', icon: `${P}gadgetSlotGear` },
       { id: 'spring', label: 'Spring', icon: `${P}gadgetSlotSpring` },
@@ -83,6 +104,11 @@ export const matchMissions: Partial<Record<MissionId, MatchMissionData>> = {
     backdrop: 'hl.bg.breadRush',
     stickerId: 'bread-rush-starter',
     coinKey: 'hl.char.benny',
+    // Recipe ORDER stays meaningful, but the target ROW positions shuffle each play so a child can't
+    // win by tapping the same spot — they must read the ingredient icon (P2-10).
+    shuffleTargets: true,
+    recipeBowl: true,
+    payoff: { color: 0xffc857, kind: 'pour' },
     targets: [
       { id: 'flour', label: 'Flour', icon: `${P}ingredientFlour` },
       { id: 'water', label: 'Water', icon: `${P}ingredientWater` },

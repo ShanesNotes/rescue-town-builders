@@ -43,7 +43,7 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - **Wave 3 — Non-reader onboarding** ✅ DONE: P1-03, P1-02, P1-06, P2-04, P3-02, P3-09.
 - **Wave 4 — No-Fail floors & Aim clarity** ✅ DONE: P1-09, P1-12, P3-05, P3-04, P1-08.
 - **Wave 5 — Reward loop** ✅ DONE: P2-01, P2-02, P1-10, P1-07, P2-08, P3-08.
-- **Wave 6 — Variety & payoffs** (Codex art lane): P1-05, P1-04, P2-10, P3-07, P3-06, P3-03.
+- **Wave 6 — Variety & payoffs** ✅ DONE (procedural + existing art): P1-05, P1-04, P2-10, P3-07, P3-06, P3-03.
 - **Wave 7 — Polish & transitions**: P2-03, P2-07, P3-01, + review follow-ups P2-11, P3-10, P3-11.
 - **Wave 8+ — Wow factor** (Codex art + Grok copy): P4-01 living diorama, P4-02 spoken VO, P4-03 aim direct-touch.
 
@@ -61,8 +61,8 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - [x] **P1-01 (S)** Game shipped SILENT (`musicVolume:0`). → *Default `0.35`; world alive from first launch.* `SaveSystem.ts`
 - [x] **P1-02 (M)** Profile first-run: 3 hero sprites look tappable but are dead; only abstract `+` works. *Fix:* make Rivet/Brick/Ember the create buttons (tap → profile with that avatar + chime + hop), soft idle glow; `+` only for slots 2–5. `ProfileScene.ts`
 - [x] **P1-03 (M)** Authored `introPanels` never rendered — missions drop a non-reader into a busy screen cold. *Fix:* 1.5–2s intro beat per mission (icon + hero pointing, pulse the first control), consuming `introPanels`. All 6 mission scenes + `missions.ts`.
-- [ ] **P1-04 (M)** Recycling 'helper' mode builds the IDENTICAL invention twice (only bubble-sprinkler is helper-eligible). *Fix:* ≥2 distinct helper-eligible blueprints. `RecyclingRun.ts`, `recyclingItems.ts`
-- [ ] **P1-05 (S)** Recycling correct card is ALWAYS leftmost — 'tap left' bypasses the mechanic. *Fix:* Fisher-Yates shuffle the 3 choices, seeded by blueprint+slot. `RecyclingRun.ts`, `RecyclingRunScene.ts`
+- [x] **P1-04 (M)** Recycling 'helper' mode builds the IDENTICAL invention twice (only bubble-sprinkler is helper-eligible). *Fix:* ≥2 distinct helper-eligible blueprints. `RecyclingRun.ts`, `recyclingItems.ts`
+- [x] **P1-05 (S)** Recycling correct card is ALWAYS leftmost — 'tap left' bypasses the mechanic. *Fix:* Fisher-Yates shuffle the 3 choices, seeded by blueprint+slot. `RecyclingRun.ts`, `RecyclingRunScene.ts`
 - [x] **P1-06 (S)** House Builder: tray pieces never highlight — only a faint sky-slot ghost shows what's next. *Fix:* highlight the required TRAY item (gold stroke + pulse + bobbing arrow), dim others. `HouseBuilderScene.ts`
 - [x] **P1-07 (M)** Multi-tap secrets reset their counter every scene reload — 2 of 3 secrets unreachable. *Fix:* persist per-secret touch counts to SaveSystem keyed by profile+secretId. `secretHotspot.ts`, `Secrets.ts`, `SaveSystem.ts`
 - [x] **P1-08 (S)** Star scoring inverted: hardest-to-read missions punish a struggling child with 1 star. *Fix:* floor completed Match/Journey at 2 stars; reserve 3 for a gentle bonus. `MatchEngine.ts`, `StarScoring.ts`
@@ -82,17 +82,17 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - [ ] **P2-07 (M)** TownMap/Profile keyboard+page nav uses `scene.restart()` per arrow press → white-fade strobe + teardown cost. *Fix:* re-render selection highlight in-place; restart only on real page change. `TownMapScene.ts`, `ProfileScene.ts`
 - [x] **P2-08 (S)** Pre-threshold secret taps give ZERO feedback — child thinks the spot is dead. *Fix:* ascending tick + inner-glow pulse per tap so each visibly 'charges'. `secretHotspot.ts`
 - [x] **P2-09 (S)** Mission-exit modal is text-only + warns about losing a 'sticker' — unreadable anxiety. *Fix:* picture-first choices (green ▶ keep coin + hero face; map icon to leave); soften subtitle; `FONTS.display`. `confirmMissionExit.ts`
-- [ ] **P2-10 (S)** Bread Rush trains tap-position memory, not the recipe (fixed positions + identical icons). *Fix:* keep recipe ORDER but shuffle TARGET positions; add a filling-bowl→loaf payoff. `matchMissions.ts`, `MatchMissionScene.ts`
+- [x] **P2-10 (S)** Bread Rush trains tap-position memory, not the recipe (fixed positions + identical icons). *Fix:* keep recipe ORDER but shuffle TARGET positions; add a filling-bowl→loaf payoff. `matchMissions.ts`, `MatchMissionScene.ts`
 
 ## P3 — missing delight
 
 - [ ] **P3-01 (S→M)** Fanfare is thin and the sticker cue == secret chime. *Fix:* richer celebratory fanfare (chord pad + sparkle + a ringing note as long as the confetti) + a dedicated warm 'sticker' cue; reserve the shimmer for true secret discoveries. *(audio — Claude lane)*
 - [x] **P3-02 (S)** Secret reveal + exit modal render in Arial, not the pixel storybook font. *Fix:* `FONTS.display`/`FONTS.label`. `secretHotspot.ts`, `confirmMissionExit.ts` — *(exit modal ✅ Wave 2; secret reveal ✅ Wave 3)*
-- [ ] **P3-03 (M)** House Builder + Match variants feel identical (no title shown, same orderedParts). *Fix:* 1.5s title card + preview silhouette + distinct accent color per house; fold Match into the P1-03 intro. `HouseBuilderScene.ts`, `houseBlueprints.ts`
+- [x] **P3-03 (M)** House Builder + Match variants feel identical (no title shown, same orderedParts). *Fix:* 1.5s title card + preview silhouette + distinct accent color per house; fold Match into the P1-03 intro. `HouseBuilderScene.ts`, `houseBlueprints.ts`
 - [x] **P3-04 (M)** Aim/Fire assist is an invisible teal dot flying the wrong way — a No-Fail mercy reads as nothing. *Fix:* real helper sprite flies TO the assisted target, sprays it, waves, warm chime. `AimMissionScene.ts`, `FireFixScene.ts`
 - [x] **P3-05 (M)** No visible aim indicator (beam alpha 0.16) — child mashes Act blind. *Fix:* bold opaque directional cone + pulsing ring on in-cone targets + ground arrow. `AimMissionScene.ts`
-- [ ] **P3-06 (M)** Journey final-waypoint arrival has no climax; per-stop story beats absent. *Fix:* branch `travelTo` on final waypoint (bigger burst, chest-opens squash, hero hop, rising chime); render destination larger from the start. `JourneyMissionScene.ts`, `journeyMissions.ts`
-- [ ] **P3-07 (L)** Match correct-match payoff is thin (same tiny pop ×5). *Fix:* 'lands and transforms' on the target — plinth lights + statue pops with a cluck, gadget slot fills + whirrs, bread bowl rises. `MatchMissionScene.ts`, `matchMissions.ts`
+- [x] **P3-06 (M)** Journey final-waypoint arrival has no climax; per-stop story beats absent. *Fix:* branch `travelTo` on final waypoint (bigger burst, chest-opens squash, hero hop, rising chime); render destination larger from the start. `JourneyMissionScene.ts`, `journeyMissions.ts`
+- [x] **P3-07 (L)** Match correct-match payoff is thin (same tiny pop ×5). *Fix:* 'lands and transforms' on the target — plinth lights + statue pops with a cluck, gadget slot fills + whirrs, bread bowl rises. `MatchMissionScene.ts`, `matchMissions.ts`
 - [x] **P3-08 (M)** Journey missions (4 of 14) have zero hidden secrets. *Fix:* seed one off-route glimmer per Journey backdrop (depends on P1-07/P2-08). `JourneyMissionScene.ts`, `Secrets.ts`
 - [x] **P3-09 (S)** Preload advances on a blind 250ms timer that can race FontFace load → title flashes fallback font. *Fix:* `await document.fonts.ready` (min splash); optional firefly/lamp fade-up. `PreloadScene.ts`, `main.ts`
 

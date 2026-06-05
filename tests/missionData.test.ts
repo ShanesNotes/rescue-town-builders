@@ -21,6 +21,17 @@ describe('roadmap mission data integrity', () => {
     }
   });
 
+  it('Match: every mission has a distinct payoff theme; bread-rush shuffles target row but keeps recipe order (P2-10/P3-07)', () => {
+    for (const [id, m] of Object.entries(matchMissions)) {
+      expect(m.payoff, `${id}: has a payoff theme`).toBeTruthy();
+    }
+    const bread = matchMissions['bread-rush'];
+    expect(bread?.shuffleTargets).toBe(true); // tap-position memory broken
+    expect(bread?.shuffle).toBeFalsy(); // recipe ORDER stays meaningful
+    expect(bread?.recipeBowl).toBe(true);
+    expect(bread?.prompts.map((p) => p.correctTargetId)).toEqual(['flour', 'water', 'yeast', 'dough', 'butter']);
+  });
+
   it('Aim: target/act/cleared/backdrop textures are all real', () => {
     for (const [id, m] of Object.entries(aimMissions)) {
       expect(keys.has(m.backdrop), `${id}: backdrop`).toBe(true);

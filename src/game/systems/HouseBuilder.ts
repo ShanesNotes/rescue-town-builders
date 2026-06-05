@@ -13,6 +13,8 @@ export type HouseBlueprint = {
   id: string;
   title: string;
   parts: HousePart[];
+  /** A per-house accent tint so finished houses look distinct on the lot (P3-03). */
+  accent?: number;
 };
 
 export type HouseBuilderState = {
