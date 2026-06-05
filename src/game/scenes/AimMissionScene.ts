@@ -10,6 +10,7 @@ import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMission
 import { isOverlayOpen } from '../systems/overlayLock';
 import { act, aimHits, coneAngles, createAimState, directHit, getAimResult, moveAimer, type AimState, type AimVec } from '../systems/AimEngine';
 import { addIconButton } from '../ui/Button';
+import { bindPress } from '../ui/press';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
 import { playMissionIntro } from '../ui/MissionIntro';
@@ -248,15 +249,7 @@ export class AimMissionScene extends Phaser.Scene {
   // pointerdown), so a stray drag never fires. A live target tap acts on THAT target directly.
   private bindTargetPress(sprite: Phaser.GameObjects.Image, id: string): void {
     sprite.setInteractive({ useHandCursor: true });
-    let armed = false;
-    sprite.on('pointerdown', () => (armed = true));
-    sprite.on('pointerout', () => (armed = false));
-    sprite.on('pointercancel', () => (armed = false));
-    sprite.on('pointerup', () => {
-      if (!armed) return;
-      armed = false;
-      this.tapTarget(id);
-    });
+    bindPress(sprite, { onConfirm: () => this.tapTarget(id) });
   }
 
   // Act directly on a tapped target via the engine's pure directHit, then play the EXACT same

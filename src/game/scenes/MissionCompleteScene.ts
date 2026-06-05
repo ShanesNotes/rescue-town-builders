@@ -8,6 +8,7 @@ import { returnToTownMap, startStickerBook } from '../systems/SceneNavigation';
 import { registerE2EButton } from '../systems/E2EBridge';
 import { STICKER_DEFINITIONS } from '../data/stickers';
 import { addIconButton } from '../ui/Button';
+import { bindPress } from '../ui/press';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
 
@@ -220,7 +221,8 @@ export class MissionCompleteScene extends Phaser.Scene {
     // Tap the just-popped sticker to read its little story right now (P2-02): opens the Sticker
     // Book straight to THIS sticker's reading page (childPoem/parentNote), not two scenes away.
     const openReading = (): void => startStickerBook(this, id);
-    frame.setInteractive({ useHandCursor: true }).on('pointerup', openReading);
+    frame.setInteractive({ useHandCursor: true });
+    bindPress(frame, { onConfirm: openReading });
     registerE2EButton({ testId: 'mission.complete.read-sticker', label: def?.title ?? 'New sticker', sceneKey: this.scene.key, press: openReading });
     if (!motionAllowed()) return openReading;
     // Pop each in to its OWN base display-scale (images keep their setDisplaySize size).

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { MIN_TOUCH_TARGET } from '../systems/AccessibilityRules';
 import { registerE2EButton, registerE2EScene } from '../systems/E2EBridge';
 import { getSfx } from '../systems/GameServices';
+import { bindPress } from './press';
 import { hasTexture, motionAllowed } from './Sprite';
 import { FONTS } from './typography';
 
@@ -12,32 +13,6 @@ function playTap(): void {
   } catch {
     /* audio is a bonus, never required (No-Fail) */
   }
-}
-
-/**
- * Robust press model: confirm on pointerUP, but only when a pointerDOWN began on THIS target.
- * pointerdown-to-confirm (the old model) fired at touch-start, so drags, scrolls, and taps that
- * landed mid-teardown registered spuriously — the "buttons sometimes don't work" bug. Releasing
- * elsewhere never confirms; pressing-and-releasing on the control always does.
- */
-function bindPress(target: Phaser.GameObjects.GameObject, handlers: { onDown?: () => void; onConfirm: () => void }): void {
-  let armed = false;
-  target.on('pointerdown', () => {
-    armed = true;
-    handlers.onDown?.();
-  });
-  target.on('pointerup', () => {
-    if (!armed) return;
-    armed = false;
-    handlers.onConfirm();
-  });
-  // Disarm if the finger slides off or the gesture is cancelled, so a later stray pointerup can
-  // never fire a "ghost tap" — the exact swipe-everything behavior a young child exhibits.
-  const disarm = (): void => {
-    armed = false;
-  };
-  target.on('pointerout', disarm);
-  target.on('pointercancel', disarm);
 }
 
 export type IconButtonOptions = {

@@ -12,6 +12,7 @@ import { isOverlayOpen } from '../systems/overlayLock';
 import { chooseMatch, createMatchState, getMatchResult, type MatchState } from '../systems/MatchEngine';
 import type { MatchPayoff } from '../data/matchMissions';
 import { addIconButton } from '../ui/Button';
+import { bindPress } from '../ui/press';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
 import { playMissionIntro } from '../ui/MissionIntro';
@@ -157,7 +158,8 @@ export class MatchMissionScene extends Phaser.Scene {
         icon = this.add.image(x, y - 8, t.icon).setDisplaySize(80, 80).setDepth(10);
       }
       this.add.text(x, y + 52, t.label, { fontFamily: FONTS.display, fontSize: '17px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 4 }).setOrigin(0.5).setDepth(11);
-      panel.setInteractive({ useHandCursor: true }).on('pointerup', () => !isMissionExitOpen(this) && this.attempt(t.id));
+      panel.setInteractive({ useHandCursor: true });
+      bindPress(panel, { onConfirm: () => !isMissionExitOpen(this) && this.attempt(t.id) });
       registerE2EButton({ testId: `${this.missionId}.target.${t.id}`, label: t.label, sceneKey: this.scene.key, press: () => this.attempt(t.id) });
       this.targets.push({ id: t.id, x, bounds, glow, panel, icon });
     });

@@ -22,6 +22,7 @@ import {
   type ReuseChoice,
 } from '../systems/RecyclingRun';
 import { addIconButton } from '../ui/Button';
+import { bindPress } from '../ui/press';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
 import { playMissionIntro } from '../ui/MissionIntro';
@@ -175,7 +176,8 @@ export class RecyclingRunScene extends Phaser.Scene {
         .text(x, WORKSHOP.choiceY + 38, '', { fontFamily: FONTS.display, fontSize: '17px', color: '#FFE2A6', stroke: '#2A1606', strokeThickness: 4, align: 'center', wordWrap: { width: 160 } })
         .setOrigin(0.5)
         .setDepth(31);
-      panel.setInteractive({ useHandCursor: true }).on('pointerup', () => !isMissionExitOpen(this) && this.attemptChoice(this.state.choices[index]?.id));
+      panel.setInteractive({ useHandCursor: true });
+      bindPress(panel, { onConfirm: () => !isMissionExitOpen(this) && this.attemptChoice(this.state.choices[index]?.id) });
       this.choiceCards.push({ itemId: '', panel, icon, label, x, y: WORKSHOP.choiceY });
     }
   }

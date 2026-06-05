@@ -48,7 +48,7 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - **Wave 8 — Input parity & truthfulness** (Codex final-QA) ✅ DONE: CF-1 overlay input-lock, CF-2 House focus sync, CF-3 truthful Aim cone, CF-4 Match alpha-reset, CF-5 Match focus ring, CF-7 reward keyboard nav, CF-9 parent-gate hold-key, CF-10 water-bottle asset.
 - **Wave 9 — Living diorama** ✅ DONE: P4-01 town grows as missions complete; + CF-11 honest secret copy + CF-12 audio status/fallback.
 - **Wave 10 — Voice & touch** ✅ DONE: P4-02 spoken VO (Web Speech, Grok script, parent-toggle, default-on, No-Fail), P4-03 aim direct-touch.
-- **Wave 11 — Final hardening**: CF-8 reuse the hardened press model for raw-pointerup mission mechanics.
+- **Wave 11 — Final hardening** ✅ DONE: CF-8 one shared bindPress (ui/press.ts) across all tap-confirm targets + a pure unit test.
 
 ---
 

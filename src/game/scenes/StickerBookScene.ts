@@ -6,6 +6,7 @@ import { registerE2EButton } from '../systems/E2EBridge';
 import { returnToTownMap } from '../systems/SceneNavigation';
 import { getAllStickers, getStickerById, isStickerUnlocked } from '../systems/StickerCatalog';
 import { addIconButton } from '../ui/Button';
+import { bindPress } from '../ui/press';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
 
@@ -119,7 +120,8 @@ export class StickerBookScene extends Phaser.Scene {
       else this.notYet(mark); // locked taps aren't dead: a gentle 'not yet' wiggle + soft tick (P1-10)
     };
     // Drop the hand cursor when locked so a sleeping sticker doesn't promise a page it can't open.
-    frame.setInteractive({ useHandCursor: unlocked }).on('pointerup', open);
+    frame.setInteractive({ useHandCursor: unlocked });
+    bindPress(frame, { onConfirm: open });
     registerE2EButton({ testId: `stickerbook.sticker.${id}`, label: title, sceneKey: this.scene.key, press: open });
     return open;
   }

@@ -10,6 +10,7 @@ import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
 import { chooseMatch, createMatchState, getMatchResult, type MatchPrompt, type MatchState, type MatchTarget } from '../systems/MatchEngine';
 import { addIconButton } from '../ui/Button';
+import { bindPress } from '../ui/press';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
 import { playMissionIntro } from '../ui/MissionIntro';
@@ -89,7 +90,8 @@ export class JourneyMissionScene extends Phaser.Scene {
       const glowRadius = isFinal ? 80 : 62;
       const glow = this.add.circle(w.x, w.y, glowRadius, 0xffd98a, 0).setBlendMode(Phaser.BlendModes.ADD).setDepth(9);
       const img = this.add.image(w.x, w.y, hasTexture(this, key) ? key : 'hl.prop.star').setDisplaySize(isFinal ? 92 : 70, isFinal ? 92 : 70).setDepth(10);
-      img.setInteractive({ useHandCursor: true }).on('pointerup', () => !isMissionExitOpen(this) && this.visit(w.id));
+      img.setInteractive({ useHandCursor: true });
+      bindPress(img, { onConfirm: () => !isMissionExitOpen(this) && this.visit(w.id) });
       registerE2EButton({ testId: `${this.missionId}.waypoint.${w.id}`, label: w.label, sceneKey: this.scene.key, press: () => this.visit(w.id) });
       this.markers.set(w.id, img);
       this.glows.set(w.id, glow);

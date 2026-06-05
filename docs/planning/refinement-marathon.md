@@ -4,6 +4,38 @@
 > **Mode:** ultracode — multi-agent Workflow fan-out + tri-model swarm (Codex, Grok) + Playwright
 > ground truth. Self-paced `/loop` targeting an ~8-hour marathon.
 
+## ✅ Summary — marathon complete (2026-06-05)
+
+**11 waves shipped on `continuous-refinement` (pushed), every gate green at every step.**
+Started from a feature-complete-but-rough build (113 tests); ended **unbelievable & professional**
+for a non-reading 5-year-old. Backlog (37 child-playtest findings + 12 Codex final-QA findings)
+**driven to zero**. **113 → 157 unit tests**, Playwright **e2e 6/6** throughout, **zero console errors**.
+
+**What changed for Willem (before → after):**
+- **Couldn't trust a tap → every tap is honest.** Killed the ghost-tap class (one shared `bindPress`
+  on every control + mission mechanic; removed the double-firing house launch).
+- **Silent & text-only → alive and spoken.** Music plays from launch; a gentle **spoken-VO layer**
+  (Web Speech, parent-toggle) narrates ~11 moments so a non-reader plays *solo*; authored intro
+  beats finally render.
+- **Could get stuck → can never get stuck.** Match/Journey auto-resolve warmly after misses; the Aim
+  dead-zone is gone; ≥2-star floor on the hardest missions; the aim cone now tells the truth.
+- **Flat reward → the loop lands.** Finishing returns you onto your freshly-lit house + new star; tap
+  the new sticker to read it; hidden father-son secrets persist and are reachable across all engines.
+- **Same-y → full of soul.** Distinct inventions, "I MADE that!" transformations, journey climaxes,
+  a **living-diorama town** that grows from dark to bustling as you heal it.
+- **Touch-only → every input method.** Full keyboard/gamepad focus + input-lock parity; a child-safe
+  modal/hold-gate controller; no one-tap save-wipe.
+
+**Systems added:** `ui/ChoiceModal`, `ui/HoldGate`, `ui/MissionIntro`, `ui/press`, `systems/overlayLock`,
+`systems/TownMapDiorama`, `systems/VoiceSystem` + `data/voiceLines`.
+
+**Tri-model swarm:** Claude orchestrated 11 implement→adversarially-verify Workflows (each finding
+hand-verified at merge). **Codex** (independent xhigh audits) seeded the backlog and the Wave-8 parity
+worklist, and confirmed *touch-only is ship-ready*. **Grok** wrote the VO script + copy polish.
+
+**Ship status:** ready for Willem on a tablet **now**. Reserved for Shane: a real-tablet play-test (the
+one thing only a child can verify — esp. the Wave-11 tap-tightening) and the **merge-to-`main`** call.
+
 ## Telos / the `/goal`
 
 Take Rescue Town Builders from *feature-complete & shippable* to **unbelievable and professional** —
@@ -81,6 +113,8 @@ call, which stays Shane's reserved nudge.
 
 | 10 | Voice & touch: P4-02 spoken VO — new VoiceSystem (Web Speech, Grok's warm script in voiceLines.ts, deterministic variant rotation, default-on `voiceEnabled` parent toggle, guaranteed No-Fail no-op when speech is unavailable) wired into ~11 moments so a non-reader plays solo; P4-03 aim direct-touch (tap a target → AimEngine.directHit via the hardened press model, same engine truth); +9 tests | 2 | typecheck✓ test✓(151) build✓ e2e✓(6) | (this commit) |
 
-**Next:** Wave 11 — final hardening (CF-8 raw-pointerup → hardened press model), then the final summary + merge-to-`main` ship decision for Shane.
+| 11 | Final hardening (CF-8): extracted one shared `bindPress` to `ui/press.ts` (type-only Phaser import) and reused it for the raw-pointer mission mechanics (recycling cards, match panels, journey waypoints) + consolidated Aim's copy; drag interactions + secret-charge/first-gesture raw-down handlers correctly left alone; +6 pure press-model unit tests | 1 | typecheck✓ test✓(157) build✓ e2e✓(6) | (this commit) |
+
+**✅ MARATHON COMPLETE — backlog driven to zero.** 11 waves, every P0/P1/P2/P3/P4 + every Codex CF finding shipped. 113 → **157** unit tests, e2e 6/6 throughout, zero console errors. See the summary at the top of this file. The one item that genuinely needs a human: **Willem's real-tablet play-test + the merge-to-`main` ship call** — Shane's reserved decision.
 
 **Multi-model engagement (per wave):** Codex (workspace-write, `/home/ark/rtb-codex`) → asset payoffs Waves 6+ (invention sprites, helper drone, house accents, diorama props) + independent re-audit. Grok (`/home/ark/rtb-grok`) → onboarding microcopy (Wave 3) + VO script (Wave 8). Claude owns all scene/system mechanics.
