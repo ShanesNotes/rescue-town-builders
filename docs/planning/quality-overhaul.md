@@ -264,3 +264,13 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   missions**. Still on the shared engines: bread-rush (Match); frog-flight/goo-cleanup/asteroid-blaster
   (Aim); bike-explorer/safety-lights/treasure-boat (Journey) — capture next.
 - Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.
+
+### Cycle 13 — Consolidation: capture the 3 Journey missions into Town Ride
+- **Captured `bike-explorer`, `safety-lights`, `treasure-boat` → TownRideScene** (all path journeys —
+  perfect fit) via `MISSION_SCENE_KEYS` overrides. The scene now reads `init({missionId})` and picks
+  per-mission backdrop + **the right off-route secret** (carried from JOURNEY_SECRETS:
+  garden-cat / lamplighter / message-bottle) + sticker; `getTownRideResult` parameterized by missionId.
+- Updated the SceneNavigation unit test. No e2e changes (none e2e-played; hearthlight-assets proves the
+  backdrops load). **Hero games now serve 10 of 14 missions.** Shared engines now serve only 4:
+  frog-flight / goo-cleanup / asteroid-blaster (Aim) + bread-rush (Match).
+- Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.

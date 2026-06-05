@@ -29,8 +29,11 @@ describe('SceneNavigation', () => {
       // Dream Catch captures inverse-dream + dream-statues (Arcade catcher).
       'inverse-dream': SCENE_KEYS.dreamCatch,
       'dream-statues': SCENE_KEYS.dreamCatch,
-      // Town Ride captures the scooter-roundup journey mission.
+      // Town Ride captures all the journey missions.
       'scooter-roundup': SCENE_KEYS.townRide,
+      'bike-explorer': SCENE_KEYS.townRide,
+      'safety-lights': SCENE_KEYS.townRide,
+      'treasure-boat': SCENE_KEYS.townRide,
       // Recycle Snake also captures recycled-inventions (same scene key as recycling-run).
       'recycled-inventions': SCENE_KEYS.recyclingRun,
     });
@@ -41,6 +44,7 @@ describe('SceneNavigation', () => {
     expect(sceneKeyForMission('recycled-inventions', 'match')).toBe(SCENE_KEYS.recyclingRun);
     expect(sceneKeyForMission('bread-rush', 'match')).toBe(SCENE_KEYS.matchMission);
     expect(sceneKeyForMission('scooter-roundup', 'journey')).toBe(SCENE_KEYS.townRide);
-    expect(sceneKeyForMission('bike-explorer', 'journey')).toBe(SCENE_KEYS.journeyMission);
+    expect(sceneKeyForMission('bike-explorer', 'journey')).toBe(SCENE_KEYS.townRide);
+    expect(sceneKeyForMission('treasure-boat', 'journey')).toBe(SCENE_KEYS.townRide);
   });
 });

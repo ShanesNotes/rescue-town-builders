@@ -18,12 +18,31 @@ import {
 } from '../systems/TownRide';
 import { addIconButton } from '../ui/Button';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
+import type { MissionId } from '../types';
+import type { SecretId } from '../systems/Secrets';
 
-// Town Ride — a no-fail momentum ride (replaces tap-the-waypoint Scooter Roundup). Scoot rides the
-// lane; steer up/down to scoop runaway friends and bump past cones. A bump only slows for a beat —
-// never a fail. Round up enough friends to bring them home. Keeps missionId 'scooter-roundup'.
+// Town Ride — a no-fail momentum ride (replaces the tap-the-waypoint journey missions). Scoot rides
+// the lane; steer up/down to scoop runaway friends and bump past cones. A bump only slows for a beat
+// — never a fail. Serves the journey missions (scooter-roundup + the captured bike-explorer /
+// safety-lights / treasure-boat) — it reads its launching missionId to pick the backdrop, the
+// off-route secret, and the sticker.
 
 type Mover = Phaser.GameObjects.Image & { kind?: 'friend' | 'cone'; consumed?: boolean };
+
+// Per-mission backdrop (each captured journey keeps its own town location).
+const RIDE_BACKDROP: Partial<Record<MissionId, string>> = {
+  'scooter-roundup': 'hl.bg.scooterRoundup',
+  'bike-explorer': 'hl.bg.bikeExplorer',
+  'safety-lights': 'hl.bg.safetyLights',
+  'treasure-boat': 'hl.bg.treasureBoat',
+};
+// Each journey's off-route glimmer (carried over from JOURNEY_SECRETS so the easter eggs survive).
+const RIDE_SECRET: Partial<Record<MissionId, { id: SecretId; x: number; y: number }>> = {
+  'scooter-roundup': { id: 'meadow-nest', x: 110, y: 180 },
+  'bike-explorer': { id: 'garden-cat', x: 110, y: 200 },
+  'safety-lights': { id: 'lamplighter', x: 110, y: 470 },
+  'treasure-boat': { id: 'message-bottle', x: 130, y: 200 },
+};
 
 const RIDER_X = 230;
 const ROAD_TOP = 300;
@@ -45,10 +64,15 @@ export class TownRideScene extends Phaser.Scene {
   private spawnToggle = 0;
   private roundIndex = 0;
   private speedMul = townRideSpeeds[0]!;
+  private missionId: MissionId = 'scooter-roundup';
   private done = false;
 
   constructor() {
     super('TownRideScene');
+  }
+
+  init(data: { missionId?: MissionId }): void {
+    this.missionId = data.missionId ?? 'scooter-roundup';
   }
 
   create(): void {
@@ -74,10 +98,11 @@ export class TownRideScene extends Phaser.Scene {
 
     this.rider = this.add.image(RIDER_X, this.targetY, 'hl.char.scoot').setDisplaySize(78, 78).setDepth(20);
 
-    addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => this.requestExit(), testId: 'scooter-roundup.back-to-map' }).setDepth(40);
+    addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => this.requestExit(), testId: `${this.missionId}.back-to-map` }).setDepth(40);
 
-    // The off-route glimmer for the wanderer (the meadow-nest secret carried from the old scene).
-    addSecretHotspot(this, createSecretsForProfile(), 'meadow-nest', 110, 180);
+    // The off-route glimmer for the wanderer — each journey's own secret, carried from JOURNEY_SECRETS.
+    const secret = RIDE_SECRET[this.missionId];
+    if (secret) addSecretHotspot(this, createSecretsForProfile(), secret.id, secret.x, secret.y);
 
     registerE2EButton({ testId: 'ride.catch', label: 'scoop friend', sceneKey: this.scene.key, press: () => this.e2eCatch() });
 
@@ -108,7 +133,8 @@ export class TownRideScene extends Phaser.Scene {
   }
 
   private paintWorld(): void {
-    this.add.image(480, 270, hasTexture(this, 'hl.bg.scooterRoundup') ? 'hl.bg.scooterRoundup' : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
+    const bg = RIDE_BACKDROP[this.missionId] ?? 'hl.bg.scooterRoundup';
+    this.add.image(480, 270, hasTexture(this, bg) ? bg : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
     this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.1).setDepth(1);
     // The lane + dashed centre line that scrolls to sell speed.
     this.add.rectangle(480, (ROAD_TOP + ROAD_BOTTOM) / 2, 960, ROAD_BOTTOM - ROAD_TOP + 40, 0x2a3550, 0.32).setDepth(2);
@@ -293,7 +319,7 @@ export class TownRideScene extends Phaser.Scene {
       if (motionAllowed()) this.tweens.add({ targets: pen, x: 760, duration: 460, ease: 'Quad.easeOut' });
     }
     getVoice().speak('mission-complete');
-    this.time.delayedCall(motionAllowed() ? 560 : 0, () => completeMission(this, getTownRideResult(this.state)));
+    this.time.delayedCall(motionAllowed() ? 560 : 0, () => completeMission(this, getTownRideResult(this.state, this.missionId)));
   }
 
   private overlayBusy(): boolean {

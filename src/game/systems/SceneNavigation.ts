@@ -55,8 +55,12 @@ export const MISSION_SCENE_KEYS: Partial<Record<MissionId, SceneKey>> = {
   // missionId to pick the backdrop + sticker).
   'inverse-dream': SCENE_KEYS.dreamCatch,
   'dream-statues': SCENE_KEYS.dreamCatch,
-  // Town Ride (momentum ride) captures the Scooter Roundup journey mission.
+  // Town Ride (momentum ride) captures ALL the journey missions; the scene reads its missionId to
+  // pick the backdrop, the off-route secret, and the sticker.
   'scooter-roundup': SCENE_KEYS.townRide,
+  'bike-explorer': SCENE_KEYS.townRide,
+  'safety-lights': SCENE_KEYS.townRide,
+  'treasure-boat': SCENE_KEYS.townRide,
   // Rivet's Recycle Snake also captures the Recycled Inventions match mission (same scene key as
   // recycling-run; the scene reads its missionId to pick the backdrop + sticker).
   'recycled-inventions': SCENE_KEYS.recyclingRun,
