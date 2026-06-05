@@ -48,8 +48,9 @@ function readSaveData(): SaveData | null {
   }
 }
 
-function isE2EEnabled(): boolean {
+export function isE2EEnabled(): boolean {
   if (typeof window === 'undefined') return false;
+  if (window.__RTB_E2E__) return true;
   return new URLSearchParams(window.location.search).get(E2E_QUERY_PARAM) === '1';
 }
 

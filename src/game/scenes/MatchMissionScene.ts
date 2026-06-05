@@ -11,6 +11,8 @@ import { chooseMatch, createMatchState, getMatchResult, type MatchState } from '
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
+import { playMissionIntro } from '../ui/MissionIntro';
+import { missionRegistry } from '../systems/GameServices';
 import type { MissionId } from '../types';
 
 const HOME = { x: 480, y: 210 };
@@ -25,7 +27,7 @@ function shuffled<T>(items: T[]): T[] {
   return out;
 }
 
-type TargetView = { id: string; x: number; bounds: Phaser.Geom.Rectangle; glow: Phaser.GameObjects.Rectangle; panel: Phaser.GameObjects.Rectangle };
+type TargetView = { id: string; x: number; bounds: Phaser.Geom.Rectangle; glow: Phaser.GameObjects.Rectangle; panel: Phaser.GameObjects.Rectangle; icon: Phaser.GameObjects.Image | null };
 
 // One reusable scene for every Match mission (Inverse Dream, Dream Statues, Recycled Inventions,
 // Bread Rush). Drag the prompt onto the matching target — also tap / keyboard / E2E. State advances
@@ -99,6 +101,9 @@ export class MatchMissionScene extends Phaser.Scene {
     });
 
     this.loadPrompt();
+
+    const panel = missionRegistry.get(this.missionId)?.introPanels[0];
+    if (panel) playMissionIntro(this, panel, () => undefined);
   }
 
   private buildPips(total: number): void {
@@ -118,14 +123,15 @@ export class MatchMissionScene extends Phaser.Scene {
       const bounds = new Phaser.Geom.Rectangle(x - 80, y - 74, 160, 150);
       const glow = this.add.rectangle(x, y, 168, 158, 0xffc857, 0).setDepth(8).setBlendMode(Phaser.BlendModes.ADD);
       const panel = this.add.rectangle(x, y, 160, 150, 0x16243a, 0.84).setStrokeStyle(4, 0xffc857, 0.85).setDepth(9);
+      let icon: Phaser.GameObjects.Image | null = null;
       if (hasTexture(this, t.icon)) {
         this.add.circle(x, y - 8, 42, 0xf2f0e6, 0.12).setBlendMode(Phaser.BlendModes.ADD).setDepth(9); // soft backing so low-contrast icons pop
-        this.add.image(x, y - 8, t.icon).setDisplaySize(80, 80).setDepth(10);
+        icon = this.add.image(x, y - 8, t.icon).setDisplaySize(80, 80).setDepth(10);
       }
       this.add.text(x, y + 52, t.label, { fontFamily: FONTS.display, fontSize: '17px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 4 }).setOrigin(0.5).setDepth(11);
       panel.setInteractive({ useHandCursor: true }).on('pointerup', () => !isMissionExitOpen(this) && this.attempt(t.id));
       registerE2EButton({ testId: `${this.missionId}.target.${t.id}`, label: t.label, sceneKey: this.scene.key, press: () => this.attempt(t.id) });
-      this.targets.push({ id: t.id, x, bounds, glow, panel });
+      this.targets.push({ id: t.id, x, bounds, glow, panel, icon });
     });
   }
 
@@ -157,7 +163,8 @@ export class MatchMissionScene extends Phaser.Scene {
 
     if (!outcome.correct) {
       getSfx().play('try-again');
-      this.hint.setText('Almost — try the glowing one.');
+      this.hint.setText(outcome.state.lastHint ?? 'Almost — try the glowing one.');
+      this.guideWrong(targetView, outcome.state.currentPrompt?.correctTargetId);
       this.springHome();
       return;
     }
@@ -177,6 +184,24 @@ export class MatchMissionScene extends Phaser.Scene {
       return;
     }
     this.loadPrompt();
+  }
+
+  // Guide the eye wrong→right (P2-04): the mistapped panel shakes + dims; at the same instant the
+  // CORRECT glowing target pulses bigger and bounces its icon, so the answer physically announces
+  // itself. Never blocks (No-Fail) — the prompt still springs home and stays tappable.
+  private guideWrong(wrong: TargetView | undefined, correctTargetId: string | undefined): void {
+    if (wrong && motionAllowed()) {
+      Juice.shake(this, 90, 0.003);
+      Juice.squashStretch(this, wrong.panel, 0.16, 120);
+      this.tweens.add({ targets: wrong.panel, alpha: 0.55, duration: 120, yoyo: true, ease: 'Quad.easeOut' });
+    }
+    const right = correctTargetId ? this.targets.find((t) => t.id === correctTargetId) : undefined;
+    if (!right) return;
+    if (motionAllowed()) {
+      Juice.punch(this, right.panel, 1.18, 200);
+      this.tweens.add({ targets: right.glow, alpha: 0.5, duration: 200, yoyo: true, ease: 'Sine.easeInOut' });
+      if (right.icon) Juice.punch(this, right.icon, 1.22, 220);
+    }
   }
 
   private flyAway(target: TargetView): void {

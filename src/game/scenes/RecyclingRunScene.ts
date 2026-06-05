@@ -23,6 +23,8 @@ import {
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
+import { playMissionIntro } from '../ui/MissionIntro';
+import { missionRegistry } from '../systems/GameServices';
 
 type ChoiceCard = {
   itemId: string;
@@ -103,6 +105,9 @@ export class RecyclingRunScene extends Phaser.Scene {
     });
 
     this.renderWorkshop();
+
+    const panel = missionRegistry.get('recycling-run')?.introPanels[0];
+    if (panel) playMissionIntro(this, { ...panel, characterId: 'rivet' }, () => undefined);
   }
 
   private paintWorld(): void {

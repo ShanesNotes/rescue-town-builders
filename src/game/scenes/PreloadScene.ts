@@ -5,6 +5,7 @@ import { registerE2ETextureInfo } from '../systems/E2EBridge';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, startScene } from '../systems/SceneNavigation';
 import { FONTS } from '../ui/typography';
+import { motionAllowed } from '../ui/Sprite';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -60,6 +61,33 @@ export class PreloadScene extends Phaser.Scene {
         color: '#9DB4C0',
       })
       .setOrigin(0.5);
-    this.time.delayedCall(250, () => startScene(this, SCENE_KEYS.start));
+
+    // A warm little firefly fades up during the wait so the splash feels alive, not frozen.
+    if (motionAllowed()) {
+      const firefly = this.add.circle(480, 376, 5, 0xffe2a6, 0).setBlendMode(Phaser.BlendModes.ADD);
+      this.tweens.add({ targets: firefly, alpha: 0.9, scale: 1.4, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+
+    this.startWhenFontsReady();
+  }
+
+  // Join the pixel-font readiness into the splash gate so the title never flashes a fallback font
+  // (P3-09): wait for document.fonts.ready, but always hold the splash a minimum beat so the
+  // transition still feels intentional rather than a blink.
+  private startWhenFontsReady(): void {
+    const MIN_SPLASH_MS = 250;
+    const MAX_WAIT_MS = 1500; // No-Fail: a stuck FontFace must never freeze the splash forever.
+    const start = Date.now();
+    let started = false;
+    const proceed = (): void => {
+      if (started) return;
+      started = true;
+      const elapsed = Date.now() - start;
+      this.time.delayedCall(Math.max(0, MIN_SPLASH_MS - elapsed), () => startScene(this, SCENE_KEYS.start));
+    };
+    const fonts = typeof document !== 'undefined' ? document.fonts : null;
+    if (fonts?.ready) void fonts.ready.then(proceed, proceed);
+    else proceed();
+    this.time.delayedCall(MAX_WAIT_MS, proceed); // hard ceiling, whatever the font state
   }
 }

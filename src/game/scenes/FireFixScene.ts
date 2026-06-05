@@ -17,6 +17,8 @@ import {
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
+import { playMissionIntro } from '../ui/MissionIntro';
+import { missionRegistry } from '../systems/GameServices';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
 
 export class FireFixScene extends Phaser.Scene {
@@ -76,6 +78,9 @@ export class FireFixScene extends Phaser.Scene {
 
     this.renderFires();
     this.placeEmber(false);
+
+    const panel = missionRegistry.get('fire-fix')?.introPanels[0];
+    if (panel) playMissionIntro(this, { ...panel, characterId: 'ember' }, () => undefined);
   }
 
   private paintWorld(): void {

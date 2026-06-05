@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import { Secrets, isSecretId, type SecretId } from './Secrets';
 import { getSaveSystem, getSfx } from './GameServices';
 import { motionAllowed } from '../ui/Sprite';
+import { FONTS } from '../ui/typography';
 
 // Glue between the pure Secrets tracker and the scenes. Hidden hotspots call
 // touchSecret() on pointerdown; when a secret reveals, it chimes, persists the
@@ -187,7 +188,7 @@ export function showSecretReveal(scene: Phaser.Scene, message: string): void {
   objects.push(
     scene.add
       .text(480, 250, `✨ ${message}`, {
-        fontFamily: 'Trebuchet MS, Arial, sans-serif',
+        fontFamily: FONTS.display,
         fontSize: '24px',
         color: '#203247',
         align: 'center',
@@ -199,7 +200,7 @@ export function showSecretReveal(scene: Phaser.Scene, message: string): void {
   objects.push(
     scene.add
       .text(480, 378, 'Tap to keep playing', {
-        fontFamily: 'Trebuchet MS, Arial, sans-serif',
+        fontFamily: FONTS.label,
         fontSize: '18px',
         color: '#5a6b7a',
       })

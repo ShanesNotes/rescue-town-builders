@@ -11,6 +11,8 @@ import { chooseMatch, createMatchState, getMatchResult, type MatchPrompt, type M
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
+import { playMissionIntro } from '../ui/MissionIntro';
+import { missionRegistry } from '../systems/GameServices';
 import type { MissionId } from '../types';
 
 // One reusable scene for every Journey mission (Scooter Roundup, Safety Lights, Bike Explorer,
@@ -96,6 +98,9 @@ export class JourneyMissionScene extends Phaser.Scene {
     });
 
     this.render();
+
+    const panel = missionRegistry.get(this.missionId)?.introPanels[0];
+    if (panel) playMissionIntro(this, panel, () => undefined);
   }
 
   private buildPips(total: number): void {

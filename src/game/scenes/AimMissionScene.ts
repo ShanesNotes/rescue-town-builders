@@ -10,6 +10,8 @@ import { act, createAimState, getAimResult, moveAimer, type AimState, type AimVe
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
+import { playMissionIntro } from '../ui/MissionIntro';
+import { missionRegistry } from '../systems/GameServices';
 import type { MissionId } from '../types';
 
 // One reusable scene for every Aim mission (Goo Cleanup, Frog Flight, Asteroid Blaster). The hero
@@ -77,6 +79,9 @@ export class AimMissionScene extends Phaser.Scene {
 
     this.renderTargets();
     this.placeHero(false);
+
+    const panel = missionRegistry.get(this.missionId)?.introPanels[0];
+    if (panel) playMissionIntro(this, panel, () => undefined);
   }
 
   private buildPips(total: number): void {

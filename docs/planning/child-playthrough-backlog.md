@@ -40,7 +40,7 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 
 - **Wave 1 — Touch-critical safety** ✅ DONE: P0-01, P0-02, P1-01.
 - **Wave 2 — Input parity & safety** (shared child-safe modal/focus controller) ✅ DONE: P0-03, P0-04, P1-11, P2-05, P2-06, P2-09.
-- **Wave 3 — Non-reader onboarding**: P1-03, P1-02, P1-06, P2-04, P3-02, P3-09.
+- **Wave 3 — Non-reader onboarding** ✅ DONE: P1-03, P1-02, P1-06, P2-04, P3-02, P3-09.
 - **Wave 4 — No-Fail floors & Aim clarity**: P1-09, P1-12, P3-05, P3-04, P1-08.
 - **Wave 5 — Reward loop**: P2-01, P2-02, P1-10, P1-07, P2-08, P3-08.
 - **Wave 6 — Variety & payoffs** (Codex art lane): P1-05, P1-04, P2-10, P3-07, P3-06, P3-03.
@@ -59,11 +59,11 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 ## P1 — confusing for a non-reader
 
 - [x] **P1-01 (S)** Game shipped SILENT (`musicVolume:0`). → *Default `0.35`; world alive from first launch.* `SaveSystem.ts`
-- [ ] **P1-02 (M)** Profile first-run: 3 hero sprites look tappable but are dead; only abstract `+` works. *Fix:* make Rivet/Brick/Ember the create buttons (tap → profile with that avatar + chime + hop), soft idle glow; `+` only for slots 2–5. `ProfileScene.ts`
-- [ ] **P1-03 (M)** Authored `introPanels` never rendered — missions drop a non-reader into a busy screen cold. *Fix:* 1.5–2s intro beat per mission (icon + hero pointing, pulse the first control), consuming `introPanels`. All 6 mission scenes + `missions.ts`.
+- [x] **P1-02 (M)** Profile first-run: 3 hero sprites look tappable but are dead; only abstract `+` works. *Fix:* make Rivet/Brick/Ember the create buttons (tap → profile with that avatar + chime + hop), soft idle glow; `+` only for slots 2–5. `ProfileScene.ts`
+- [x] **P1-03 (M)** Authored `introPanels` never rendered — missions drop a non-reader into a busy screen cold. *Fix:* 1.5–2s intro beat per mission (icon + hero pointing, pulse the first control), consuming `introPanels`. All 6 mission scenes + `missions.ts`.
 - [ ] **P1-04 (M)** Recycling 'helper' mode builds the IDENTICAL invention twice (only bubble-sprinkler is helper-eligible). *Fix:* ≥2 distinct helper-eligible blueprints. `RecyclingRun.ts`, `recyclingItems.ts`
 - [ ] **P1-05 (S)** Recycling correct card is ALWAYS leftmost — 'tap left' bypasses the mechanic. *Fix:* Fisher-Yates shuffle the 3 choices, seeded by blueprint+slot. `RecyclingRun.ts`, `RecyclingRunScene.ts`
-- [ ] **P1-06 (S)** House Builder: tray pieces never highlight — only a faint sky-slot ghost shows what's next. *Fix:* highlight the required TRAY item (gold stroke + pulse + bobbing arrow), dim others. `HouseBuilderScene.ts`
+- [x] **P1-06 (S)** House Builder: tray pieces never highlight — only a faint sky-slot ghost shows what's next. *Fix:* highlight the required TRAY item (gold stroke + pulse + bobbing arrow), dim others. `HouseBuilderScene.ts`
 - [ ] **P1-07 (M)** Multi-tap secrets reset their counter every scene reload — 2 of 3 secrets unreachable. *Fix:* persist per-secret touch counts to SaveSystem keyed by profile+secretId. `secretHotspot.ts`, `Secrets.ts`, `SaveSystem.ts`
 - [ ] **P1-08 (S)** Star scoring inverted: hardest-to-read missions punish a struggling child with 1 star. *Fix:* floor completed Match/Journey at 2 stars; reserve 3 for a gentle bonus. `MatchEngine.ts`, `StarScoring.ts`
 - [ ] **P1-09 (M)** Match (4) + Journey (4) have NO assist floor — a stuck child can tap wrong forever. *Fix:* per-prompt miss counter; escalate telegraph, then helper hops over and places the answer. `MatchEngine.ts`, `MatchMissionScene.ts`, `JourneyMissionScene.ts`
@@ -76,7 +76,7 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - [ ] **P2-01 (S)** Returning from a finished mission resets to page 0 — child can't see the star they earned. *Fix:* thread completed mission's page+index through `returnToTownMap`. `SceneNavigation.ts`, `MissionCompleteScene.ts`, `TownMapScene.ts`
 - [ ] **P2-02 (S)** No path from celebration to the just-earned sticker. *Fix:* make the popped sticker interactive → open its reading page (pass `readingId`). `MissionCompleteScene.ts`, `StickerBookScene.ts`
 - [ ] **P2-03 (M)** Instant hard-cut to white between every scene (no fade-out). *Fix:* `fadeOutAndStart` (~140–160ms), warm cream not pure white, gated on `motionAllowed`. `SceneTransitions.ts`, `SceneNavigation.ts`
-- [ ] **P2-04 (S)** Match wrong-tap gives a non-reader nothing actionable (springHome HOME→HOME, no panel reaction). *Fix:* shake/dim wrong panel + pulse correct target bigger; read the engine's dead `lastHint`. `MatchMissionScene.ts`
+- [x] **P2-04 (S)** Match wrong-tap gives a non-reader nothing actionable (springHome HOME→HOME, no panel reaction). *Fix:* shake/dim wrong panel + pulse correct target bigger; read the engine's dead `lastHint`. `MatchMissionScene.ts`
 - [x] **P2-05 (S)** Journey: tapping a passed stop plays the wrong-answer bonk; keyboard confirm auto-skips the whole mission. *Fix:* `disableInteractive` visited waypoints; bind `onMove` to a highlighted waypoint cursor, confirm visits the highlighted one. `JourneyMissionScene.ts`
 - [x] **P2-06 (S)** Profile keyboard nav can land on Settings/Back with zero highlight → opens parent gate by accident. *Fix:* exclude corner utilities from the navigable array (or bind their pulse). `ProfileScene.ts`
 - [ ] **P2-07 (M)** TownMap/Profile keyboard+page nav uses `scene.restart()` per arrow press → white-fade strobe + teardown cost. *Fix:* re-render selection highlight in-place; restart only on real page change. `TownMapScene.ts`, `ProfileScene.ts`
@@ -87,14 +87,14 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 ## P3 — missing delight
 
 - [ ] **P3-01 (S→M)** Fanfare is thin and the sticker cue == secret chime. *Fix:* richer celebratory fanfare (chord pad + sparkle + a ringing note as long as the confetti) + a dedicated warm 'sticker' cue; reserve the shimmer for true secret discoveries. *(audio — Claude lane)*
-- [ ] **P3-02 (S)** Secret reveal + exit modal render in Arial, not the pixel storybook font. *Fix:* `FONTS.display`/`FONTS.label`. `secretHotspot.ts`, `confirmMissionExit.ts` — *(exit modal ✅ Wave 2; `secretHotspot.ts` reveal remains for Wave 3)*
+- [x] **P3-02 (S)** Secret reveal + exit modal render in Arial, not the pixel storybook font. *Fix:* `FONTS.display`/`FONTS.label`. `secretHotspot.ts`, `confirmMissionExit.ts` — *(exit modal ✅ Wave 2; secret reveal ✅ Wave 3)*
 - [ ] **P3-03 (M)** House Builder + Match variants feel identical (no title shown, same orderedParts). *Fix:* 1.5s title card + preview silhouette + distinct accent color per house; fold Match into the P1-03 intro. `HouseBuilderScene.ts`, `houseBlueprints.ts`
 - [ ] **P3-04 (M)** Aim/Fire assist is an invisible teal dot flying the wrong way — a No-Fail mercy reads as nothing. *Fix:* real helper sprite flies TO the assisted target, sprays it, waves, warm chime. `AimMissionScene.ts`, `FireFixScene.ts`
 - [ ] **P3-05 (M)** No visible aim indicator (beam alpha 0.16) — child mashes Act blind. *Fix:* bold opaque directional cone + pulsing ring on in-cone targets + ground arrow. `AimMissionScene.ts`
 - [ ] **P3-06 (M)** Journey final-waypoint arrival has no climax; per-stop story beats absent. *Fix:* branch `travelTo` on final waypoint (bigger burst, chest-opens squash, hero hop, rising chime); render destination larger from the start. `JourneyMissionScene.ts`, `journeyMissions.ts`
 - [ ] **P3-07 (L)** Match correct-match payoff is thin (same tiny pop ×5). *Fix:* 'lands and transforms' on the target — plinth lights + statue pops with a cluck, gadget slot fills + whirrs, bread bowl rises. `MatchMissionScene.ts`, `matchMissions.ts`
 - [ ] **P3-08 (M)** Journey missions (4 of 14) have zero hidden secrets. *Fix:* seed one off-route glimmer per Journey backdrop (depends on P1-07/P2-08). `JourneyMissionScene.ts`, `Secrets.ts`
-- [ ] **P3-09 (S)** Preload advances on a blind 250ms timer that can race FontFace load → title flashes fallback font. *Fix:* `await document.fonts.ready` (min splash); optional firefly/lamp fade-up. `PreloadScene.ts`, `main.ts`
+- [x] **P3-09 (S)** Preload advances on a blind 250ms timer that can race FontFace load → title flashes fallback font. *Fix:* `await document.fonts.ready` (min splash); optional firefly/lamp fade-up. `PreloadScene.ts`, `main.ts`
 
 ## P4 — wow-factor (the big swings toward "unbelievable")
 

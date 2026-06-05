@@ -19,6 +19,8 @@ import {
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
+import { playMissionIntro } from '../ui/MissionIntro';
+import { missionRegistry } from '../systems/GameServices';
 
 const PART_KEY: Record<HousePartId, string> = {
   foundation: 'hl.prop.houseFoundation',
@@ -45,9 +47,21 @@ const SLOT: Record<HousePartId, { x: number; y: number; w: number; h: number }> 
 };
 const ORDER: HousePartId[] = ['foundation', 'walls', 'roof', 'door', 'decoration'];
 
+type TrayView = {
+  id: HousePartId;
+  frame: Phaser.GameObjects.Rectangle;
+  part: Phaser.GameObjects.Image;
+  label: Phaser.GameObjects.Text;
+  arrow: Phaser.GameObjects.Text;
+  base: number;
+  pulse?: Phaser.Tweens.Tween;
+  arrowPulse?: Phaser.Tweens.Tween;
+};
+
 export class HouseBuilderScene extends Phaser.Scene {
   private state!: HouseBuilderState;
   private slots = new Map<HousePartId, Phaser.GameObjects.Image>();
+  private trays: TrayView[] = [];
   private telegraph!: Phaser.GameObjects.Rectangle;
   private hint!: Phaser.GameObjects.Text;
   private pips: Phaser.GameObjects.Arc[] = [];
@@ -62,6 +76,7 @@ export class HouseBuilderScene extends Phaser.Scene {
     fadeInScene(this);
     this.state = createHouseBuilderState(houseBlueprints);
     this.slots = new Map();
+    this.trays = [];
     this.pips = [];
     this.selected = 0;
     this.done = false;
@@ -108,6 +123,9 @@ export class HouseBuilderScene extends Phaser.Scene {
     });
 
     this.render();
+
+    const panel = missionRegistry.get('house-builder')?.introPanels[0];
+    if (panel) playMissionIntro(this, { ...panel, characterId: 'brick' }, () => undefined);
   }
 
   private paintWorld(): void {
@@ -131,17 +149,51 @@ export class HouseBuilderScene extends Phaser.Scene {
       const x = xs[index];
       const y = 470;
       const key = hasTexture(this, PART_KEY[id]) ? PART_KEY[id] : FALLBACK_KEY[id];
-      this.add.rectangle(x, y, 132, 108, 0x16243a, 0.78).setStrokeStyle(3, 0xffc857, 0.7).setDepth(15);
+      const frame = this.add.rectangle(x, y, 132, 108, 0x16243a, 0.78).setStrokeStyle(3, 0xffc857, 0.7).setDepth(15);
       const part = this.add.image(x, y - 8, key).setDisplaySize(72, 72).setDepth(17);
-      this.add.text(x, y + 40, PART_LABEL[id], { fontFamily: FONTS.display, fontSize: '16px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 3 }).setOrigin(0.5).setDepth(17);
+      const label = this.add.text(x, y + 40, PART_LABEL[id], { fontFamily: FONTS.display, fontSize: '16px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 3 }).setOrigin(0.5).setDepth(17);
+      // A bobbing finger above the tray piece a child should grab next (hidden until it's active).
+      const arrow = this.add.text(x, y - 64, '👇', { fontSize: '34px' }).setOrigin(0.5).setDepth(18).setVisible(false);
       const baseScale = part.scale;
       part.setData('home', { x, y: y - 8 }).setData('id', id).setData('base', baseScale);
       part.setInteractive({ useHandCursor: true, draggable: true });
       this.input.setDraggable(part);
       part.on('pointerup', () => !this.draggingThisFrame && this.placePart(id)); // tap-to-place
       registerE2EButton({ testId: `house.part.${id}`, label: id, sceneKey: this.scene.key, press: () => this.placePart(id) });
+      this.trays.push({ id, frame, part, label, arrow, base: baseScale });
     });
     this.wireDrag();
+  }
+
+  // Show the child WHICH tray piece to grab for the current ordered part: the required one gets a
+  // gold stroke + gentle scale-pulse + a bobbing finger; the rest dim back so the eye is unambiguous.
+  private updateTrayHighlight(): void {
+    const activeId = this.done ? undefined : ORDER[this.state.currentPartIndex];
+    this.trays.forEach((tray) => {
+      const active = tray.id === activeId;
+      // Stop only the looping highlight tweens — NOT a springTray return tween that may still be
+      // animating a just-dropped piece home (killTweensOf(part) used to strand it at the drop point).
+      tray.pulse?.stop();
+      tray.pulse = undefined;
+      tray.arrowPulse?.stop();
+      tray.arrowPulse = undefined;
+      tray.part.setScale(tray.base);
+      if (active) {
+        tray.frame.setStrokeStyle(5, 0xffe27a, 1);
+        tray.part.setAlpha(1);
+        tray.label.setAlpha(1);
+        tray.arrow.setVisible(true).setAlpha(1).setY(tray.part.y - 56);
+        if (motionAllowed()) {
+          tray.pulse = this.tweens.add({ targets: tray.part, scale: tray.base * 1.12, duration: 620, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+          tray.arrowPulse = this.tweens.add({ targets: tray.arrow, y: tray.arrow.y + 12, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+        }
+      } else {
+        tray.frame.setStrokeStyle(3, 0xffc857, 0.5);
+        tray.part.setAlpha(0.6);
+        tray.label.setAlpha(0.6);
+        tray.arrow.setVisible(false);
+      }
+    });
   }
 
   private draggingThisFrame = false;
@@ -236,6 +288,7 @@ export class HouseBuilderScene extends Phaser.Scene {
     });
     this.updatePips();
     this.placeTelegraph(placed);
+    this.updateTrayHighlight();
   }
 
   private placeTelegraph(placed: number): void {

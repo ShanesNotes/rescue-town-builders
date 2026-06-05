@@ -2,12 +2,13 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, startParentSettingsGate, startScene } from '../systems/SceneNavigation';
 import { bindIntents } from '../systems/bindIntents';
-import { getSaveSystem } from '../systems/GameServices';
+import { getSaveSystem, getSfx } from '../systems/GameServices';
+import { registerE2EButton } from '../systems/E2EBridge';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
 
-type ProfileAction = { type: 'select'; profileId: string } | { type: 'create' };
+type ProfileAction = { type: 'select'; profileId: string } | { type: 'create'; avatarId?: string };
 
 // Only the three live, IP-reviewed MVP helpers ship. Roadmap characters stay out of the bundle
 // until ADR-0006's expansion gate opens. The modulo wrap means profiles 4-5 reuse a vetted avatar.
@@ -49,10 +50,11 @@ export class ProfileScene extends Phaser.Scene {
       this.addCoin(startX + profiles.length * spacing, rowY, actionIndex === this.selectedIndex);
     }
 
-    // First run (no profiles yet): the three helpers wait on the cobbles to be chosen.
+    // First run (no profiles yet): the three helpers wait on the cobbles, each a tappable create
+    // button ("pick me!") so a non-reader makes their first profile by choosing a friend — not by
+    // hunting an abstract +. The + is reserved for slots 2-5 (handled by `canAdd` above).
     if (profiles.length === 0) {
-      const heroes = ['hl.char.rivet', 'hl.char.brick', 'hl.char.ember'];
-      heroes.forEach((key, i) => this.plantCharacter(key, 300 + i * 180, 470, 104, i));
+      AVATARS.forEach((avatar, i) => this.plantCharacter(avatar, 300 + i * 180, 470, 104, i));
     }
 
     // Corner utility coins (icon-first; same destinations + testIds as before). Pointer-only: they
@@ -125,12 +127,46 @@ export class ProfileScene extends Phaser.Scene {
       .setDepth(30);
   }
 
-  private plantCharacter(key: string, x: number, feetY: number, size: number, index: number): void {
+  // First-run helper: a tappable "pick me!" create button. Tapping makes a profile with this
+  // avatar (happy chime + hop), then heads to the Town Map. Reuses the reliable bindPress path.
+  private plantCharacter(avatarId: string, x: number, feetY: number, size: number, index: number): void {
+    const key = `hl.char.${avatarId}`;
     this.add.ellipse(x, feetY + 2, size * 0.7, size * 0.18, 0x0a1322, 0.5).setDepth(9);
-    const sprite = this.add.image(x, feetY, key).setOrigin(0.5, 1).setDisplaySize(size, size).setDepth(11).setAlpha(0.92);
+
+    // Soft idle glow under the hero so a non-reader sees "choose one of these".
+    const glow = this.add.circle(x, feetY - size * 0.42, size * 0.6, 0xffd86b, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(10);
+
+    const sprite = this.add.image(x, feetY, key).setOrigin(0.5, 1).setDisplaySize(size, size).setDepth(11);
+    const create = (): void => {
+      try {
+        getSfx().play('correct');
+      } catch {
+        /* audio is a bonus (No-Fail) */
+      }
+      if (motionAllowed()) this.tweens.add({ targets: sprite, y: feetY - 22, duration: 150, yoyo: true, ease: 'Quad.easeOut', onComplete: () => this.choose({ type: 'create', avatarId }) });
+      else this.choose({ type: 'create', avatarId });
+    };
+    sprite.setInteractive({ useHandCursor: true });
+    let armed = false;
+    sprite.on('pointerdown', () => (armed = true));
+    sprite.on('pointerup', () => {
+      if (!armed) return;
+      armed = false;
+      create();
+    });
+    sprite.on('pointerout', () => (armed = false));
+    sprite.on('pointercancel', () => (armed = false));
+    registerE2EButton({ testId: `profile.create.${avatarId}`, label: avatarId, sceneKey: this.scene.key, press: create });
+
+    this.add
+      .text(x, feetY + 18, 'Pick me!', { fontFamily: FONTS.display, fontSize: '18px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 4 })
+      .setOrigin(0.5)
+      .setDepth(12);
+
     if (!motionAllowed()) return;
     const baseScaleY = sprite.scaleY;
     this.tweens.add({ targets: sprite, scaleY: baseScaleY * 1.03, duration: 1200 + index * 130, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: index * 160 });
+    this.tweens.add({ targets: glow, scale: 1.25, alpha: 0.06, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: index * 200 });
   }
 
   private bindInput(): void {
@@ -157,7 +193,8 @@ export class ProfileScene extends Phaser.Scene {
     }
     if (action.type === 'create') {
       const nextNumber = saves.getProfiles().length + 1;
-      saves.createProfile({ name: `Player ${nextNumber}`, avatarId: AVATARS[(nextNumber - 1) % AVATARS.length] ?? 'rivet' });
+      const avatarId = action.avatarId ?? AVATARS[(nextNumber - 1) % AVATARS.length] ?? 'rivet';
+      saves.createProfile({ name: `Player ${nextNumber}`, avatarId });
       startScene(this, SCENE_KEYS.townMap);
       return;
     }
