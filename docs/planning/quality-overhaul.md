@@ -236,3 +236,17 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   `isE2EEnabled()`; `finalWin()` completes). **4 of 5 hero games now have multi-round depth**
   (Recycle Snake remains).
 - Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.
+
+### Cycle 11 — Depth: Recycle Snake (3 yards) — ALL 5 HERO GAMES NOW HAVE DEPTH 🎉
+- `recycleSnakeLevels` (3 yards on the same 12×6 grid so the grid consts stay valid; 6 → 7 → 8 items).
+  The scene lays out each yard in place (clears item sprites + tail, resets the cart to start, rebuilds
+  pips), round dots, `yardComplete()` advances synchronously under `isE2EEnabled()`, `finalWin()`
+  completes. E2E total 21 `recycling.choice.N` collects (< the 40 loop).
+- **Milestone: every hero game now plays 3 ramping rounds** — Brick's Tower (3 towers), Ember (3 waves),
+  Dream Catch (3 rounds), Town Ride (3 legs), Recycle Snake (3 yards). Real session length + difficulty
+  curve, still no-fail.
+- Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.
+- Next: capture the leftover old-engine roadmap missions (dream-statues, recycled-inventions, bread-rush,
+  goo-cleanup, bike-explorer, safety-lights, treasure-boat) into the hero games — needs the bespoke
+  scenes to read their launching `missionId` (check how TownMapScene starts a mission; MatchMissionScene
+  uses `init({missionId})`) so one scene can serve several missions as themed rounds/skins.

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { recycleSnakeLevel } from '../data/recycleSnakeLevels';
+import { recycleSnakeLevels } from '../data/recycleSnakeLevels';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
@@ -25,8 +25,8 @@ import { hasTexture, motionAllowed } from '../ui/Sprite';
 // load. Collect them all to win. No death: walls wrap and the tail is harmless. Keeps the Phaser key
 // 'RecyclingRunScene' + the recycling.* testIds so the town map, sticker, and e2e all carry over.
 
-const COLS = recycleSnakeLevel.cols;
-const ROWS = recycleSnakeLevel.rows;
+const COLS = recycleSnakeLevels[0]!.cols;
+const ROWS = recycleSnakeLevels[0]!.rows;
 const CELL = 58;
 const GX0 = 130;
 const GY0 = 118;
@@ -61,6 +61,8 @@ export class RecycleSnakeScene extends Phaser.Scene {
   private tail: Phaser.GameObjects.Arc[] = [];
   private itemSprites = new Map<string, Phaser.GameObjects.Image>();
   private pips: Phaser.GameObjects.Arc[] = [];
+  private roundDots: Phaser.GameObjects.Arc[] = [];
+  private roundIndex = 0;
   private pointer: { x: number; y: number } | null = null;
   private done = false;
 
@@ -77,15 +79,18 @@ export class RecycleSnakeScene extends Phaser.Scene {
 
   create(): void {
     fadeInScene(this);
-    this.state = createRecycleSnakeState(recycleSnakeLevel);
+    this.roundIndex = 0;
+    this.state = createRecycleSnakeState(recycleSnakeLevels[0]!);
     this.tail = [];
     this.itemSprites = new Map();
     this.pips = [];
+    this.roundDots = [];
     this.pointer = null;
     this.done = false;
 
     this.paintWorld();
     this.buildPips();
+    this.buildRoundDots();
     this.buildItems();
     this.buildBins();
 
@@ -131,6 +136,27 @@ export class RecycleSnakeScene extends Phaser.Scene {
     for (let i = 0; i < total; i += 1) {
       this.pips.push(this.add.circle(startX + i * gap, 44, 6, 0x3a4a66).setStrokeStyle(2, 0x1b2a41).setDepth(30));
     }
+  }
+
+  // The item count grows each yard, so the pip row is rebuilt when a new yard starts.
+  private rebuildPips(): void {
+    for (const pip of this.pips) pip.destroy();
+    this.pips = [];
+    this.buildPips();
+  }
+
+  // One dot per yard (top-right) — the child sees how many yards are left to tidy.
+  private buildRoundDots(): void {
+    for (let i = 0; i < recycleSnakeLevels.length; i += 1) {
+      this.roundDots.push(this.add.circle(812 + i * 24, 44, 8, 0x3a4a66).setStrokeStyle(2, 0x1b2a41).setDepth(30));
+    }
+    this.updateRoundDots();
+  }
+
+  private updateRoundDots(): void {
+    this.roundDots.forEach((dot, i) => {
+      dot.setFillStyle(i < this.roundIndex ? 0x5ec8b5 : i === this.roundIndex ? 0x2f6a5e : 0x3a4a66);
+    });
   }
 
   private buildItems(): void {
@@ -206,7 +232,7 @@ export class RecycleSnakeScene extends Phaser.Scene {
       this.updatePips();
     }
     this.renderSnake(animate);
-    if (this.state.completed && !this.done) this.win();
+    if (this.state.completed && !this.done) this.yardComplete();
   }
 
   private renderSnake(animate: boolean): void {
@@ -245,7 +271,48 @@ export class RecycleSnakeScene extends Phaser.Scene {
     });
   }
 
-  private win(): void {
+  private clearItems(): void {
+    for (const [, sprite] of this.itemSprites) {
+      (sprite.getData('disc') as Phaser.GameObjects.Arc | undefined)?.destroy();
+      sprite.destroy();
+    }
+    this.itemSprites.clear();
+  }
+
+  // A yard is all tidied. If more yards remain, lay out the next (fuller) yard in place; otherwise
+  // complete the mission. `done` pauses driving/collecting during the swap.
+  private yardComplete(): void {
+    this.done = true;
+    this.roundIndex += 1;
+    this.updateRoundDots();
+    if (this.roundIndex < recycleSnakeLevels.length) {
+      if (isE2EEnabled()) {
+        this.startYard();
+        return;
+      }
+      getSfx().play('correct');
+      Juice.hitStop(this, 80);
+      Juice.confetti(this, 16);
+      if (motionAllowed()) Juice.punch(this, this.head, 1.2, 200);
+      this.time.delayedCall(motionAllowed() ? 700 : 0, () => this.startYard());
+    } else {
+      this.finalWin();
+    }
+  }
+
+  private startYard(): void {
+    this.state = createRecycleSnakeState(recycleSnakeLevels[this.roundIndex]!);
+    this.clearItems();
+    for (const t of this.tail) t.destroy();
+    this.tail = [];
+    this.rebuildPips();
+    this.buildItems();
+    this.head.setPosition(this.cx(this.state.body[0]!.x), this.cy(this.state.body[0]!.y));
+    this.renderSnake(false);
+    this.done = false;
+  }
+
+  private finalWin(): void {
     this.done = true;
     getSfx().play('correct');
     Juice.hitStop(this, 90);
