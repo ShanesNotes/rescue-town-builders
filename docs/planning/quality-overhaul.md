@@ -113,3 +113,21 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   exercised by e2e (e2e uses the deterministic path). Feel/physics validated by Willem's playtest;
   do a manual dev-server real-drop smoke in a later cycle. Old HouseBuilderScene now unreachable
   (kept in the scene list; retire in a cleanup cycle).
+
+### Cycle 3 — Hero Game #2: Ember's Fire Brigade (Arcade water-arc firefighting)
+- New `systems/FireBrigade.ts` (pure no-fail heat/douse/helper logic + scoring; 8 unit tests) +
+  `data/fireBrigadeLevels.ts` (5 fires, total heat 19) + `scenes/EmberBrigadeScene.ts` (**Arcade**
+  physics). Point anywhere → water LAUNCHES on a visible ballistic arc that lands where you touch
+  (forgiving aim — teaches trajectory by sight, kills the old hidden cone). Fires shrink to steam as
+  they cool; recoil + flashWhite + steam puffs; hit-stop + confetti on the all-clear. Lighter grade
+  for arcade energy. No-fail: unlimited water, no player damage, and a timed firefly-helper cools the
+  weakest fire if the child stalls (so it always converges).
+- Integration: reuses `missionId: 'fire-fix'` + sticker 'fire-fix-starter'; repointed
+  `MISSION_SCENE_KEYS['fire-fix']` → EmberBrigadeScene. **Carried the `secret-friend` secret** to the
+  same (822,438) coords. Kept testIds `fire.spray` / `fire.back-to-map`.
+- E2E: `fire.spray` press cools the weakest fire deterministically (no physics-timing flake); updated
+  browser-smoke, secret-discovery, screenshots specs + the SceneNavigation unit test.
+- Screenshot verified: Ember in firefighter gear with a hose, 5 legible campfires, visible water arc.
+  Zero console errors across the full e2e playthrough.
+- Gates: GREEN — typecheck clean, **173/173** unit, build ok, **e2e 6/6**.
+- Old FireFixScene now unreachable (kept in scene list; retire in cleanup cycle).

@@ -14,6 +14,7 @@ export const SCENE_KEYS = {
   houseBuilder: 'HouseBuilderScene',
   brickTower: 'BrickTowerScene',
   fireFix: 'FireFixScene',
+  emberBrigade: 'EmberBrigadeScene',
   matchMission: 'MatchMissionScene',
   aimMission: 'AimMissionScene',
   journeyMission: 'JourneyMissionScene',
@@ -45,7 +46,8 @@ export const MISSION_SCENE_KEYS: Partial<Record<MissionId, SceneKey>> = {
   'recycling-run': SCENE_KEYS.recyclingRun,
   // Brick's Tower (physics stacker) replaces the ordered House Builder; same missionId/node/sticker.
   'house-builder': SCENE_KEYS.brickTower,
-  'fire-fix': SCENE_KEYS.fireFix,
+  // Ember's Fire Brigade (Arcade water-arc) replaces Fire Fix; same missionId/node/sticker.
+  'fire-fix': SCENE_KEYS.emberBrigade,
 };
 
 const ARCHETYPE_SCENE_KEYS: Record<MissionArchetype, SceneKey> = {

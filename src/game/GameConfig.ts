@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { BrickTowerScene } from './scenes/BrickTowerScene';
+import { EmberBrigadeScene } from './scenes/EmberBrigadeScene';
 import { FireFixScene } from './scenes/FireFixScene';
 import { AimMissionScene } from './scenes/AimMissionScene';
 import { HouseBuilderScene } from './scenes/HouseBuilderScene';
@@ -49,6 +50,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     HouseBuilderScene,
     BrickTowerScene,
     FireFixScene,
+    EmberBrigadeScene,
     MatchMissionScene,
     AimMissionScene,
     JourneyMissionScene,

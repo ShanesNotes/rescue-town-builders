@@ -24,8 +24,9 @@ describe('SceneNavigation', () => {
       'recycling-run': SCENE_KEYS.recyclingRun,
       // The house-builder mission now routes to Brick's Tower (the physics-stacker rebuild).
       'house-builder': SCENE_KEYS.brickTower,
-      'fire-fix': SCENE_KEYS.fireFix,
+      // The fire-fix mission now routes to Ember's Fire Brigade (the Arcade water-arc rebuild).
+      'fire-fix': SCENE_KEYS.emberBrigade,
     });
-    expect(sceneKeyForMission('fire-fix')).toBe(SCENE_KEYS.fireFix);
+    expect(sceneKeyForMission('fire-fix')).toBe(SCENE_KEYS.emberBrigade);
   });
 });

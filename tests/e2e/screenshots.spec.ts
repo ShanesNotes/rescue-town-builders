@@ -74,9 +74,9 @@ test('captures every screen and stays error-free across a full playthrough', asy
   await scene(page, 'TownMapScene');
 
   await tap(page, 'townmap.mission.fire-fix');
-  await scene(page, 'FireFixScene');
+  await scene(page, 'EmberBrigadeScene');
   await shot(page, '07-fire');
-  await clearMission(page, 'FireFixScene', ['fire.spray'], 40);
+  await clearMission(page, 'EmberBrigadeScene', ['fire.spray'], 40);
   await tap(page, 'mission.complete.back-to-map');
   await scene(page, 'TownMapScene');
 

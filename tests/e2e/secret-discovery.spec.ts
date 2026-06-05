@@ -69,7 +69,7 @@ test('all three secrets reveal without error and persist as stickers', async ({ 
 
   // 3) Secret Friend — Fire Fix (3 touches).
   await tap(page, 'townmap.mission.fire-fix');
-  await scene(page, 'FireFixScene');
+  await scene(page, 'EmberBrigadeScene');
   await clickGame(page, 822, 438, 3);
   await page.waitForTimeout(400);
   await page.screenshot({ path: 'test-results/shots/secret-friend.png' });

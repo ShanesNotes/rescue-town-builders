@@ -51,11 +51,11 @@ async function completeHouseBuilder(page: Page): Promise<void> {
 }
 
 async function completeFireFix(page: Page): Promise<void> {
-  // Spray-only: the No-Fail helper-drone floor guarantees completion even if the
-  // child never moves Ember (this exercises the Cycle 1 hard-block fix in-browser).
+  // Ember's Fire Brigade (Arcade water-arc): each spray press deterministically cools the weakest
+  // fire in E2E, so the round always converges without depending on physics timing.
   for (let i = 0; i < 40; i += 1) {
     const scene = await page.evaluate(() => window.__RTB_E2E__?.currentSceneKey);
-    if (scene !== 'FireFixScene') break;
+    if (scene !== 'EmberBrigadeScene') break;
     await page.evaluate(() => window.__RTB_E2E__?.pressButton('fire.spray'));
   }
   await waitForScene(page, 'MissionCompleteScene');
@@ -91,7 +91,7 @@ test('creates a profile, completes all MVP missions, and persists stars/stickers
   await press(page, 'townmap.mission.house-builder', 'BrickTowerScene');
   await completeHouseBuilder(page);
 
-  await press(page, 'townmap.mission.fire-fix', 'FireFixScene');
+  await press(page, 'townmap.mission.fire-fix', 'EmberBrigadeScene');
   await completeFireFix(page);
 
   const beforeRefresh = await page.evaluate(() => window.__RTB_E2E__?.getSaveData() ?? null);
