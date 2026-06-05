@@ -19,6 +19,8 @@ const HEROES: Hero[] = [
 const GROUND_Y = 522; // where little feet meet the front cobblestones
 
 export class StartScene extends Phaser.Scene {
+  private begun = false;
+
   constructor() {
     super('StartScene');
   }
@@ -119,7 +121,12 @@ export class StartScene extends Phaser.Scene {
   }
 
   private begin(): void {
+    if (this.begun) return; // a double-tap must not fire two transitions
+    this.begun = true;
     getMusic().start();
-    softStartScene(this, SCENE_KEYS.profile);
+    // Give the gesture-initiated audio play() a beat to start resolving before the scene is torn
+    // down — otherwise the deferred HTMLAudio play() is orphaned and the menu/first scenes stay
+    // silent (root cause confirmed by audit). The fade already softens the wait.
+    this.time.delayedCall(80, () => softStartScene(this, SCENE_KEYS.profile));
   }
 }

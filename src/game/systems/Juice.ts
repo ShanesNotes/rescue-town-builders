@@ -75,4 +75,37 @@ export const Juice = {
       });
     }
   },
+
+  /**
+   * Hit-stop: the single highest-impact "crunch" trick. Briefly freezes visual tweens on a
+   * meaningful impact (a brick lands, a fire goes out), then restores — the game-feel equivalent
+   * of a sharp intake of breath. Only `tweens.timeScale` is touched (NOT `time.timeScale`), so the
+   * restore timer itself still fires on schedule and input/audio never stall. Reduced-motion: no-op.
+   */
+  hitStop(scene: Phaser.Scene, ms = 70): void {
+    if (!motionAllowed()) return;
+    scene.tweens.timeScale = 0.0001;
+    scene.time.delayedCall(ms, () => {
+      scene.tweens.timeScale = 1;
+    });
+  },
+
+  /**
+   * A one-frame white flash over a sprite on impact — reads instantly as "that got hit". Uses
+   * setTintFill so it works on any Image/Sprite; restores the prior tint (so an accent-tinted piece
+   * keeps its colour). Reduced-motion: no-op.
+   */
+  flashWhite(scene: Phaser.Scene, target: Phaser.GameObjects.Image, duration = 80): void {
+    if (!motionAllowed() || typeof target.setTintMode !== 'function') return;
+    const wasTinted = target.isTinted;
+    const tint = target.tintTopLeft;
+    // Phaser 4: a fill-tint is setTint(colour) + tint mode FILL (setTintFill is the deprecated 0-arg form).
+    target.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL);
+    scene.time.delayedCall(duration, () => {
+      if (!target.active) return;
+      target.setTintMode(Phaser.TintModes.MULTIPLY);
+      if (wasTinted) target.setTint(tint);
+      else target.clearTint();
+    });
+  },
 };
