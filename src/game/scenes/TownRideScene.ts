@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { townRideLevel } from '../data/townRideLevels';
+import { townRideLevels, townRideSpeeds } from '../data/townRideLevels';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
@@ -38,10 +38,13 @@ export class TownRideScene extends Phaser.Scene {
   private trail: Phaser.GameObjects.Image[] = [];
   private dashes: Phaser.GameObjects.Rectangle[] = [];
   private pips: Phaser.GameObjects.Arc[] = [];
+  private roundDots: Phaser.GameObjects.Arc[] = [];
   private targetY = (ROAD_TOP + ROAD_BOTTOM) / 2;
   private slowUntil = 0;
   private bumpCdUntil = 0;
   private spawnToggle = 0;
+  private roundIndex = 0;
+  private speedMul = townRideSpeeds[0]!;
   private done = false;
 
   constructor() {
@@ -49,11 +52,14 @@ export class TownRideScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.state = createTownRideState(townRideLevel);
+    this.roundIndex = 0;
+    this.state = createTownRideState(townRideLevels[0]!);
+    this.speedMul = townRideSpeeds[0]!;
     this.movers = new Set();
     this.trail = [];
     this.dashes = [];
     this.pips = [];
+    this.roundDots = [];
     this.targetY = (ROAD_TOP + ROAD_BOTTOM) / 2;
     this.slowUntil = 0;
     this.bumpCdUntil = 0;
@@ -64,6 +70,7 @@ export class TownRideScene extends Phaser.Scene {
     this.makeConeTexture();
     this.paintWorld();
     this.buildPips();
+    this.buildRoundDots();
 
     this.rider = this.add.image(RIDER_X, this.targetY, 'hl.char.scoot').setDisplaySize(78, 78).setDepth(20);
 
@@ -119,6 +126,27 @@ export class TownRideScene extends Phaser.Scene {
     }
   }
 
+  // The friend goal grows each leg, so the pip row is rebuilt when a new leg starts.
+  private rebuildPips(): void {
+    for (const pip of this.pips) pip.destroy();
+    this.pips = [];
+    this.buildPips();
+  }
+
+  // One dot per leg (top-right) — the child sees how many legs of the ride are left.
+  private buildRoundDots(): void {
+    for (let i = 0; i < townRideLevels.length; i += 1) {
+      this.roundDots.push(this.add.circle(812 + i * 24, 42, 8, 0x3a4a66).setStrokeStyle(2, 0x1b2a41).setDepth(30));
+    }
+    this.updateRoundDots();
+  }
+
+  private updateRoundDots(): void {
+    this.roundDots.forEach((dot, i) => {
+      dot.setFillStyle(i < this.roundIndex ? 0xffc857 : i === this.roundIndex ? 0x8a6a3c : 0x3a4a66);
+    });
+  }
+
   private spawn(): void {
     if (this.done || this.overlayBusy()) return;
     this.spawnToggle += 1;
@@ -134,7 +162,7 @@ export class TownRideScene extends Phaser.Scene {
     if (this.done) return;
     const f = delta / 16.667;
     const slow = time < this.slowUntil ? 0.4 : 1;
-    const speed = BASE_SPEED * f * slow;
+    const speed = BASE_SPEED * f * slow * this.speedMul;
 
     // Rider eases toward the steered lane.
     if (!this.overlayBusy()) this.rider.y += (this.targetY - this.rider.y) * 0.25;
@@ -173,7 +201,7 @@ export class TownRideScene extends Phaser.Scene {
     // The rescued friend hops onto the trailing train.
     this.trail.push(m.setDepth(19).setDisplaySize(44, 44));
     this.updatePips();
-    if (this.state.completed && !this.done) this.win();
+    if (this.state.completed && !this.done) this.legComplete();
   }
 
   private onCone(m: Mover, time: number): void {
@@ -203,7 +231,7 @@ export class TownRideScene extends Phaser.Scene {
     if (this.done) return;
     this.state = catchFriend(this.state);
     this.updatePips();
-    if (this.state.completed && !this.done) this.win();
+    if (this.state.completed && !this.done) this.legComplete();
   }
 
   private nudge(dir: number): void {
@@ -219,7 +247,40 @@ export class TownRideScene extends Phaser.Scene {
     });
   }
 
-  private win(): void {
+  // A leg is done. If more legs remain, clear the road and start the next (faster, fuller) leg in
+  // place; otherwise bring the friends home to the pen and complete. `done` pauses the ride mid-swap.
+  private legComplete(): void {
+    this.done = true;
+    this.roundIndex += 1;
+    this.updateRoundDots();
+    if (this.roundIndex < townRideLevels.length) {
+      if (isE2EEnabled()) {
+        this.startLeg();
+        return;
+      }
+      getSfx().play('correct');
+      Juice.hitStop(this, 80);
+      Juice.confetti(this, 16);
+      Juice.punch(this, this.rider, 1.18, 200);
+      this.time.delayedCall(motionAllowed() ? 700 : 0, () => this.startLeg());
+    } else {
+      this.finalWin();
+    }
+  }
+
+  private startLeg(): void {
+    this.state = createTownRideState(townRideLevels[this.roundIndex]!);
+    this.speedMul = townRideSpeeds[this.roundIndex] ?? this.speedMul;
+    for (const m of [...this.movers]) m.destroy();
+    this.movers.clear();
+    for (const f of this.trail) f.destroy();
+    this.trail = [];
+    this.spawnToggle = 0;
+    this.rebuildPips();
+    this.done = false;
+  }
+
+  private finalWin(): void {
     this.done = true;
     getSfx().play('correct');
     Juice.hitStop(this, 90);

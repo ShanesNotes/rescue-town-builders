@@ -224,3 +224,15 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   (else a celebration delay eats the deterministic spray budget); bumped the e2e fire loops 40 → 70
   (browser-smoke + screenshots) since 3 waves total 45 deterministic presses.
 - Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.
+
+### Cycle 10 — Depth: Dream Catch (3 rounds) + Town Ride (3 legs)
+- **Dream Catch:** `dreamCatchLevels` (3 rounds, goal 5→6→7) + `dreamFallSpeeds` (42→62→84). Dreams
+  fall faster + there are more to catch each round; pips rebuilt per round (goal grows), round dots,
+  reset-in-place. E2E total 18 `dream.catch` presses (< the 30 loop).
+- **Town Ride:** `townRideLevels` (3 legs, 4→5→6 friends) + `townRideSpeeds` (1→1.22→1.46 scroll
+  multiplier). Each leg rolls faster and wants more friends; movers + trail cleared and pips rebuilt
+  per leg, round dots, reset-in-place. E2E total 15 `ride.catch` presses (< 30).
+- Both reuse the **Cycle-8 pattern** (`roundComplete()`/`legComplete()` advances synchronously under
+  `isE2EEnabled()`; `finalWin()` completes). **4 of 5 hero games now have multi-round depth**
+  (Recycle Snake remains).
+- Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.

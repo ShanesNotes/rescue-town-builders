@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { dreamCatchLevel } from '../data/dreamCatchLevels';
+import { dreamCatchLevels, dreamFallSpeeds } from '../data/dreamCatchLevels';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
@@ -38,8 +38,11 @@ export class DreamCatchScene extends Phaser.Scene {
   private cluckle!: Phaser.GameObjects.Image;
   private drops = new Set<Drop>();
   private pips: Phaser.GameObjects.Arc[] = [];
+  private roundDots: Phaser.GameObjects.Arc[] = [];
   private bag: DreamType[] = [];
   private bagIndex = 0;
+  private roundIndex = 0;
+  private fallSpeed = dreamFallSpeeds[0]!;
   private pointerX: number | null = null;
   private done = false;
 
@@ -49,17 +52,21 @@ export class DreamCatchScene extends Phaser.Scene {
 
   create(): void {
     fadeInScene(this);
-    this.state = createDreamCatchState(dreamCatchLevel);
+    this.roundIndex = 0;
+    this.state = createDreamCatchState(dreamCatchLevels[0]!);
     this.drops = new Set();
     this.pips = [];
-    this.bag = dreamCatchLevel.types;
+    this.roundDots = [];
+    this.bag = dreamCatchLevels[0]!.types;
     this.bagIndex = 0;
+    this.fallSpeed = dreamFallSpeeds[0]!;
     this.pointerX = null;
     this.done = false;
 
     this.makeDreamTextures();
     this.paintWorld();
     this.buildPips();
+    this.buildRoundDots();
     this.buildBins();
 
     this.cluckle = this.add.image(480, 96, 'hl.char.cluckle').setOrigin(0.5, 0).setDisplaySize(110, 110).setDepth(12);
@@ -122,6 +129,27 @@ export class DreamCatchScene extends Phaser.Scene {
     }
   }
 
+  // The goal grows each round, so the pip row is rebuilt when a new round starts.
+  private rebuildPips(): void {
+    for (const pip of this.pips) pip.destroy();
+    this.pips = [];
+    this.buildPips();
+  }
+
+  // One dot per round (top-right) — the child sees how many dream-rounds are left.
+  private buildRoundDots(): void {
+    for (let i = 0; i < dreamCatchLevels.length; i += 1) {
+      this.roundDots.push(this.add.circle(812 + i * 24, 42, 8, 0x3a4a66).setStrokeStyle(2, 0x1b2a41).setDepth(30));
+    }
+    this.updateRoundDots();
+  }
+
+  private updateRoundDots(): void {
+    this.roundDots.forEach((dot, i) => {
+      dot.setFillStyle(i < this.roundIndex ? 0xc9b8e8 : i === this.roundIndex ? 0x6a5ba8 : 0x3a4a66);
+    });
+  }
+
   private buildBins(): void {
     ([[SUN_BIN, '__dreamSun', 0xffd24a], [MOON_BIN, '__dreamMoon', 0xb9a8e8]] as const).forEach(([bin, key, color]) => {
       this.add.circle(bin.x, bin.y, 40, color, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(6);
@@ -137,7 +165,7 @@ export class DreamCatchScene extends Phaser.Scene {
     const x = 220 + Math.random() * 520;
     const drop = this.physics.add.image(x, 150, type === 'sun' ? '__dreamSun' : '__dreamMoon').setDepth(15) as Drop;
     drop.setData('type', type);
-    drop.setVelocity((Math.random() - 0.5) * 30, 40);
+    drop.setVelocity((Math.random() - 0.5) * 30, this.fallSpeed);
     const glow = this.add.circle(x, 150, 22, type === 'sun' ? 0xffd24a : 0xb9a8e8, 0.25).setBlendMode(Phaser.BlendModes.ADD).setDepth(14);
     drop.setData('glow', glow);
     this.drops.add(drop);
@@ -182,7 +210,7 @@ export class DreamCatchScene extends Phaser.Scene {
     }
     this.drops.delete(drop);
     this.updatePips();
-    if (this.state.completed && !this.done) this.win();
+    if (this.state.completed && !this.done) this.roundComplete();
   }
 
   private onMiss(drop: Drop): void {
@@ -197,7 +225,7 @@ export class DreamCatchScene extends Phaser.Scene {
     if (this.done) return;
     this.state = catchDream(this.state);
     this.updatePips();
-    if (this.state.completed && !this.done) this.win();
+    if (this.state.completed && !this.done) this.roundComplete();
   }
 
   private nudgeBasket(dir: number): void {
@@ -213,13 +241,49 @@ export class DreamCatchScene extends Phaser.Scene {
     });
   }
 
-  private win(): void {
-    this.done = true;
+  private clearDrops(): void {
     for (const drop of [...this.drops]) {
       (drop.getData('glow') as Phaser.GameObjects.Arc | undefined)?.destroy();
       drop.destroy();
     }
     this.drops.clear();
+  }
+
+  // A round of catching is done. If more rounds remain, start the next (faster) round in place;
+  // otherwise complete the mission. `done` pauses spawning/catching during the swap.
+  private roundComplete(): void {
+    this.done = true;
+    this.clearDrops();
+    this.roundIndex += 1;
+    this.updateRoundDots();
+    if (this.roundIndex < dreamCatchLevels.length) {
+      if (isE2EEnabled()) {
+        this.startRound();
+        return;
+      }
+      getSfx().play('correct');
+      Juice.hitStop(this, 80);
+      Juice.confetti(this, 16);
+      if (motionAllowed()) Juice.punch(this, this.cluckle, 1.16, 200);
+      this.time.delayedCall(motionAllowed() ? 700 : 0, () => this.startRound());
+    } else {
+      this.finalWin();
+    }
+  }
+
+  private startRound(): void {
+    this.state = createDreamCatchState(dreamCatchLevels[this.roundIndex]!);
+    this.bag = dreamCatchLevels[this.roundIndex]!.types;
+    this.bagIndex = 0;
+    this.fallSpeed = dreamFallSpeeds[this.roundIndex] ?? this.fallSpeed;
+    this.rebuildPips();
+    this.done = false;
+    if (!isE2EEnabled()) this.time.delayedCall(300, () => this.dropDream());
+  }
+
+  private finalWin(): void {
+    this.done = true;
+    this.clearDrops();
     getSfx().play('correct');
     Juice.hitStop(this, 90);
     Juice.shake(this, 120, 0.003);
