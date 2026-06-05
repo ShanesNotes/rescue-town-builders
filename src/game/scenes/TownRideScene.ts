@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { townRideLevels, townRideSpeeds } from '../data/townRideLevels';
+import { townRideTuning, defaultTownRideTuning } from '../data/townRideLevels';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
@@ -63,7 +63,8 @@ export class TownRideScene extends Phaser.Scene {
   private bumpCdUntil = 0;
   private spawnToggle = 0;
   private roundIndex = 0;
-  private speedMul = townRideSpeeds[0]!;
+  private speedMul = 1;
+  private tuning = defaultTownRideTuning;
   private missionId: MissionId = 'scooter-roundup';
   private done = false;
 
@@ -77,8 +78,9 @@ export class TownRideScene extends Phaser.Scene {
 
   create(): void {
     this.roundIndex = 0;
-    this.state = createTownRideState(townRideLevels[0]!);
-    this.speedMul = townRideSpeeds[0]!;
+    this.tuning = townRideTuning[this.missionId] ?? defaultTownRideTuning;
+    this.state = createTownRideState(this.tuning.levels[0]!);
+    this.speedMul = this.tuning.speeds[0]!;
     this.movers = new Set();
     this.trail = [];
     this.dashes = [];
@@ -161,7 +163,7 @@ export class TownRideScene extends Phaser.Scene {
 
   // One dot per leg (top-right) — the child sees how many legs of the ride are left.
   private buildRoundDots(): void {
-    for (let i = 0; i < townRideLevels.length; i += 1) {
+    for (let i = 0; i < this.tuning.levels.length; i += 1) {
       this.roundDots.push(this.add.circle(812 + i * 24, 42, 8, 0x3a4a66).setStrokeStyle(2, 0x1b2a41).setDepth(30));
     }
     this.updateRoundDots();
@@ -279,7 +281,7 @@ export class TownRideScene extends Phaser.Scene {
     this.done = true;
     this.roundIndex += 1;
     this.updateRoundDots();
-    if (this.roundIndex < townRideLevels.length) {
+    if (this.roundIndex < this.tuning.levels.length) {
       if (isE2EEnabled()) {
         this.startLeg();
         return;
@@ -295,8 +297,8 @@ export class TownRideScene extends Phaser.Scene {
   }
 
   private startLeg(): void {
-    this.state = createTownRideState(townRideLevels[this.roundIndex]!);
-    this.speedMul = townRideSpeeds[this.roundIndex] ?? this.speedMul;
+    this.state = createTownRideState(this.tuning.levels[this.roundIndex]!);
+    this.speedMul = this.tuning.speeds[this.roundIndex] ?? this.speedMul;
     for (const m of [...this.movers]) m.destroy();
     this.movers.clear();
     for (const f of this.trail) f.destroy();

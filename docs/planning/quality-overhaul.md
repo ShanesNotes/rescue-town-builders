@@ -351,3 +351,15 @@ asteroid-blaster (Aim) + bread-rush (Match). **The two remaining steps are human
 - *Honest note:* the clearly-high-value structural work is now complete (overhaul + consolidation +
   cleanup + docs + this asset trim). Remaining is genuine polish (per-mission level variety so captured
   missions feel distinct, audio, town-map cohesion) or the human steps (merge + Willem playtest).
+
+### Cycle 19 — Polish: per-mission level variety (Town Ride + Dream Catch)
+- Captured missions now play DISTINCTLY, not as backdrop reskins. Refactored each scene's level data to
+  a **per-missionId tuning map** (`townRideTuning` / `dreamCatchTuning`) with a default that preserves
+  the original; the scene picks `tuning[missionId] ?? default` in `create()`.
+  - **Town Ride (4 journeys):** scooter (4/5/6 friends, brisk), bike-explorer (5/6/7, longer+faster),
+    safety-lights (4/4/5, calmer crossings), treasure-boat (4/5/6, slow sea voyage) — distinct
+    friend-goals + scroll speeds.
+  - **Dream Catch (2):** inverse-dream (5/6/7, gentle) vs dream-statues (6/7/8, faster falls, moon-heavy).
+- Deterministic E2E totals stay under the loop counts (dream-statues 21, bike 18 < 30). Pure logic
+  unchanged, so unit tests untouched.
+- Gates: GREEN — typecheck clean, **168/168** unit, build ok, **e2e 8/8**.

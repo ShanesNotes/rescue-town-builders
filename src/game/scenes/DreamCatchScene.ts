@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { dreamCatchLevels, dreamFallSpeeds } from '../data/dreamCatchLevels';
+import { dreamCatchTuning, defaultDreamCatchTuning } from '../data/dreamCatchLevels';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
@@ -50,7 +50,8 @@ export class DreamCatchScene extends Phaser.Scene {
   private bag: DreamType[] = [];
   private bagIndex = 0;
   private roundIndex = 0;
-  private fallSpeed = dreamFallSpeeds[0]!;
+  private fallSpeed = defaultDreamCatchTuning.speeds[0]!;
+  private tuning = defaultDreamCatchTuning;
   private pointerX: number | null = null;
   private missionId: MissionId = 'inverse-dream';
   private done = false;
@@ -66,13 +67,14 @@ export class DreamCatchScene extends Phaser.Scene {
   create(): void {
     fadeInScene(this);
     this.roundIndex = 0;
-    this.state = createDreamCatchState(dreamCatchLevels[0]!);
+    this.tuning = dreamCatchTuning[this.missionId] ?? defaultDreamCatchTuning;
+    this.state = createDreamCatchState(this.tuning.levels[0]!);
     this.drops = new Set();
     this.pips = [];
     this.roundDots = [];
-    this.bag = dreamCatchLevels[0]!.types;
+    this.bag = this.tuning.levels[0]!.types;
     this.bagIndex = 0;
-    this.fallSpeed = dreamFallSpeeds[0]!;
+    this.fallSpeed = this.tuning.speeds[0]!;
     this.pointerX = null;
     this.done = false;
 
@@ -152,7 +154,7 @@ export class DreamCatchScene extends Phaser.Scene {
 
   // One dot per round (top-right) — the child sees how many dream-rounds are left.
   private buildRoundDots(): void {
-    for (let i = 0; i < dreamCatchLevels.length; i += 1) {
+    for (let i = 0; i < this.tuning.levels.length; i += 1) {
       this.roundDots.push(this.add.circle(812 + i * 24, 42, 8, 0x3a4a66).setStrokeStyle(2, 0x1b2a41).setDepth(30));
     }
     this.updateRoundDots();
@@ -270,7 +272,7 @@ export class DreamCatchScene extends Phaser.Scene {
     this.clearDrops();
     this.roundIndex += 1;
     this.updateRoundDots();
-    if (this.roundIndex < dreamCatchLevels.length) {
+    if (this.roundIndex < this.tuning.levels.length) {
       if (isE2EEnabled()) {
         this.startRound();
         return;
@@ -286,10 +288,10 @@ export class DreamCatchScene extends Phaser.Scene {
   }
 
   private startRound(): void {
-    this.state = createDreamCatchState(dreamCatchLevels[this.roundIndex]!);
-    this.bag = dreamCatchLevels[this.roundIndex]!.types;
+    this.state = createDreamCatchState(this.tuning.levels[this.roundIndex]!);
+    this.bag = this.tuning.levels[this.roundIndex]!.types;
     this.bagIndex = 0;
-    this.fallSpeed = dreamFallSpeeds[this.roundIndex] ?? this.fallSpeed;
+    this.fallSpeed = this.tuning.speeds[this.roundIndex] ?? this.fallSpeed;
     this.rebuildPips();
     this.done = false;
     if (!isE2EEnabled()) this.time.delayedCall(300, () => this.dropDream());
