@@ -143,13 +143,18 @@ export class JourneyMissionScene extends Phaser.Scene {
     if (!outcome.correct) {
       getSfx().play('try-again');
       this.hint.setText('Almost — tap the glowing stop.');
+      // After a couple of wrong stops, escalate so the next stop is unmistakable (P1-09).
+      if (outcome.assistLevel >= 1) this.escalateNextStop();
       return;
     }
 
-    getSfx().play('correct');
+    // No-Fail floor (P1-09): the hero auto-walks to the correct next stop, placing it for the child.
+    getSfx().play(outcome.autoResolved ? 'place' : 'correct');
     this.hint.setText('');
-    const wp = this.waypoints.find((w) => w.id === waypointId);
-    if (wp) this.travelTo(wp);
+    // The just-resolved stop is the prompt before the new currentIndex (auto-resolve advances state).
+    const resolvedId = this.state.prompts[this.state.currentIndex - 1]?.correctTargetId ?? waypointId;
+    const wp = this.waypoints.find((w) => w.id === resolvedId);
+    if (wp) this.travelTo(wp, outcome.autoResolved);
 
     if (outcome.completed) {
       this.done = true;
@@ -159,10 +164,31 @@ export class JourneyMissionScene extends Phaser.Scene {
     this.render();
   }
 
-  private travelTo(wp: JourneyWaypoint): void {
-    Juice.burst(this, wp.x, wp.y, { color: 0xffe2a6, count: 7, radius: 34 });
+  // Escalated telegraph (P1-09): brighten the next stop and dim the rest so a stuck child sees it.
+  private escalateNextStop(): void {
+    const next = this.state.currentIndex;
+    this.waypoints.forEach((w, i) => {
+      const glow = this.glows.get(w.id);
+      const marker = this.markers.get(w.id);
+      if (!glow || !marker) return;
+      if (i === next) {
+        this.tweens.killTweensOf(glow);
+        glow.setAlpha(motionAllowed() ? 0.5 : 0.7);
+        if (motionAllowed()) {
+          this.tweens.add({ targets: glow, alpha: 0.85, duration: 480, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+          Juice.punch(this, marker, 1.2, 220);
+        }
+      } else if (i > next) {
+        marker.setAlpha(0.5);
+      }
+    });
+  }
+
+  private travelTo(wp: JourneyWaypoint, assisted = false): void {
+    // Auto-resolve gets a warmer 'a friend helped' burst so the No-Fail mercy reads as a gift.
+    Juice.burst(this, wp.x, wp.y, { color: 0xffe2a6, count: assisted ? 12 : 7, radius: assisted ? 52 : 34 });
     const marker = this.markers.get(wp.id);
-    if (marker) Juice.punch(this, marker, 1.16, 130);
+    if (marker) Juice.punch(this, marker, assisted ? 1.24 : 1.16, assisted ? 200 : 130);
     if (!motionAllowed()) {
       this.hero.setPosition(wp.x, wp.y + 30);
       this.heroShadow.setPosition(wp.x, wp.y + 32);

@@ -24,8 +24,8 @@ export const DEFAULT_AIM_CONFIG: AimConfig = {
   step: 80,
   range: 190,
   bounds: { minX: 120, maxX: 840, minY: 160, maxY: 390 },
-  assistEarlyAt: 5,
-  assistFloorAt: 8,
+  assistEarlyAt: 2,
+  assistFloorAt: 3,
 };
 
 export type AimState = {
@@ -40,7 +40,13 @@ export type AimState = {
   config: AimConfig;
 };
 
-export type AimOutcome = { state: AimState; hit: boolean; completed: boolean };
+export type AimOutcome = {
+  state: AimState;
+  hit: boolean;
+  completed: boolean;
+  assisted: boolean; // the No-Fail helper sprayed this act (scene flies the helper to the target)
+  autoPanned: boolean; // a miss nudged the hero one step toward the nearest live target
+};
 
 export function createAimState(targets: AimTarget[], config: AimConfig = DEFAULT_AIM_CONFIG): AimState {
   if (targets.length === 0) throw new Error('An aim mission needs at least one target.');
@@ -72,13 +78,21 @@ export function moveAimer(state: AimState, dir: AimVec): AimState {
 }
 
 export function act(state: AimState): AimOutcome {
-  if (state.completed) return { state, hit: false, completed: true };
+  if (state.completed) return { state, hit: false, completed: true, assisted: false, autoPanned: false };
 
   const index = state.targets.findIndex((t) => t.health > 0 && inCone(state, t));
   if (index < 0) {
-    const missed = { ...state, acts: state.acts + 1, lastMessage: 'Missed — move a little closer.' };
-    const assisted = maybeAssist(missed);
-    return { state: assisted, hit: false, completed: assisted.completed };
+    // P1-12: a miss must always move the mission forward. Nudge the hero one step toward the
+    // nearest live target so the next Act is visible progress, then run the No-Fail helper floor.
+    const panned = autoPan({ ...state, acts: state.acts + 1, lastMessage: 'Missed — moving closer for you.' });
+    const assisted = maybeAssist(panned.state);
+    return {
+      state: assisted,
+      hit: false,
+      completed: assisted.completed,
+      assisted: assisted.assists > state.assists,
+      autoPanned: panned.moved,
+    };
   }
 
   const targets = state.targets.map((t, i) => (i === index ? { ...t, health: Math.max(0, t.health - 1) } : t));
@@ -89,7 +103,43 @@ export function act(state: AimState): AimOutcome {
     hits: state.hits + 1,
     lastMessage: targets[index]?.health === 0 ? 'Done — nicely helped!' : 'Almost — once more.',
   });
-  return { state: next, hit: true, completed: next.completed };
+  return { state: next, hit: true, completed: next.completed, assisted: false, autoPanned: false };
+}
+
+// Step the hero one cell toward the nearest live target and aim at it, so a missed act never leaves
+// the child stranded with no path forward. Returns whether the player actually moved.
+function autoPan(state: AimState): { state: AimState; moved: boolean } {
+  const target = nearestLiveTarget(state);
+  if (!target) return { state, moved: false };
+  const dir: AimVec = { x: stepSign(target.x - state.player.x), y: stepSign(target.y - state.player.y) };
+  if (dir.x === 0 && dir.y === 0) return { state, moved: false };
+  const b = state.config.bounds;
+  const player = {
+    x: clamp(state.player.x + dir.x * state.config.step, b.minX, b.maxX),
+    y: clamp(state.player.y + dir.y * state.config.step, b.minY, b.maxY),
+  };
+  const moved = player.x !== state.player.x || player.y !== state.player.y;
+  return { state: { ...state, player, aim: dir }, moved };
+}
+
+function nearestLiveTarget(state: AimState): AimTarget | null {
+  let best: AimTarget | null = null;
+  let bestDist = Infinity;
+  for (const t of state.targets) {
+    if (t.health <= 0) continue;
+    const d = Math.hypot(t.x - state.player.x, t.y - state.player.y);
+    if (d < bestDist) {
+      bestDist = d;
+      best = t;
+    }
+  }
+  return best;
+}
+
+function stepSign(delta: number): -1 | 0 | 1 {
+  if (delta > 1e-6) return 1;
+  if (delta < -1e-6) return -1;
+  return 0;
 }
 
 export function applyAssist(state: AimState): AimState {
@@ -117,7 +167,10 @@ export function getAimResult(state: AimState, missionId: MissionId, stickerId: s
 function maybeAssist(state: AimState): AimState {
   const remaining = state.targets.reduce((sum, t) => sum + t.health, 0);
   if (remaining === 0) return state;
-  if (state.acts >= state.config.assistEarlyAt && remaining >= 5 && state.assists === 0) return applyAssist(state);
+  // P1-12: only ever called on a miss. Fire one early helper pass once a child has acted a couple
+  // of times with no in-cone target (the old remaining>=5 gate left a silent dead-zone), then keep
+  // helping on every subsequent miss so acts always converge — the mission can never stall.
+  if (state.acts >= state.config.assistEarlyAt && state.assists === 0) return applyAssist(state);
   if (state.acts >= state.config.assistFloorAt) return applyAssist(state);
   return state;
 }

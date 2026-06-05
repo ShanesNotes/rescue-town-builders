@@ -24,10 +24,17 @@ export class AimMissionScene extends Phaser.Scene {
   private hero!: Phaser.GameObjects.Image;
   private heroShadow!: Phaser.GameObjects.Ellipse;
   private beam!: Phaser.GameObjects.Rectangle;
+  private cone!: Phaser.GameObjects.Graphics;
+  private groundArrow!: Phaser.GameObjects.Triangle;
+  private coneColor = 0x6fd3e0;
   private targetSprites = new Map<string, Phaser.GameObjects.Image>();
+  private targetRings = new Map<string, Phaser.GameObjects.Arc>();
   private pips: Phaser.GameObjects.Arc[] = [];
   private message!: Phaser.GameObjects.Text;
   private done = false;
+
+  // Mirrors AimEngine.inCone so the bold cone + target rings exactly match what an Act will hit.
+  private readonly CONE_RANGE = 190;
 
   constructor() {
     super('AimMissionScene');
@@ -45,8 +52,10 @@ export class AimMissionScene extends Phaser.Scene {
       return;
     }
     this.cfg = cfg;
+    this.coneColor = cfg.coneColor ?? 0x6fd3e0;
     this.state = createAimState(cfg.targets);
     this.targetSprites = new Map();
+    this.targetRings = new Map();
     this.pips = [];
     this.done = false;
 
@@ -57,10 +66,18 @@ export class AimMissionScene extends Phaser.Scene {
     this.buildPips(cfg.targets.length);
 
     for (const t of this.state.targets) {
+      // A pulsing ring marks any LIVE target currently inside the aim cone (P3-05) — under the sprite.
+      this.targetRings.set(t.id, this.add.circle(t.x, t.y, 46, 0x000000, 0).setStrokeStyle(6, this.coneColor, 0.95).setDepth(11).setVisible(false));
       this.targetSprites.set(t.id, this.add.image(t.x, t.y, hasTexture(this, cfg.targetKey) ? cfg.targetKey : 'hl.prop.star').setDepth(12));
     }
 
-    this.beam = this.add.rectangle(0, 0, 190, 46, 0x6fd3e0, 0.16).setOrigin(0, 0.5).setBlendMode(Phaser.BlendModes.ADD).setDepth(13);
+    // Bold opaque aim cone (P3-05) — a mission-themed fan from the hero so the child can SEE where
+    // an Act will land, instead of mashing blind at a near-invisible beam.
+    this.cone = this.add.graphics().setDepth(13);
+    // A faint beam flash is kept for the Act pulse (actVisual), but the cone is the primary signal.
+    this.beam = this.add.rectangle(0, 0, 190, 46, this.coneColor, 0.16).setOrigin(0, 0.5).setBlendMode(Phaser.BlendModes.ADD).setDepth(13);
+    // Subtle ground arrow under the hero showing the aim direction.
+    this.groundArrow = this.add.triangle(0, 0, 0, -14, 13, 12, -13, 12, this.coneColor, 0.85).setDepth(14);
     this.heroShadow = this.add.ellipse(0, 0, 64, 18, 0x0a1322, 0.5).setDepth(14);
     this.hero = this.add.image(0, 0, hasTexture(this, `hl.char.${cfg.characterId}`) ? `hl.char.${cfg.characterId}` : 'hl.char.ember').setOrigin(0.5, 1).setDisplaySize(92, 92).setDepth(15);
 
@@ -94,13 +111,66 @@ export class AimMissionScene extends Phaser.Scene {
 
   private placeHero(animate: boolean): void {
     const { x, y } = this.state.player;
-    this.beam.setPosition(x, y - 30).setRotation(Math.atan2(this.state.aim.y, this.state.aim.x));
+    const angle = Math.atan2(this.state.aim.y, this.state.aim.x);
+    this.beam.setPosition(x, y - 30).setRotation(angle);
+    this.groundArrow.setPosition(x + this.state.aim.x * 30, y + 30 + this.state.aim.y * 14).setRotation(angle + Math.PI / 2);
+    this.drawCone(x, y - 30, angle);
+    this.updateTargetRings();
     if (animate && motionAllowed()) {
       this.tweens.add({ targets: this.hero, x, y: y + 34, duration: 200, ease: 'Quad.easeOut' });
       this.tweens.add({ targets: this.heroShadow, x, y: y + 36, duration: 200, ease: 'Quad.easeOut' });
     } else {
       this.hero.setPosition(x, y + 34);
       this.heroShadow.setPosition(x, y + 36);
+    }
+  }
+
+  // A bold filled cone (P3-05) from the hero in the aim direction — the child's clear "aim here".
+  private drawCone(ox: number, oy: number, angle: number): void {
+    const half = Math.PI / 5; // ~36° half-spread, generous so it reads from across the room
+    const r = this.CONE_RANGE;
+    const ax = ox + Math.cos(angle - half) * r;
+    const ay = oy + Math.sin(angle - half) * r;
+    const bx = ox + Math.cos(angle + half) * r;
+    const by = oy + Math.sin(angle + half) * r;
+    this.cone.clear();
+    this.cone.fillStyle(this.coneColor, 0.6).lineStyle(3, this.coneColor, 0.85);
+    this.cone.beginPath();
+    this.cone.moveTo(ox, oy);
+    this.cone.lineTo(ax, ay);
+    this.cone.lineTo(bx, by);
+    this.cone.closePath();
+    this.cone.fillPath();
+    this.cone.strokePath();
+  }
+
+  // Mirror of AimEngine.inCone: live + within range + aim sign matches. Drives the pulsing rings.
+  private inConeView(t: { x: number; y: number; health: number }): boolean {
+    if (t.health <= 0) return false;
+    const dx = t.x - this.state.player.x;
+    const dy = t.y - this.state.player.y;
+    if (Math.hypot(dx, dy) > this.CONE_RANGE) return false;
+    const a = this.state.aim;
+    const hOk = a.x === 0 || Math.sign(dx) === a.x;
+    const vOk = a.y === 0 || Math.sign(dy) === a.y;
+    return hOk && vOk;
+  }
+
+  private updateTargetRings(): void {
+    for (const t of this.state.targets) {
+      const ring = this.targetRings.get(t.id);
+      if (!ring) continue;
+      const lit = this.inConeView(t);
+      if (lit && !ring.visible) {
+        ring.setVisible(true).setScale(1).setAlpha(0.95);
+        if (motionAllowed()) {
+          this.tweens.killTweensOf(ring);
+          this.tweens.add({ targets: ring, scale: 1.18, alpha: 0.5, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+        }
+      } else if (!lit && ring.visible) {
+        this.tweens.killTweensOf(ring);
+        ring.setVisible(false);
+      }
     }
   }
 
@@ -119,6 +189,7 @@ export class AimMissionScene extends Phaser.Scene {
       }
     }
     this.pips.forEach((pip, i) => pip.setFillStyle(i < cleared ? 0x6fd3e0 : 0x6b3a2a));
+    this.updateTargetRings();
   }
 
   private move(dir: AimVec): void {
@@ -129,17 +200,30 @@ export class AimMissionScene extends Phaser.Scene {
 
   private doAct(): void {
     if (this.done) return;
-    const prevAssists = this.state.assists;
+    const prevPlayer = { ...this.state.player };
     const prevHealth = new Map(this.state.targets.map((t) => [t.id, t.health]));
     const outcome = act(this.state);
     this.state = outcome.state;
 
     this.actVisual();
-    if (outcome.hit) getSfx().play('spray-hit');
-    for (const t of this.state.targets) {
-      if ((prevHealth.get(t.id) ?? 0) > t.health) Juice.burst(this, t.x, t.y - 16, { color: 0x9fe3ee, count: 7, radius: 30 });
+    if (outcome.hit) {
+      getSfx().play('spray-hit');
+    } else if (!outcome.assisted) {
+      // P1-12: a miss is NEVER silent — soft whiff + a puff at the cone tip + a nudge arrow toward
+      // the nearest live target, so every press gives the child visible + audible feedback.
+      getSfx().play('try-again');
+      this.whiffFeedback();
     }
-    if (this.state.assists > prevAssists) this.assistFlyby();
+    for (const t of this.state.targets) {
+      if ((prevHealth.get(t.id) ?? 0) > t.health && !outcome.assisted) Juice.burst(this, t.x, t.y - 16, { color: 0x9fe3ee, count: 7, radius: 30 });
+    }
+    // The hero auto-pans on a miss — animate the move so the next Act is visible progress.
+    if (outcome.autoPanned) {
+      this.placeHero(true);
+    } else {
+      this.placeHero(false);
+    }
+    if (outcome.assisted) this.helperAssist(prevPlayer);
 
     this.message.setText(this.state.lastMessage);
     this.renderTargets();
@@ -149,6 +233,43 @@ export class AimMissionScene extends Phaser.Scene {
       if (motionAllowed()) Juice.shake(this, 100, 0.003);
       this.time.delayedCall(motionAllowed() ? 360 : 0, () => completeMission(this, getAimResult(this.state, this.missionId, this.cfg.stickerId)));
     }
+  }
+
+  // P1-12: never a silent dead tap. A small puff at the cone tip + a one-shot arrow pointing the
+  // child toward the nearest live target, so a miss always *teaches* where to go next.
+  private whiffFeedback(): void {
+    const { x, y } = this.state.player;
+    const a = this.state.aim;
+    const tipX = x + a.x * 120;
+    const tipY = y - 30 + a.y * 120;
+    Juice.burst(this, tipX, tipY, { color: this.coneColor, count: 6, radius: 26 });
+    const target = this.nearestLive();
+    if (!target || !motionAllowed()) return;
+    const ang = Math.atan2(target.y - y, target.x - x);
+    const arrow = this.add.triangle(x + Math.cos(ang) * 70, y - 20 + Math.sin(ang) * 70, 0, -16, 16, 14, -16, 14, 0xffe2a6, 0.95).setDepth(38).setRotation(ang + Math.PI / 2);
+    this.tweens.add({
+      targets: arrow,
+      x: x + Math.cos(ang) * 120,
+      y: y - 20 + Math.sin(ang) * 120,
+      alpha: 0,
+      duration: 760,
+      ease: 'Quad.easeOut',
+      onComplete: () => arrow.destroy(),
+    });
+  }
+
+  private nearestLive(): { x: number; y: number } | null {
+    let best: { x: number; y: number } | null = null;
+    let bestDist = Infinity;
+    for (const t of this.state.targets) {
+      if (t.health <= 0) continue;
+      const d = Math.hypot(t.x - this.state.player.x, t.y - this.state.player.y);
+      if (d < bestDist) {
+        bestDist = d;
+        best = { x: t.x, y: t.y };
+      }
+    }
+    return best;
   }
 
   private actVisual(): void {
@@ -163,13 +284,60 @@ export class AimMissionScene extends Phaser.Scene {
     }
   }
 
-  private assistFlyby(): void {
-    const drone = this.add.circle(-40, 150, 14, 0x9fe3ee, 0.9).setStrokeStyle(3, 0xffc857).setDepth(35);
+  // P3-04: a real friendly helper flies TO the assisted target, dips, sprays a visible splash on
+  // THAT target, waves, and leaves with a warm 'a friend helped!' chime — a No-Fail mercy that
+  // reads as a gift instead of the old invisible teal dot.
+  private helperAssist(prevPlayer: { x: number; y: number }): void {
+    const target = this.assistTargetNear(prevPlayer);
+    getSfx().play('place'); // warm 'a friend helped' chime
+    if (!target) return;
     if (!motionAllowed()) {
-      drone.destroy();
+      Juice.burst(this, target.x, target.y - 16, { color: 0x9fe3ee, count: 9, radius: 34 });
       return;
     }
-    this.tweens.add({ targets: drone, x: 1000, y: 180, duration: 1100, ease: 'Sine.easeInOut', onComplete: () => drone.destroy() });
+    const fromX = -40;
+    const fromY = 150;
+    const key = hasTexture(this, 'hl.prop.firefly') ? 'hl.prop.firefly' : null;
+    const helper = key
+      ? this.add.image(fromX, fromY, key).setDisplaySize(46, 46).setDepth(36)
+      : this.add.circle(fromX, fromY, 16, 0xffe2a6, 0.95).setStrokeStyle(3, this.coneColor).setDepth(36);
+    // Fly in to just above the target...
+    this.tweens.add({
+      targets: helper,
+      x: target.x,
+      y: target.y - 56,
+      duration: 520,
+      ease: 'Sine.easeInOut',
+      onComplete: () => {
+        // ...dip + spray a visible splash on THAT target...
+        this.tweens.add({ targets: helper, y: target.y - 34, duration: 150, yoyo: true, ease: 'Quad.easeOut' });
+        Juice.burst(this, target.x, target.y - 12, { color: 0x9fe3ee, count: 10, radius: 38 });
+        const sprite = this.targetSprites.get(target.id);
+        if (sprite) Juice.punch(this, sprite, 1.16, 160);
+        // ...wave (a little wobble)...
+        this.tweens.add({ targets: helper, angle: 16, duration: 120, yoyo: true, repeat: 1, delay: 160, ease: 'Sine.easeInOut' });
+        // ...then leave.
+        this.tweens.add({ targets: helper, x: 1010, y: 180, duration: 620, delay: 520, ease: 'Sine.easeIn', onComplete: () => helper.destroy() });
+      },
+    });
+  }
+
+  private assistTargetNear(p: { x: number; y: number }): { id: string; x: number; y: number } | null {
+    // Prefer a still-live target near where the child was aiming; fall back to any target so the
+    // helper always has somewhere to fly even on the assist that clears the last one.
+    let best: { id: string; x: number; y: number } | null = null;
+    let bestDist = Infinity;
+    let fallback: { id: string; x: number; y: number } | null = null;
+    for (const t of this.state.targets) {
+      fallback = { id: t.id, x: t.x, y: t.y };
+      if (t.health <= 0) continue;
+      const d = Math.hypot(t.x - p.x, t.y - p.y);
+      if (d < bestDist) {
+        bestDist = d;
+        best = { id: t.id, x: t.x, y: t.y };
+      }
+    }
+    return best ?? fallback;
   }
 
   private buildControls(): void {

@@ -13,6 +13,8 @@ export type AimMissionData = {
   actIconKey: string;
   targetKey: string;
   clearedKey?: string;
+  /** Bold aim-cone tint (P3-05) — mission-themed so each Aim mission reads distinct. */
+  coneColor?: number;
   targets: AimTarget[];
 };
 
@@ -32,6 +34,7 @@ export const aimMissions: Partial<Record<MissionId, AimMissionData>> = {
     actIconKey: 'hl.prop.grumbleSpray',
     targetKey: 'hl.prop.gooBlobLarge',
     clearedKey: 'hl.prop.cleanPatch',
+    coneColor: 0x8be36a,
     targets: targetsAt([[330, 260, 2], [540, 210, 1], [700, 300, 2], [420, 360, 2], [630, 370, 1]]),
   },
   'frog-flight': {
@@ -43,6 +46,7 @@ export const aimMissions: Partial<Record<MissionId, AimMissionData>> = {
     actIconKey: 'hl.prop.leafGlider',
     targetKey: 'hl.prop.skyRing',
     clearedKey: 'hl.prop.rescueBasket',
+    coneColor: 0xffd36a,
     targets: targetsAt([[300, 330, 1], [470, 260, 1], [650, 220, 1], [800, 280, 1]]),
   },
   'asteroid-blaster': {
@@ -54,6 +58,7 @@ export const aimMissions: Partial<Record<MissionId, AimMissionData>> = {
     actIconKey: 'hl.prop.foamStar',
     targetKey: 'hl.prop.asteroidLarge',
     clearedKey: 'hl.prop.asteroidSmall',
+    coneColor: 0x8bb8ff,
     targets: targetsAt([[320, 230, 1], [490, 300, 2], [640, 210, 1], [760, 330, 2], [560, 370, 1], [830, 250, 1]]),
   },
 };

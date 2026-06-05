@@ -33,6 +33,42 @@ describe('AimEngine', () => {
     expect(state.targets.every((t) => t.health === 0)).toBe(true);
   });
 
+  it('a miss is never silent: it auto-pans the hero toward the nearest live target (P1-12)', () => {
+    // Far targets that no single act can reach in-cone from the start.
+    let state = createAimState([
+      { id: 'far', x: 820, y: 380, health: 1, maxHealth: 1 },
+      { id: 'far2', x: 800, y: 360, health: 1, maxHealth: 1 },
+    ]);
+    state = moveAimer(state, { x: -1, y: 0 }); // aim the wrong way → a guaranteed miss
+    const startX = state.player.x;
+    const out = act(state);
+    expect(out.hit).toBe(false);
+    expect(out.autoPanned).toBe(true); // the miss moved the hero
+    expect(out.state.player.x).toBeGreaterThan(startX); // toward the right-hand targets
+  });
+
+  it('acts always converge to zero remaining from any start, and the assist fires (P1-12)', () => {
+    // A spread of targets the child can never line up well; the lowered floor + auto-pan must
+    // still drive every target to zero within a child-plausible number of taps.
+    let state = createAimState([
+      { id: 'a', x: 760, y: 360, health: 2, maxHealth: 2 },
+      { id: 'b', x: 180, y: 180, health: 2, maxHealth: 2 },
+      { id: 'c', x: 480, y: 380, health: 1, maxHealth: 1 },
+    ]);
+    state = moveAimer(state, { x: 0, y: -1 }); // start aimed away from most targets
+    let completed = false;
+    let sawAssist = false;
+    for (let i = 0; i < 60 && !completed; i += 1) {
+      const out = act(state);
+      state = out.state;
+      completed = out.completed;
+      sawAssist = sawAssist || out.assisted;
+    }
+    expect(completed).toBe(true);
+    expect(state.targets.reduce((s, t) => s + t.health, 0)).toBe(0);
+    expect(sawAssist).toBe(true); // the No-Fail helper visibly stepped in at least once
+  });
+
   it('scores stars and unlocks the sticker only on completion', () => {
     let state = createAimState(TARGETS);
     state = act(state).state;

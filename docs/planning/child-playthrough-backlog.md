@@ -41,10 +41,10 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - **Wave 1 — Touch-critical safety** ✅ DONE: P0-01, P0-02, P1-01.
 - **Wave 2 — Input parity & safety** (shared child-safe modal/focus controller) ✅ DONE: P0-03, P0-04, P1-11, P2-05, P2-06, P2-09.
 - **Wave 3 — Non-reader onboarding** ✅ DONE: P1-03, P1-02, P1-06, P2-04, P3-02, P3-09.
-- **Wave 4 — No-Fail floors & Aim clarity**: P1-09, P1-12, P3-05, P3-04, P1-08.
+- **Wave 4 — No-Fail floors & Aim clarity** ✅ DONE: P1-09, P1-12, P3-05, P3-04, P1-08.
 - **Wave 5 — Reward loop**: P2-01, P2-02, P1-10, P1-07, P2-08, P3-08.
 - **Wave 6 — Variety & payoffs** (Codex art lane): P1-05, P1-04, P2-10, P3-07, P3-06, P3-03.
-- **Wave 7 — Polish & transitions**: P2-03, P2-07, P3-01.
+- **Wave 7 — Polish & transitions**: P2-03, P2-07, P3-01, + review follow-ups P2-11, P3-10, P3-11.
 - **Wave 8+ — Wow factor** (Codex art + Grok copy): P4-01 living diorama, P4-02 spoken VO, P4-03 aim direct-touch.
 
 ---
@@ -65,11 +65,11 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - [ ] **P1-05 (S)** Recycling correct card is ALWAYS leftmost — 'tap left' bypasses the mechanic. *Fix:* Fisher-Yates shuffle the 3 choices, seeded by blueprint+slot. `RecyclingRun.ts`, `RecyclingRunScene.ts`
 - [x] **P1-06 (S)** House Builder: tray pieces never highlight — only a faint sky-slot ghost shows what's next. *Fix:* highlight the required TRAY item (gold stroke + pulse + bobbing arrow), dim others. `HouseBuilderScene.ts`
 - [ ] **P1-07 (M)** Multi-tap secrets reset their counter every scene reload — 2 of 3 secrets unreachable. *Fix:* persist per-secret touch counts to SaveSystem keyed by profile+secretId. `secretHotspot.ts`, `Secrets.ts`, `SaveSystem.ts`
-- [ ] **P1-08 (S)** Star scoring inverted: hardest-to-read missions punish a struggling child with 1 star. *Fix:* floor completed Match/Journey at 2 stars; reserve 3 for a gentle bonus. `MatchEngine.ts`, `StarScoring.ts`
-- [ ] **P1-09 (M)** Match (4) + Journey (4) have NO assist floor — a stuck child can tap wrong forever. *Fix:* per-prompt miss counter; escalate telegraph, then helper hops over and places the answer. `MatchEngine.ts`, `MatchMissionScene.ts`, `JourneyMissionScene.ts`
+- [x] **P1-08 (S)** Star scoring inverted: hardest-to-read missions punish a struggling child with 1 star. *Fix:* floor completed Match/Journey at 2 stars; reserve 3 for a gentle bonus. `MatchEngine.ts`, `StarScoring.ts`
+- [x] **P1-09 (M)** Match (4) + Journey (4) have NO assist floor — a stuck child can tap wrong forever. *Fix:* per-prompt miss counter; escalate telegraph, then helper hops over and places the answer. `MatchEngine.ts`, `MatchMissionScene.ts`, `JourneyMissionScene.ts`
 - [ ] **P1-10 (S)** Locked sticker cells show a hand cursor + fire on tap but do nothing — dead taps across the album. *Fix:* gentle 'not yet' wiggle + muted tick; drop `useHandCursor` when locked. `StickerBookScene.ts`
 - [x] **P1-11 (S)** 'Start fresh' wipes ALL saves instantly, no confirm — catastrophic footgun. *Fix:* gate behind the existing 3-second hold-ring / two-step confirm. `ParentSettingsScene.ts`
-- [ ] **P1-12 (M)** Aim dead-zone: after the 1–2 reachable targets, the big pulsing Act button gives SILENT misses for ~3 taps before help. *Fix:* never-silent miss (whiff SFX + puff + nudge arrow); lower `assistFloorAt`≈3, drop `remaining>=5` gate; auto-pan hero toward nearest live target. `AimEngine.ts`, `AimMissionScene.ts`
+- [x] **P1-12 (M)** Aim dead-zone: after the 1–2 reachable targets, the big pulsing Act button gives SILENT misses for ~3 taps before help. *Fix:* never-silent miss (whiff SFX + puff + nudge arrow); lower `assistFloorAt`≈3, drop `remaining>=5` gate; auto-pan hero toward nearest live target. `AimEngine.ts`, `AimMissionScene.ts`
 
 ## P2 — polish / juice
 
@@ -89,8 +89,8 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - [ ] **P3-01 (S→M)** Fanfare is thin and the sticker cue == secret chime. *Fix:* richer celebratory fanfare (chord pad + sparkle + a ringing note as long as the confetti) + a dedicated warm 'sticker' cue; reserve the shimmer for true secret discoveries. *(audio — Claude lane)*
 - [x] **P3-02 (S)** Secret reveal + exit modal render in Arial, not the pixel storybook font. *Fix:* `FONTS.display`/`FONTS.label`. `secretHotspot.ts`, `confirmMissionExit.ts` — *(exit modal ✅ Wave 2; secret reveal ✅ Wave 3)*
 - [ ] **P3-03 (M)** House Builder + Match variants feel identical (no title shown, same orderedParts). *Fix:* 1.5s title card + preview silhouette + distinct accent color per house; fold Match into the P1-03 intro. `HouseBuilderScene.ts`, `houseBlueprints.ts`
-- [ ] **P3-04 (M)** Aim/Fire assist is an invisible teal dot flying the wrong way — a No-Fail mercy reads as nothing. *Fix:* real helper sprite flies TO the assisted target, sprays it, waves, warm chime. `AimMissionScene.ts`, `FireFixScene.ts`
-- [ ] **P3-05 (M)** No visible aim indicator (beam alpha 0.16) — child mashes Act blind. *Fix:* bold opaque directional cone + pulsing ring on in-cone targets + ground arrow. `AimMissionScene.ts`
+- [x] **P3-04 (M)** Aim/Fire assist is an invisible teal dot flying the wrong way — a No-Fail mercy reads as nothing. *Fix:* real helper sprite flies TO the assisted target, sprays it, waves, warm chime. `AimMissionScene.ts`, `FireFixScene.ts`
+- [x] **P3-05 (M)** No visible aim indicator (beam alpha 0.16) — child mashes Act blind. *Fix:* bold opaque directional cone + pulsing ring on in-cone targets + ground arrow. `AimMissionScene.ts`
 - [ ] **P3-06 (M)** Journey final-waypoint arrival has no climax; per-stop story beats absent. *Fix:* branch `travelTo` on final waypoint (bigger burst, chest-opens squash, hero hop, rising chime); render destination larger from the start. `JourneyMissionScene.ts`, `journeyMissions.ts`
 - [ ] **P3-07 (L)** Match correct-match payoff is thin (same tiny pop ×5). *Fix:* 'lands and transforms' on the target — plinth lights + statue pops with a cluck, gadget slot fills + whirrs, bread bowl rises. `MatchMissionScene.ts`, `matchMissions.ts`
 - [ ] **P3-08 (M)** Journey missions (4 of 14) have zero hidden secrets. *Fix:* seed one off-route glimmer per Journey backdrop (depends on P1-07/P2-08). `JourneyMissionScene.ts`, `Secrets.ts`
@@ -101,6 +101,14 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - [ ] **P4-01 (L)** **Living diorama:** each completed mission permanently adds a lit window / strolling rescued character / chimney smoke / planted tree / lamp, so the child literally SEES the town they healed grow from dark to warm-and-bustling. *The single biggest swing.* `TownMapScene.ts`, `TownMapProgress.ts`, Codex art.
 - [ ] **P4-02 (L)** **Light spoken VO** for ~10 highest-value moments (pick a helper, well done, keep playing, found a secret, here's your sticker) so a non-reader plays fully solo. TTS stubs behind a parent toggle are fine to start. New `VoiceSystem` + Grok script copy.
 - [ ] **P4-03 (M)** **Aim direct-touch No-Fail layer:** tap the target to auto-walk the hero + spray it — collapses the most confusing loop into the one gesture every other mission uses. `AimMissionScene.ts`, `AimEngine.ts`
+
+## Wave-execution follow-ups (captured during the marathon)
+
+Small, non-blocking items surfaced by adversarial review of shipped waves — slotted into Wave 7.
+
+- [ ] **P2-11 (S)** Fire Fix still has the silent-dead-zone assist shape (`sprays>=5 && remaining>=5`) that P1-12 removed from Aim. Bring `FireFix.maybeAssist` + the scene's miss feedback in line with the Aim fix. `FireFix.ts`, `FireFixScene.ts` *(Wave 4 review)*
+- [ ] **P3-10 (S)** Journey auto-resolve lacks the `busy` input-lock Match got — a fast tapper can skip an auto-resolve animation (not a No-Fail issue). Mirror Match's lock. `JourneyMissionScene.ts` *(Wave 4 review)*
+- [ ] **P3-11 (S)** Aim cone visual hardcodes `CONE_RANGE=190` instead of reading `state.config.range`; safe today, would diverge if a mission overrides range. Derive from config. `AimMissionScene.ts` *(Wave 4 review)*
 
 ## Codex independent audit — corroboration
 

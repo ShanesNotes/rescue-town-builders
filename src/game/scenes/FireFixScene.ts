@@ -143,6 +143,7 @@ export class FireFixScene extends Phaser.Scene {
   private spray(): void {
     if (this.done) return;
     const prevAssists = this.state.helperAssists;
+    const prevPlayer = { ...this.state.player };
     const prevHealth = new Map(this.state.fires.map((f) => [f.id, f.health]));
     const outcome = sprayWater(this.state);
     this.state = outcome.state;
@@ -150,13 +151,15 @@ export class FireFixScene extends Phaser.Scene {
     this.sprayVisual();
     if (outcome.hit) getSfx().play('spray-hit');
 
-    // Splash + steam on any fire that just dropped (player spray or drone assist).
+    const assisted = this.state.helperAssists > prevAssists;
+    // Splash + steam on any fire that just dropped from the PLAYER'S spray; the helper's own
+    // splash is rendered by helperAssist so it lands on the fire it flew to.
     for (const fire of this.state.fires) {
-      if ((prevHealth.get(fire.id) ?? 0) > fire.health) {
+      if ((prevHealth.get(fire.id) ?? 0) > fire.health && !assisted) {
         Juice.burst(this, fire.x, fire.y - 20, { color: 0x9fe3ee, count: 7, radius: 30 });
       }
     }
-    if (this.state.helperAssists > prevAssists) this.droneFlyby();
+    if (assisted) this.helperAssist(prevPlayer);
 
     this.message.setText(this.state.lastMessage);
     this.renderFires();
@@ -181,13 +184,51 @@ export class FireFixScene extends Phaser.Scene {
     }
   }
 
-  private droneFlyby(): void {
-    const drone = this.add.circle(-40, 150, 14, 0x9fe3ee, 0.9).setStrokeStyle(3, 0xffc857).setDepth(35);
+  // P3-04: a real friendly helper flies TO the assisted fire, dips, sprays a visible splash on THAT
+  // fire, waves, and leaves with a warm 'a friend helped!' chime — replaces the invisible teal dot.
+  private helperAssist(prevPlayer: { x: number; y: number }): void {
+    const fire = this.assistFireNear(prevPlayer);
+    getSfx().play('place'); // warm 'a friend helped' chime
+    if (!fire) return;
     if (!motionAllowed()) {
-      drone.destroy();
+      Juice.burst(this, fire.x, fire.y - 20, { color: 0x9fe3ee, count: 9, radius: 34 });
       return;
     }
-    this.tweens.add({ targets: drone, x: 1000, y: 180, duration: 1100, ease: 'Sine.easeInOut', onComplete: () => drone.destroy() });
+    const key = hasTexture(this, 'hl.prop.firefly') ? 'hl.prop.firefly' : null;
+    const helper = key
+      ? this.add.image(-40, 150, key).setDisplaySize(46, 46).setDepth(36)
+      : this.add.circle(-40, 150, 16, 0xffe2a6, 0.95).setStrokeStyle(3, 0x6fd3e0).setDepth(36);
+    this.tweens.add({
+      targets: helper,
+      x: fire.x,
+      y: fire.y - 70,
+      duration: 520,
+      ease: 'Sine.easeInOut',
+      onComplete: () => {
+        this.tweens.add({ targets: helper, y: fire.y - 48, duration: 150, yoyo: true, ease: 'Quad.easeOut' });
+        Juice.burst(this, fire.x, fire.y - 20, { color: 0x9fe3ee, count: 10, radius: 38 });
+        const flame = this.fireSprites.get(fire.id);
+        if (flame) Juice.punch(this, flame, 1.12, 160);
+        this.tweens.add({ targets: helper, angle: 16, duration: 120, yoyo: true, repeat: 1, delay: 160, ease: 'Sine.easeInOut' });
+        this.tweens.add({ targets: helper, x: 1010, y: 180, duration: 620, delay: 520, ease: 'Sine.easeIn', onComplete: () => helper.destroy() });
+      },
+    });
+  }
+
+  private assistFireNear(p: { x: number; y: number }): { id: string; x: number; y: number } | null {
+    let best: { id: string; x: number; y: number } | null = null;
+    let bestDist = Infinity;
+    let fallback: { id: string; x: number; y: number } | null = null;
+    for (const fire of this.state.fires) {
+      fallback = { id: fire.id, x: fire.x, y: fire.y };
+      if (fire.health <= 0) continue;
+      const d = Math.hypot(fire.x - p.x, fire.y - p.y);
+      if (d < bestDist) {
+        bestDist = d;
+        best = { id: fire.id, x: fire.x, y: fire.y };
+      }
+    }
+    return best ?? fallback;
   }
 
   private buildControls(): void {

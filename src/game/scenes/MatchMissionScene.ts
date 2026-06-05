@@ -44,6 +44,9 @@ export class MatchMissionScene extends Phaser.Scene {
   private hint!: Phaser.GameObjects.Text;
   private selected = 0;
   private done = false;
+  private helper: Phaser.GameObjects.Image | null = null;
+  private helperHome = { x: 866, y: 360 };
+  private busy = false; // input lock while the No-Fail helper places the answer (no mid-anim double-tap)
 
   constructor() {
     super('MatchMissionScene');
@@ -67,6 +70,7 @@ export class MatchMissionScene extends Phaser.Scene {
     this.pips = [];
     this.selected = 0;
     this.done = false;
+    this.busy = false;
 
     this.add.image(480, 270, hasTexture(this, cfg.backdrop) ? cfg.backdrop : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
     this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.22).setDepth(1);
@@ -75,9 +79,9 @@ export class MatchMissionScene extends Phaser.Scene {
     this.buildPips(cfg.prompts.length);
 
     this.add.ellipse(866, 360, 70, 18, 0x0a1322, 0.5).setDepth(9);
-    if (hasTexture(this, `hl.char.${cfg.characterId}`)) {
-      this.add.image(866, 360, `hl.char.${cfg.characterId}`).setOrigin(0.5, 1).setDisplaySize(96, 96).setDepth(10);
-    }
+    this.helper = hasTexture(this, `hl.char.${cfg.characterId}`)
+      ? this.add.image(866, 360, `hl.char.${cfg.characterId}`).setOrigin(0.5, 1).setDisplaySize(96, 96).setDepth(10)
+      : null;
 
     this.buildTargets(cfg.targets);
 
@@ -156,7 +160,7 @@ export class MatchMissionScene extends Phaser.Scene {
   }
 
   private attempt(targetId: string | undefined): void {
-    if (!targetId || this.done) return;
+    if (!targetId || this.done || this.busy) return;
     const targetView = this.targets.find((t) => t.id === targetId);
     const outcome = chooseMatch(this.state, targetId);
     this.state = outcome.state;
@@ -165,17 +169,29 @@ export class MatchMissionScene extends Phaser.Scene {
       getSfx().play('try-again');
       this.hint.setText(outcome.state.lastHint ?? 'Almost — try the glowing one.');
       this.guideWrong(targetView, outcome.state.currentPrompt?.correctTargetId);
+      // After a couple of misses on the SAME prompt, escalate the telegraph so the answer can't be
+      // missed: brighten the correct target, dim the rest (P1-09).
+      if (outcome.assistLevel >= 1) this.escalateTelegraph(outcome.state.currentPrompt?.correctTargetId);
       this.springHome();
       return;
     }
 
-    getSfx().play('correct');
+    getSfx().play(outcome.autoResolved ? 'place' : 'correct');
     this.hint.setText('');
     this.updatePips();
-    if (targetView) {
-      Juice.punch(this, targetView.panel, 1.1, 110);
-      Juice.burst(this, targetView.x, targetView.bounds.y, { color: 0xffe2a6, count: 8 });
-      this.flyAway(targetView);
+    // The just-resolved prompt's correct target is the one BEFORE the new currentIndex.
+    const resolvedTargetId = this.state.prompts[this.state.currentIndex - 1]?.correctTargetId;
+    const placed = this.targets.find((t) => t.id === resolvedTargetId) ?? targetView;
+    if (outcome.autoResolved) {
+      // No-Fail floor: a child who can't read the answer is never stuck — the helper hops over and
+      // places it for them, with the warm 'place' chime + sparkle (mirrors the Aim drone-assist).
+      this.helperAssist(placed, outcome.completed);
+      return;
+    }
+    if (placed) {
+      Juice.punch(this, placed.panel, 1.1, 110);
+      Juice.burst(this, placed.x, placed.bounds.y, { color: 0xffe2a6, count: 8 });
+      this.flyAway(placed);
     }
 
     if (outcome.completed) {
@@ -204,6 +220,84 @@ export class MatchMissionScene extends Phaser.Scene {
     }
   }
 
+  // Escalated telegraph (P1-09): once the child has missed this prompt a few times, make the answer
+  // unmissable — the correct target glows bright and the wrong panels dim back.
+  private escalateTelegraph(correctTargetId: string | undefined): void {
+    this.targets.forEach((t) => {
+      const right = t.id === correctTargetId;
+      this.tweens.killTweensOf(t.glow);
+      if (right) {
+        t.glow.setAlpha(motionAllowed() ? 0.4 : 0.5);
+        if (motionAllowed()) this.tweens.add({ targets: t.glow, alpha: 0.75, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+        if (motionAllowed()) Juice.punch(this, t.panel, 1.14, 220);
+      } else {
+        t.glow.setAlpha(0);
+        if (motionAllowed()) this.tweens.add({ targets: t.panel, alpha: 0.5, duration: 220, ease: 'Quad.easeOut' });
+        else t.panel.setAlpha(0.5);
+      }
+    });
+  }
+
+  // No-Fail floor (P1-09): the helper character hops to the answer, the prompt flies onto it with a
+  // sparkle, then the helper waves home — the child sees a friend solve it for them, never a fail.
+  private helperAssist(target: TargetView | undefined, completed: boolean): void {
+    this.busy = true; // lock input until the answer is fully placed
+    this.targets.forEach((t) => t.panel.setAlpha(1)); // undo any escalation dimming
+    const finish = (): void => {
+      this.busy = false;
+      if (completed) {
+        this.done = true;
+        completeMission(this, getMatchResult(this.state, this.missionId, this.stickerId));
+      } else {
+        this.loadPrompt();
+      }
+    };
+    if (!target || !motionAllowed()) {
+      if (target) {
+        Juice.burst(this, target.x, target.bounds.y, { color: 0xffe2a6, count: 10 });
+        target.glow.setAlpha(0.5);
+      }
+      this.prompt.setVisible(false);
+      finish();
+      return;
+    }
+    const helper = this.helper;
+    if (!helper) {
+      // No portrait — just fly the prompt over with a sparkle.
+      this.flyAway(target);
+      this.prompt.setVisible(false);
+      Juice.burst(this, target.x, target.bounds.y, { color: 0xffe2a6, count: 10 });
+      this.time.delayedCall(320, finish);
+      return;
+    }
+    this.prompt.setVisible(false);
+    helper.setDepth(33);
+    // Hop the helper over to the target...
+    this.tweens.add({ targets: helper, x: target.x, y: target.bounds.y + 64, duration: 320, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: helper, scaleY: helper.scaleY * 0.86, duration: 160, yoyo: true, ease: 'Quad.easeOut' });
+    // ...fly the prompt icon onto it + sparkle + 'place' the answer.
+    const ghost = this.add.image(this.prompt.x, this.prompt.y, this.prompt.texture.key).setDisplaySize(104, 104).setDepth(34);
+    this.tweens.add({
+      targets: ghost,
+      x: target.x,
+      y: target.bounds.y + 70,
+      scale: 0.6,
+      duration: 360,
+      delay: 200,
+      ease: 'Quad.easeIn',
+      onComplete: () => {
+        ghost.destroy();
+        Juice.punch(this, target.panel, 1.18, 160);
+        Juice.burst(this, target.x, target.bounds.y, { color: 0xffe2a6, count: 12, radius: 56 });
+        target.glow.setAlpha(0.6);
+        getSfx().play('correct');
+        // Helper waves and hops home.
+        this.tweens.add({ targets: helper, x: this.helperHome.x, y: this.helperHome.y, duration: 360, delay: 120, ease: 'Sine.easeInOut', onComplete: () => helper.setDepth(10) });
+        this.time.delayedCall(260, finish);
+      },
+    });
+  }
+
   private flyAway(target: TargetView): void {
     if (!motionAllowed()) return;
     const ghost = this.add.image(this.prompt.x, this.prompt.y, this.prompt.texture.key).setDisplaySize(104, 104).setDepth(31);
@@ -216,7 +310,7 @@ export class MatchMissionScene extends Phaser.Scene {
       completeMission(this, getMatchResult(this.state, this.missionId, this.stickerId));
       return;
     }
-    this.prompt.setTexture(current.icon).setDisplaySize(104, 104).setPosition(HOME.x, HOME.y).setAngle(0).setDepth(30);
+    this.prompt.setTexture(current.icon).setDisplaySize(104, 104).setPosition(HOME.x, HOME.y).setAngle(0).setDepth(30).setVisible(true);
     this.promptBase = this.prompt.scale;
     this.telegraph(current.correctTargetId);
     if (motionAllowed()) {

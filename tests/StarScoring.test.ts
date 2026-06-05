@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bestStars, clampStars, starsFromAccuracy } from '../src/game/systems/StarScoring';
+import { bestStars, clampStars, starsForMatch, starsFromAccuracy } from '../src/game/systems/StarScoring';
 
 describe('StarScoring', () => {
   it('always returns mission-complete stars between one and three', () => {
@@ -22,5 +22,12 @@ describe('StarScoring', () => {
   it('keeps the better star result', () => {
     expect(bestStars(3, 1)).toBe(3);
     expect(bestStars(0, 2)).toBe(2);
+  });
+
+  it('floors a completed Match/Journey at 2 stars; reserves 3 for a clean unassisted run (P1-08)', () => {
+    expect(starsForMatch(1, false)).toBe(3); // perfect, no help → bonus
+    expect(starsForMatch(0.5, false)).toBe(2); // struggled but finished → never below 2
+    expect(starsForMatch(0, false)).toBe(2); // hardest-to-read mission, all wrong taps → still 2
+    expect(starsForMatch(1, true)).toBe(2); // needed the auto-assist → not a clean run, capped at 2
   });
 });
