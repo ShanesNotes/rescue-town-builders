@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SaveSystem, type StorageLike } from '../src/game/systems/SaveSystem';
+import { Secrets } from '../src/game/systems/Secrets';
 
 const SAVE_KEY = 'rescue-town-builders.save.v1';
 
@@ -291,5 +292,56 @@ describe('SaveSystem', () => {
   it('throws when unlocking a sticker for an unknown profile', () => {
     const saves = new SaveSystem(memoryStorage());
     expect(() => saves.unlockSticker('nope', 'cluckle-dream')).toThrow(/Unknown profile/);
+  });
+
+  it('persists a secret touch count and rehydrates it into a fresh Secrets after reload (P1-07)', () => {
+    const storage = memoryStorage();
+    const saves = new SaveSystem(storage);
+    const profile = saves.createProfile({ name: 'Willem', avatarId: 'rivet' });
+
+    // A multi-tap secret needs 3 touches; the child taps it twice this session.
+    const session1 = new Secrets({ touches: saves.getSelectedProfile()?.progress.secretTouches });
+    expect(session1.touch('cluckle-dream')).toBeNull();
+    saves.recordSecretTouch(profile.id, 'cluckle-dream', session1.getTouches('cluckle-dream'));
+    expect(session1.touch('cluckle-dream')).toBeNull();
+    saves.recordSecretTouch(profile.id, 'cluckle-dream', session1.getTouches('cluckle-dream'));
+
+    // A fresh SaveSystem (refresh) + a fresh Secrets (new scene) resumes at 2 touches, so the
+    // NEXT tap reveals the secret instead of resetting to zero.
+    const reloaded = new SaveSystem(storage);
+    expect(reloaded.getSelectedProfile()?.progress.secretTouches['cluckle-dream']).toBe(2);
+    const session2 = new Secrets({ touches: reloaded.getSelectedProfile()?.progress.secretTouches });
+    expect(session2.getTouches('cluckle-dream')).toBe(2);
+    expect(session2.touch('cluckle-dream')).not.toBeNull();
+  });
+
+  it('loads an old save with no secretTouches field without crashing (back-compat)', () => {
+    const storage = memoryStorage();
+    storage.setItem(
+      SAVE_KEY,
+      JSON.stringify({
+        version: 1,
+        profiles: [
+          {
+            id: 'p1',
+            name: 'Willem',
+            avatarId: 'rivet',
+            createdAt: 'x',
+            settings: { difficulty: 'easy', musicVolume: 0.2, sfxVolume: 0.5, audioMuted: false },
+            progress: { missions: {}, stickers: ['secret-friend'], totalStars: 0 },
+          },
+        ],
+        selectedProfileId: 'p1',
+      }),
+    );
+
+    const saves = new SaveSystem(storage);
+    const progress = saves.getSelectedProfile()?.progress;
+
+    expect(progress?.secretTouches).toEqual({});
+    expect(progress?.stickers).toContain('secret-friend');
+    // Recording a touch on a migrated save still works.
+    saves.recordSecretTouch('p1', 'cluckle-dream', 1);
+    expect(saves.getSelectedProfile()?.progress.secretTouches['cluckle-dream']).toBe(1);
   });
 });

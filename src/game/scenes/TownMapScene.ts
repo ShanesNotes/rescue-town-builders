@@ -21,15 +21,18 @@ const PER_PAGE = 3;
 export class TownMapScene extends Phaser.Scene {
   private selectedIndex = 0;
   private page = 0;
+  private celebrate = false;
   private pageNodes: TownMapNode[] = [];
 
   constructor() {
     super('TownMapScene');
   }
 
-  init(data: { page?: number; selectedIndex?: number }): void {
+  init(data: { page?: number; selectedIndex?: number; celebrate?: boolean }): void {
     this.page = data.page ?? 0;
     this.selectedIndex = data.selectedIndex ?? 0;
+    // One-shot: a returning-from-a-finished-mission landing pulses the freshly-lit house once.
+    this.celebrate = data.celebrate ?? false;
   }
 
   create(): void {
@@ -95,12 +98,16 @@ export class TownMapScene extends Phaser.Scene {
     // The house is decorative only. The pulsing mission coin (below) is the single, obvious launch
     // target — one tap per node. (Previously the house had a raw unguarded pointerup that
     // double-fired with the coin and launched on stray drags — a No-Fail input-safety hole.)
-    this.add
+    const house = this.add
       .image(x, houseY, node.completed ? 'hl.map.houseLit' : 'hl.map.houseDark')
       .setOrigin(0.5, 1)
       .setDisplaySize(150, 150)
       .setDepth(6);
     this.add.rectangle(x, 256, 7, 96, 0xffd98a, 0.1).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
+
+    // Landing here straight from finishing this mission: a one-shot celebratory pulse on the
+    // freshly-lit house so the child SEES the star/house they just earned (P2-01).
+    if (selected && this.celebrate && node.completed) this.celebrateNode(house, x, houseY);
 
     this.starRow(x, 412, node.bestStars);
 
@@ -114,6 +121,16 @@ export class TownMapScene extends Phaser.Scene {
       testId: `townmap.mission.${node.missionId}`,
       pulse: selected,
     }).setDepth(20);
+  }
+
+  // A one-shot warm pulse + sparkle on the house just lit by finishing its mission. Gated on
+  // motionAllowed (a still child still lands on the right node, just without the flourish).
+  private celebrateNode(house: Phaser.GameObjects.Image, x: number, houseY: number): void {
+    if (!motionAllowed()) return;
+    const base = house.scale;
+    this.tweens.add({ targets: house, scale: base * 1.12, duration: 320, yoyo: true, repeat: 1, ease: 'Sine.easeInOut' });
+    const ring = this.add.circle(x, houseY - 52, 70, 0xffe2a6, 0.5).setBlendMode(Phaser.BlendModes.ADD).setDepth(7);
+    this.tweens.add({ targets: ring, scale: 2, alpha: 0, duration: 900, ease: 'Quad.easeOut', onComplete: () => ring.destroy() });
   }
 
   // Prev/next page coins + page dots (only when the town spans more than one screen).

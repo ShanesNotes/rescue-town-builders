@@ -8,12 +8,15 @@ import { FONTS } from '../ui/typography';
 // touchSecret() on pointerdown; when a secret reveals, it chimes, persists the
 // sticker (so it shows up in the Sticker Book), and returns the message to display.
 
-/** Build a Secrets tracker for the active profile, rehydrating already-found secrets. */
+/** Build a Secrets tracker for the active profile, rehydrating already-found secrets + touch counts. */
 export function createSecretsForProfile(): Secrets {
   const profile = getSaveSystem().getSelectedProfile();
   return new Secrets({
     playerName: profile?.name,
     discovered: (profile?.progress.stickers ?? []).filter(isSecretId),
+    // Per-secret touch counts persisted in a prior session, so a multi-tap secret keeps charging
+    // across scene reloads/refreshes instead of resetting to zero each create() (P1-07).
+    touches: profile?.progress.secretTouches,
   });
 }
 
@@ -23,10 +26,16 @@ export function createSecretsForProfile(): Secrets {
  * (not yet, or already found). Touching is never wrong (No-Fail).
  */
 export function touchSecret(secrets: Secrets, id: SecretId): string | null {
+  const before = secrets.getTouches(id);
   const reveal = secrets.touch(id);
+  // Persist the running touch count ONLY when this tap actually advanced it, so a half-charged
+  // secret survives a reload (P1-07) without writing to localStorage on every tap of an
+  // already-found glimmer.
+  const profile = getSaveSystem().getSelectedProfile();
+  const after = secrets.getTouches(id);
+  if (profile && after > before) getSaveSystem().recordSecretTouch(profile.id, id, after);
   if (!reveal) return null;
   getSfx().play('secret');
-  const profile = getSaveSystem().getSelectedProfile();
   if (profile) {
     getSaveSystem().unlockSticker(profile.id, reveal.sticker);
   }
@@ -42,7 +51,7 @@ export function touchSecret(secrets: Secrets, id: SecretId): string | null {
  */
 export function addSecretHotspot(scene: Phaser.Scene, secrets: Secrets, id: SecretId, x: number, y: number): void {
   const glow = scene.add.circle(x, y, 22, 0xfff1a8, 0.32);
-  scene.add.circle(x, y, 12, 0xffd86b, 0.6).setStrokeStyle(2, 0xfff8e7, 0.8);
+  const core = scene.add.circle(x, y, 12, 0xffd86b, 0.6).setStrokeStyle(2, 0xfff8e7, 0.8);
   if (motionAllowed()) {
     scene.tweens.add({
       targets: glow,
@@ -59,14 +68,31 @@ export function addSecretHotspot(scene: Phaser.Scene, secrets: Secrets, id: Secr
     .circle(x, y, 30, 0xffffff, 0.001)
     .setInteractive()
     .on('pointerdown', () => {
+      const before = secrets.getTouches(id);
       const message = touchSecret(secrets, id);
-      if (!message) return;
+      if (!message) {
+        // Pre-threshold tap: charge feedback so the glimmer never feels dead (P2-08). Only when
+        // this tap actually advanced the count (not an already-found secret).
+        if (secrets.getTouches(id) > before) chargeGlimmer(scene, core);
+        return;
+      }
       // Each secret gets its own little visual soul (Language-of-Creation patterns) before
       // the words: the microcosm, light-from-darkness, naming-the-animals.
       const intro = SECRET_INTROS[id];
       if (intro) intro(scene, x, y, () => showSecretReveal(scene, message));
       else showSecretReveal(scene, message);
     });
+}
+
+// Each pre-threshold touch visibly charges the glimmer toward its reveal: a soft ascending tick
+// and an inner-glow pulse (scale yoyo), so a patient child feels the secret answering them (P2-08).
+function chargeGlimmer(scene: Phaser.Scene, core: Phaser.GameObjects.Arc): void {
+  getSfx().play('place');
+  if (!motionAllowed()) return;
+  const base = core.scale;
+  scene.tweens.killTweensOf(core);
+  core.setScale(base);
+  scene.tweens.add({ targets: core, scale: base * 1.5, duration: 160, yoyo: true, ease: 'Sine.easeOut', onComplete: () => core.setScale(base) });
 }
 
 type SecretIntro = (scene: Phaser.Scene, x: number, y: number, onDone: () => void) => void;

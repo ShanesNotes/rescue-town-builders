@@ -13,7 +13,19 @@ import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
 import { playMissionIntro } from '../ui/MissionIntro';
 import { missionRegistry } from '../systems/GameServices';
+import { createSecretsForProfile, addSecretHotspot } from '../systems/secretHotspot';
+import type { SecretId } from '../systems/Secrets';
 import type { MissionId } from '../types';
+
+// One gentle off-route glimmer per Journey backdrop (P3-08), tucked in a quiet corner away from
+// the waypoint route so it rewards a child who wanders a little. Reachable now that touch counts
+// persist (P1-07) and each tap charges (P2-08).
+const JOURNEY_SECRETS: Partial<Record<MissionId, { id: SecretId; x: number; y: number }>> = {
+  'scooter-roundup': { id: 'meadow-nest', x: 110, y: 180 },
+  'safety-lights': { id: 'lamplighter', x: 110, y: 470 },
+  'bike-explorer': { id: 'garden-cat', x: 110, y: 200 },
+  'treasure-boat': { id: 'message-bottle', x: 130, y: 200 },
+};
 
 // One reusable scene for every Journey mission (Scooter Roundup, Safety Lights, Bike Explorer,
 // Treasure Boat). Tap the next glowing waypoint; the hero travels there; reaching the last
@@ -90,6 +102,10 @@ export class JourneyMissionScene extends Phaser.Scene {
       .setDepth(30);
 
     addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => this.requestExit(), testId: `${this.missionId}.back-to-map` }).setDepth(40);
+
+    // A quiet off-route glimmer for the wanderer (P3-08). Touch counts persist across reloads.
+    const secret = JOURNEY_SECRETS[this.missionId];
+    if (secret) addSecretHotspot(this, createSecretsForProfile(), secret.id, secret.x, secret.y);
 
     bindIntents(this, {
       onMove: (x, y) => !isMissionExitOpen(this) && this.moveHighlight(x || y),

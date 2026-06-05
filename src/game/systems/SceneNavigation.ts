@@ -64,12 +64,16 @@ export function startParentSettingsGate(scene: Phaser.Scene, returnScene: Parent
   startScene(scene, SCENE_KEYS.parentSettingsGate, { returnScene });
 }
 
-export function returnToTownMap(scene: Phaser.Scene): void {
-  startScene(scene, SCENE_KEYS.townMap);
+// Optionally open the map on a specific node (e.g. the mission just finished), selected and lit,
+// so the child lands on the star they earned. Defaults to page 0 / index 0 (back-compat).
+export function returnToTownMap(scene: Phaser.Scene, focus?: { page: number; selectedIndex: number }): void {
+  startScene(scene, SCENE_KEYS.townMap, focus ? { ...focus, celebrate: true } : undefined);
 }
 
-export function startStickerBook(scene: Phaser.Scene): void {
-  startScene(scene, SCENE_KEYS.stickerBook);
+// Optionally open straight to a single sticker's reading page (the just-earned one), so the
+// celebration leads right into reading its little story (P2-02). Omit for the grid.
+export function startStickerBook(scene: Phaser.Scene, readingId?: string): void {
+  startScene(scene, SCENE_KEYS.stickerBook, readingId ? { readingId } : undefined);
 }
 
 export function returnToParentScene(scene: Phaser.Scene, returnScene: ParentSettingsReturnScene): void {

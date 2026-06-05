@@ -29,6 +29,10 @@ export type PlayerProfile = {
     missions: Partial<Record<MissionId, MissionProgress>>;
     stickers: string[];
     totalStars: number;
+    // Per-secret touch counts, keyed by secret id, so a multi-tap secret keeps charging across
+    // scene reloads and refreshes instead of resetting every create() (No-Fail discoverability).
+    // Optional on disk: old saves without it load fine (back-compat).
+    secretTouches: Partial<Record<string, number>>;
   };
 };
 
@@ -80,10 +84,13 @@ function createId(): string {
 function normalizeProgress(progress: PlayerProfile['progress'] | undefined): PlayerProfile['progress'] {
   const stickers = progress?.stickers;
   const totalStars = progress?.totalStars;
+  const secretTouches = progress?.secretTouches;
   return {
     missions: progress?.missions ?? {},
     stickers: Array.isArray(stickers) ? stickers : [],
     totalStars: typeof totalStars === 'number' ? totalStars : 0,
+    // Old saves predate this field — default to empty so a returning child loads fine (back-compat).
+    secretTouches: secretTouches && typeof secretTouches === 'object' ? { ...secretTouches } : {},
   };
 }
 
@@ -139,6 +146,7 @@ export class SaveSystem {
         missions: {},
         stickers: [],
         totalStars: 0,
+        secretTouches: {},
       },
     };
 
@@ -199,6 +207,18 @@ export class SaveSystem {
       0,
     );
 
+    this.persist();
+    return structuredClone(profile);
+  }
+
+  recordSecretTouch(profileId: string, secretId: string, touches: number): PlayerProfile {
+    const profile = this.data.profiles.find((candidate) => candidate.id === profileId);
+    if (!profile) {
+      throw new Error(`Unknown profile: ${profileId}`);
+    }
+    // Persist a secret's running touch count so a half-charged secret survives a scene reload or
+    // a full refresh (the bug that made 2 of 3 secrets effectively unreachable).
+    profile.progress.secretTouches[secretId] = touches;
     this.persist();
     return structuredClone(profile);
   }

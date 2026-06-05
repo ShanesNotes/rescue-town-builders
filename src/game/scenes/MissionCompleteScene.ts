@@ -4,7 +4,8 @@ import type { MissionResult } from '../types';
 import { createCelebrationPlan } from '../systems/Celebration';
 import { getSaveSystem, missionRegistry, getSfx } from '../systems/GameServices';
 import { bindIntents } from '../systems/bindIntents';
-import { returnToTownMap } from '../systems/SceneNavigation';
+import { returnToTownMap, startStickerBook } from '../systems/SceneNavigation';
+import { registerE2EButton } from '../systems/E2EBridge';
 import { STICKER_DEFINITIONS } from '../data/stickers';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
@@ -70,6 +71,13 @@ export class MissionCompleteScene extends Phaser.Scene {
     const celebration = createCelebrationPlan(this.result);
     const place = PLACE[this.result.missionId] ?? 'town';
 
+    // Land the child back on the node they just lit (selected, glowing, pulsing) instead of map
+    // page 0 — so they SEE the new star they earned (P2-01). Nodes follow registry list order,
+    // paged 3-per-screen, matching TownMapScene.
+    const order = missionRegistry.list().findIndex((m) => m.id === this.result!.missionId);
+    const focus = order >= 0 ? { page: Math.floor(order / 3), selectedIndex: order % 3 } : undefined;
+    const goHome = (): void => returnToTownMap(this, focus);
+
     this.paintWorld(MISSION_BG[this.result.missionId] ?? 'hl.bg.town');
 
     // Title — the light IS the completion.
@@ -106,7 +114,7 @@ export class MissionCompleteScene extends Phaser.Scene {
       size: 76,
       key: 'hl.ui.back',
       caption: 'Town',
-      onPress: () => returnToTownMap(this),
+      onPress: goHome,
       testId: 'mission.complete.back-to-map',
       pulse: true,
     }).setDepth(30);
@@ -118,7 +126,7 @@ export class MissionCompleteScene extends Phaser.Scene {
       this.cameras.main.zoomTo(1, 360, 'Sine.easeOut');
     }
 
-    bindIntents(this, { onConfirm: () => returnToTownMap(this), onBack: () => returnToTownMap(this) });
+    bindIntents(this, { onConfirm: goHome, onBack: goHome });
   }
 
   private paintWorld(bgKey: string): void {
@@ -176,6 +184,11 @@ export class MissionCompleteScene extends Phaser.Scene {
       .text(x, y + 70, def?.title ?? 'New sticker!', { fontFamily: FONTS.display, fontSize: '20px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 5, align: 'center', wordWrap: { width: 280 } })
       .setOrigin(0.5)
       .setDepth(17);
+    // Tap the just-popped sticker to read its little story right now (P2-02): opens the Sticker
+    // Book straight to THIS sticker's reading page (childPoem/parentNote), not two scenes away.
+    const openReading = (): void => startStickerBook(this, id);
+    frame.setInteractive({ useHandCursor: true }).on('pointerup', openReading);
+    registerE2EButton({ testId: 'mission.complete.read-sticker', label: def?.title ?? 'New sticker', sceneKey: this.scene.key, press: openReading });
     if (!motionAllowed()) return;
     // Pop each in to its OWN base display-scale (images keep their setDisplaySize size).
     const items: Array<{ o: Phaser.GameObjects.Image | Phaser.GameObjects.Text; base: number }> = [

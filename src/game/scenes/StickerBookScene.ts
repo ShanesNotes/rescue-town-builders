@@ -1,13 +1,13 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { getSaveSystem } from '../systems/GameServices';
+import { getSaveSystem, getSfx } from '../systems/GameServices';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton } from '../systems/E2EBridge';
 import { returnToTownMap } from '../systems/SceneNavigation';
 import { getAllStickers, getStickerById, isStickerUnlocked } from '../systems/StickerCatalog';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
-import { hasTexture } from '../ui/Sprite';
+import { hasTexture, motionAllowed } from '../ui/Sprite';
 
 // A calm reward album. A child opens a sticker they found and a parent reads its little story
 // aloud — "read it again" is the whole point. Locked stickers sleep as gentle silhouettes,
@@ -63,11 +63,13 @@ export class StickerBookScene extends Phaser.Scene {
       this.add.image(startX + i * gap, 102, i < found ? 'hl.ui.starFull' : 'hl.ui.starEmpty').setDisplaySize(19, 19).setDepth(40);
     });
 
-    const cols = 6;
-    const cellW = 132;
-    const cellH = 122;
+    // 7 columns keeps the growing catalog (mission + secret stickers, incl. the Journey glimmers)
+    // to three rows inside the panel — no overflow as new secrets are seeded.
+    const cols = 7;
+    const cellW = 112;
+    const cellH = 116;
     const gridX = 480 - ((cols - 1) * cellW) / 2;
-    const gridY = 200;
+    const gridY = 196;
     stickers.forEach((sticker, index) => {
       const unlocked = isStickerUnlocked(sticker.id, owned);
       const x = gridX + (index % cols) * cellW;
@@ -85,14 +87,30 @@ export class StickerBookScene extends Phaser.Scene {
     } else {
       frame = this.add.rectangle(x, y, 90, 90, unlocked ? 0x1b2a41 : 0x101a2e, 0.9).setStrokeStyle(3, 0xffc857).setDepth(6);
     }
-    if (unlocked) this.add.image(x, y - 4, icon).setDisplaySize(46, 46).setDepth(7);
-    else this.add.text(x, y - 4, '?', { fontSize: '32px', color: '#7e8cab' }).setOrigin(0.5).setDepth(7);
+    let mark: Phaser.GameObjects.Image | Phaser.GameObjects.Text;
+    if (unlocked) mark = this.add.image(x, y - 4, icon).setDisplaySize(46, 46).setDepth(7);
+    else mark = this.add.text(x, y - 4, '?', { fontSize: '32px', color: '#7e8cab' }).setOrigin(0.5).setDepth(7);
     this.add
-      .text(x, y + 44, unlocked ? title : 'waiting', { fontFamily: FONTS.display, fontSize: '11px', color: unlocked ? '#FFE2A6' : '#7e8cab', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 3, align: 'center', wordWrap: { width: 126 } })
+      .text(x, y + 44, unlocked ? title : 'waiting', { fontFamily: FONTS.display, fontSize: '11px', color: unlocked ? '#FFE2A6' : '#7e8cab', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 3, align: 'center', wordWrap: { width: 106 } })
       .setOrigin(0.5)
       .setDepth(7);
-    frame.setInteractive({ useHandCursor: true }).on('pointerup', () => unlocked && this.scene.restart({ readingId: id }));
-    registerE2EButton({ testId: `stickerbook.sticker.${id}`, label: title, sceneKey: this.scene.key, press: () => unlocked && this.scene.restart({ readingId: id }) });
+    const open = (): void => {
+      if (unlocked) this.scene.restart({ readingId: id });
+      else this.notYet(mark); // locked taps aren't dead: a gentle 'not yet' wiggle + soft tick (P1-10)
+    };
+    // Drop the hand cursor when locked so a sleeping sticker doesn't promise a page it can't open.
+    frame.setInteractive({ useHandCursor: unlocked }).on('pointerup', open);
+    registerE2EButton({ testId: `stickerbook.sticker.${id}`, label: title, sceneKey: this.scene.key, press: open });
+  }
+
+  // A locked-cell tap is never dead (No-Fail): the sleeping question-mark gives a gentle
+  // 'not yet' wiggle and a soft muted tick, so the child feels the album answered (P1-10).
+  private notYet(mark: Phaser.GameObjects.Image | Phaser.GameObjects.Text): void {
+    getSfx().play('tap');
+    if (!motionAllowed()) return;
+    this.tweens.killTweensOf(mark);
+    mark.setAngle(0);
+    this.tweens.add({ targets: mark, angle: { from: -9, to: 9 }, duration: 70, yoyo: true, repeat: 3, ease: 'Sine.easeInOut', onComplete: () => mark.setAngle(0) });
   }
 
   private renderReadingPage(readingId: string, owned: readonly string[]): void {

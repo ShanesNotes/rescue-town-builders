@@ -71,9 +71,28 @@ describe('Secrets', () => {
     expect(secrets.isDiscovered('secret-friend')).toBe(false);
   });
 
+  it('rehydrates prior touch counts so a half-charged secret resumes (P1-07)', () => {
+    // Two of three touches happened last session; this session's first tap should reveal it.
+    const resumed = new Secrets({ playerName: 'Willem', touches: { 'cluckle-dream': 2 } });
+
+    expect(resumed.getTouches('cluckle-dream')).toBe(2);
+    expect(resumed.touch('cluckle-dream')).not.toBeNull();
+    expect(resumed.isDiscovered('cluckle-dream')).toBe(true);
+  });
+
+  it('reports the running touch count so it can be persisted', () => {
+    const secrets = new Secrets({ playerName: 'Willem' });
+
+    expect(secrets.getTouches('secret-friend')).toBe(0);
+    secrets.touch('secret-friend');
+    expect(secrets.getTouches('secret-friend')).toBe(1);
+    secrets.touch('secret-friend');
+    expect(secrets.getTouches('secret-friend')).toBe(2);
+  });
+
   it('records the Language-of-Creation pattern each secret embodies', () => {
     const secrets = new Secrets({ playerName: 'Willem' });
-    const patterns: Record<SecretId, string> = {
+    const patterns: Partial<Record<SecretId, string>> = {
       'secret-friend': 'naming-the-animals',
       'hidden-light': 'light-from-darkness',
       'cluckle-dream': 'microcosm',
