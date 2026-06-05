@@ -22,7 +22,8 @@ describe('SceneNavigation', () => {
   it('maps each MVP mission id to its scene route', () => {
     expect(MISSION_SCENE_KEYS).toEqual({
       'recycling-run': SCENE_KEYS.recyclingRun,
-      'house-builder': SCENE_KEYS.houseBuilder,
+      // The house-builder mission now routes to Brick's Tower (the physics-stacker rebuild).
+      'house-builder': SCENE_KEYS.brickTower,
       'fire-fix': SCENE_KEYS.fireFix,
     });
     expect(sceneKeyForMission('fire-fix')).toBe(SCENE_KEYS.fireFix);

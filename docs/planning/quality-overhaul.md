@@ -95,3 +95,21 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   fires) + `flashWhite` (Phaser-4 `setTint`+`setTintMode(FILL)`, restores prior tint/mode).
   Both reduced-motion-gated.
 - Gates: GREEN — typecheck clean, 157/157 unit, build ok, e2e 6/6.
+
+### Cycle 2 — Hero Game #1: Brick's Tower (physics stacker, proof-of-bar)
+- New `systems/BrickTower.ts` (pure no-fail logic + scoring; 8 unit tests) + `data/brickTowerLevels.ts`
+  + `scenes/BrickTowerScene.ts` (per-scene **Matter** physics — confirmed `this.matter` works
+  without global config). Drop bricks → real weight → they fall, settle, freeze (setStatic on rest
+  = the awake-body cap + the no-fail "tower only grows" guarantee). Win by reaching the ribbon OR by
+  persistence (brick-count floor). Generated rounded-brick textures (no art dependency yet).
+- Integration: reuses `missionId: 'house-builder'` so the town-map node, sticker, and registry carry
+  over. Repointed `MISSION_SCENE_KEYS['house-builder']` → BrickTowerScene. **Carried the
+  `hidden-light` secret** (Dad's words — the soul) into the new scene at the same (888,268) coords.
+- E2E: deterministic `brick.drop` (no physics-settle wait) keeps the harness fast/non-flaky; updated
+  browser-smoke, secret-discovery, screenshots specs + the SceneNavigation unit test.
+- Renders clean (screenshot verified), zero console errors across the full e2e playthrough.
+- Gates: GREEN — typecheck clean, **165/165** unit, build ok, **e2e 6/6**.
+- Known validation gap: the *real* Matter drop path (spawnFallingBrick + settle detector) isn't
+  exercised by e2e (e2e uses the deterministic path). Feel/physics validated by Willem's playtest;
+  do a manual dev-server real-drop smoke in a later cycle. Old HouseBuilderScene now unreachable
+  (kept in the scene list; retire in a cleanup cycle).

@@ -12,6 +12,7 @@ export const SCENE_KEYS = {
   parentSettings: 'ParentSettingsScene',
   recyclingRun: 'RecyclingRunScene',
   houseBuilder: 'HouseBuilderScene',
+  brickTower: 'BrickTowerScene',
   fireFix: 'FireFixScene',
   matchMission: 'MatchMissionScene',
   aimMission: 'AimMissionScene',
@@ -42,7 +43,8 @@ export const MVP_SCENE_FLOW = [
 // The original three have bespoke scenes; roadmap missions route by archetype to a shared engine scene.
 export const MISSION_SCENE_KEYS: Partial<Record<MissionId, SceneKey>> = {
   'recycling-run': SCENE_KEYS.recyclingRun,
-  'house-builder': SCENE_KEYS.houseBuilder,
+  // Brick's Tower (physics stacker) replaces the ordered House Builder; same missionId/node/sticker.
+  'house-builder': SCENE_KEYS.brickTower,
   'fire-fix': SCENE_KEYS.fireFix,
 };
 

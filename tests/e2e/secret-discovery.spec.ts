@@ -56,7 +56,7 @@ test('all three secrets reveal without error and persist as stickers', async ({ 
 
   // 2) Hidden Light — House Builder (1 touch).
   await tap(page, 'townmap.mission.house-builder');
-  await scene(page, 'HouseBuilderScene');
+  await scene(page, 'BrickTowerScene');
   await clickGame(page, 888, 268, 1);
   await page.waitForTimeout(450);
   await page.screenshot({ path: 'test-results/shots/secret-hidden-light.png' });

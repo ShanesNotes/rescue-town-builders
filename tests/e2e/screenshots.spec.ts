@@ -67,14 +67,9 @@ test('captures every screen and stays error-free across a full playthrough', asy
   await scene(page, 'TownMapScene');
 
   await tap(page, 'townmap.mission.house-builder');
-  await scene(page, 'HouseBuilderScene');
+  await scene(page, 'BrickTowerScene');
   await shot(page, '06-house');
-  await clearMission(
-    page,
-    'HouseBuilderScene',
-    ['house.part.foundation', 'house.part.walls', 'house.part.roof', 'house.part.door', 'house.part.decoration'],
-    80,
-  );
+  await clearMission(page, 'BrickTowerScene', ['brick.drop'], 30);
   await tap(page, 'mission.complete.back-to-map');
   await scene(page, 'TownMapScene');
 

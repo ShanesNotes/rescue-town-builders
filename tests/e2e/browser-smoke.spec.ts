@@ -39,12 +39,12 @@ async function completeRecycling(page: Page): Promise<void> {
 }
 
 async function completeHouseBuilder(page: Page): Promise<void> {
-  // Rotate through the parts until all three houses are built; wrong parts only hint.
-  const parts = ['house.part.foundation', 'house.part.walls', 'house.part.roof', 'house.part.door', 'house.part.decoration'];
-  for (let i = 0; i < 80; i += 1) {
+  // Brick's Tower (physics stacker): drop bricks until the tower completes. In E2E the drop is
+  // deterministic (no physics wait), so a handful of presses finishes the round.
+  for (let i = 0; i < 30; i += 1) {
     const scene = await page.evaluate(() => window.__RTB_E2E__?.currentSceneKey);
-    if (scene !== 'HouseBuilderScene') break;
-    await page.evaluate((id) => window.__RTB_E2E__?.pressButton(id), parts[i % parts.length]);
+    if (scene !== 'BrickTowerScene') break;
+    await page.evaluate(() => window.__RTB_E2E__?.pressButton('brick.drop'));
   }
   await waitForScene(page, 'MissionCompleteScene');
   await press(page, 'mission.complete.back-to-map', 'TownMapScene');
@@ -88,7 +88,7 @@ test('creates a profile, completes all MVP missions, and persists stars/stickers
   await press(page, 'townmap.mission.recycling-run', 'RecyclingRunScene');
   await completeRecycling(page);
 
-  await press(page, 'townmap.mission.house-builder', 'HouseBuilderScene');
+  await press(page, 'townmap.mission.house-builder', 'BrickTowerScene');
   await completeHouseBuilder(page);
 
   await press(page, 'townmap.mission.fire-fix', 'FireFixScene');
