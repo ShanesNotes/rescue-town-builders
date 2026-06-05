@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, softStartScene, startParentSettingsGate } from '../systems/SceneNavigation';
 import { bindIntents } from '../systems/bindIntents';
-import { getSaveSystem, getSfx } from '../systems/GameServices';
+import { getSaveSystem, getSfx, getVoice } from '../systems/GameServices';
 import { registerE2EButton } from '../systems/E2EBridge';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
@@ -79,6 +79,9 @@ export class ProfileScene extends Phaser.Scene {
     addIconButton(this, { x: 908, y: 46, size: 58, key: 'hl.ui.settings', onPress: () => this.choose({ type: 'settings' }), testId: 'profile.parent-settings' }).setDepth(30);
 
     this.bindInput();
+
+    // Warm spoken invite so a non-reader knows to choose a friend (P4-02).
+    getVoice().speak('pick-helper');
   }
 
   private profileCoin(

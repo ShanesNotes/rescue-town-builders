@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import { Secrets, isSecretId, type SecretId } from './Secrets';
-import { getSaveSystem, getSfx } from './GameServices';
+import { getSaveSystem, getSfx, getVoice } from './GameServices';
 import { motionAllowed } from '../ui/Sprite';
 import { FONTS } from '../ui/typography';
 
@@ -36,6 +36,8 @@ export function touchSecret(secrets: Secrets, id: SecretId): string | null {
   if (profile && after > before) getSaveSystem().recordSecretTouch(profile.id, id, after);
   if (!reveal) return null;
   getSfx().play('secret');
+  // A hushed "you found something special" — whispered, never shouted (P4-02).
+  getVoice().speak('secret-found');
   if (profile) {
     getSaveSystem().unlockSticker(profile.id, reveal.sticker);
   }

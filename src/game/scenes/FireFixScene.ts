@@ -4,7 +4,7 @@ import { picnicFires } from '../data/picnicFires';
 import { bindIntents } from '../systems/bindIntents';
 import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
-import { getSfx } from '../systems/GameServices';
+import { getSfx, getVoice } from '../systems/GameServices';
 import { createSecretsForProfile, addSecretHotspot } from '../systems/secretHotspot';
 import {
   createFireFixState,
@@ -80,7 +80,10 @@ export class FireFixScene extends Phaser.Scene {
     this.placeEmber(false);
 
     const panel = missionRegistry.get('fire-fix')?.introPanels[0];
-    if (panel) playMissionIntro(this, { ...panel, characterId: 'ember' }, () => undefined);
+    // Fire Fix is a "build/care" mission — speak its mission-start line when the intro veil lifts (P4-02).
+    const speakStart = (): void => getVoice().speak('mission-start-build');
+    if (panel) playMissionIntro(this, { ...panel, characterId: 'ember' }, speakStart);
+    else speakStart();
   }
 
   private paintWorld(): void {

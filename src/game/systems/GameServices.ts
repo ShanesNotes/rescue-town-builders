@@ -4,6 +4,7 @@ import { SaveSystem } from './SaveSystem';
 import { getEffectiveAudioLevels } from './AudioSystem';
 import { SfxSystem, createWebAudioSfxSink } from './SfxSystem';
 import { MusicSystem, createFallbackMusicSink } from './MusicSystem';
+import { VoiceSystem, createWebSpeechVoiceSink } from './VoiceSystem';
 
 export const missionRegistry = new MissionRegistry(missionDefinitions);
 
@@ -24,6 +25,20 @@ export function getSfx(): SfxSystem {
     return profile ? getEffectiveAudioLevels(profile.settings).sfx : 0;
   });
   return sfxSystem;
+}
+
+let voiceSystem: VoiceSystem | null = null;
+
+export function getVoice(): VoiceSystem {
+  // Spoken VO so a non-reader can play solo (P4-02). Enabled follows the selected profile's
+  // voiceEnabled AND audioMuted (a muted town speaks no words either), so the existing Parent
+  // Settings govern it with no extra wiring. No-Fail when speechSynthesis is unavailable (headless).
+  voiceSystem ??= new VoiceSystem(createWebSpeechVoiceSink(), () => {
+    const profile = getSaveSystem().getSelectedProfile();
+    if (!profile) return true; // before a profile exists (title), the voice may still greet
+    return profile.settings.voiceEnabled !== false && !profile.settings.audioMuted;
+  });
+  return voiceSystem;
 }
 
 let musicSystem: MusicSystem | null = null;

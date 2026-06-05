@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { SCENE_KEYS, softStartScene } from '../systems/SceneNavigation';
 import { bindIntents } from '../systems/bindIntents';
-import { getMusic } from '../systems/GameServices';
+import { getMusic, getVoice } from '../systems/GameServices';
 import { addIconButton } from '../ui/Button';
 import { motionAllowed } from '../ui/Sprite';
 import { FONTS } from '../ui/typography';
@@ -41,7 +41,12 @@ export class StartScene extends Phaser.Scene {
     play.setDepth(20);
 
     // Music begins on the first real gesture (browser autoplay policy), then plays on.
-    this.input.once('pointerdown', () => getMusic().start());
+    // The warm title line greets on that same first gesture (speech also needs a user gesture),
+    // so a non-reader hears "the town is dreaming you" the moment they touch (P4-02).
+    this.input.once('pointerdown', () => {
+      getMusic().start();
+      getVoice().speak('title');
+    });
     bindIntents(this, { onConfirm: () => this.begin() });
   }
 

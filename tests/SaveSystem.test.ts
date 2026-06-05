@@ -89,6 +89,8 @@ describe('SaveSystem', () => {
       musicVolume: 0.25,
       sfxVolume: 0,
       audioMuted: true,
+      // voiceEnabled was untouched by the update, so it keeps its default-on value (P4-02).
+      voiceEnabled: true,
     });
   });
 

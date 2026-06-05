@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { matchMissions } from '../data/matchMissions';
-import { getSfx } from '../systems/GameServices';
+import { getSfx, getVoice } from '../systems/GameServices';
+import { missionStartVoiceKey } from '../data/voiceLines';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
@@ -122,8 +123,12 @@ export class MatchMissionScene extends Phaser.Scene {
 
     this.loadPrompt();
 
-    const panel = missionRegistry.get(this.missionId)?.introPanels[0];
-    if (panel) playMissionIntro(this, panel, () => undefined);
+    const mission = missionRegistry.get(this.missionId);
+    const panel = mission?.introPanels[0];
+    // The warm archetype mission-start line is spoken when the intro veil lifts (P4-02).
+    const speakStart = (): void => getVoice().speak(missionStartVoiceKey(mission?.archetype));
+    if (panel) playMissionIntro(this, panel, speakStart);
+    else speakStart();
   }
 
   private buildPips(total: number): void {

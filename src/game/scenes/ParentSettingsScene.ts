@@ -32,7 +32,7 @@ export class ParentSettingsScene extends Phaser.Scene {
     this.labels = {};
     this.add.image(480, 270, 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
     this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.62).setDepth(1);
-    this.add.rectangle(480, 300, 800, 410, 0x16243a, 0.85).setStrokeStyle(4, 0xffc857, 0.8).setDepth(2);
+    this.add.rectangle(480, 300, 800, 468, 0x16243a, 0.85).setStrokeStyle(4, 0xffc857, 0.8).setDepth(2);
     this.add
       .text(480, 70, 'PARENT SETTINGS', { fontFamily: FONTS.display, fontSize: '34px', color: '#FFE2A6', fontStyle: 'bold', stroke: '#2A1606', strokeThickness: 7 })
       .setOrigin(0.5)
@@ -54,24 +54,28 @@ export class ParentSettingsScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(10);
 
-    this.pill('difficulty', 270, 178, () => `Difficulty: ${this.profile.settings.difficulty}`, 0xffc857, () =>
+    this.pill('difficulty', 270, 170, () => `Difficulty: ${this.profile.settings.difficulty}`, 0xffc857, () =>
       this.applySetting({ difficulty: this.nextDifficulty(this.profile.settings.difficulty) }),
     );
-    this.pill('mute', 690, 178, () => `Sound: ${this.profile.settings.audioMuted ? 'off' : 'on'}`, 0xffc857, () =>
+    this.pill('mute', 690, 170, () => `Sound: ${this.profile.settings.audioMuted ? 'off' : 'on'}`, 0xffc857, () =>
       this.applySetting({ audioMuted: !this.profile.settings.audioMuted }),
     );
-    this.pill('music', 270, 256, () => `Music: ${this.pct(getEffectiveAudioLevels(this.profile.settings).music)}`, 0x43a29c, () =>
+    this.pill('music', 270, 240, () => `Music: ${this.pct(getEffectiveAudioLevels(this.profile.settings).music)}`, 0x43a29c, () =>
       this.applySetting({ musicVolume: this.cycleVol(this.profile.settings.musicVolume) }),
     );
-    this.pill('sfx', 690, 256, () => `Sounds: ${this.pct(getEffectiveAudioLevels(this.profile.settings).sfx)}`, 0x43a29c, () =>
+    this.pill('sfx', 690, 240, () => `Sounds: ${this.pct(getEffectiveAudioLevels(this.profile.settings).sfx)}`, 0x43a29c, () =>
       this.applySetting({ sfxVolume: this.cycleVol(this.profile.settings.sfxVolume) }),
     );
-    this.pill('quiet', 270, 334, () => 'Calm night (soft sounds)', 0x76b3e6, () =>
+    // Spoken VO so a non-reader can play solo (P4-02) — on by default; mutable here.
+    this.pill('voice', 270, 310, () => `Talking: ${this.profile.settings.voiceEnabled ? 'on' : 'off'}`, 0x9b8fd6, () =>
+      this.applySetting({ voiceEnabled: !this.profile.settings.voiceEnabled }),
+    );
+    this.pill('quiet', 690, 310, () => 'Calm night (soft sounds)', 0x76b3e6, () =>
       this.applySetting({ musicVolume: 0, sfxVolume: 0.4, audioMuted: false }),
     );
-    this.pill('reset', 690, 334, () => 'Start fresh', 0xe8946a, () => this.confirmReset());
+    this.pill('reset', 480, 380, () => 'Start fresh', 0xe8946a, () => this.confirmReset());
 
-    addIconButton(this, { x: 480, y: 452, size: 76, key: 'hl.ui.back', caption: 'Done', onPress: () => returnToParentScene(this, this.returnScene), testId: 'parent.done' }).setDepth(40);
+    addIconButton(this, { x: 480, y: 478, size: 76, key: 'hl.ui.back', caption: 'Done', onPress: () => returnToParentScene(this, this.returnScene), testId: 'parent.done' }).setDepth(40);
     bindIntents(this, {
       onBack: () => {
         if (this.resetModalOpen) return; // the modal owns Back while it's up (Escape = cancel)

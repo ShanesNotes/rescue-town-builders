@@ -17,6 +17,9 @@ export type ProfileSettings = {
   musicVolume: number;
   sfxVolume: number;
   audioMuted: boolean;
+  // Spoken VO (P4-02). DEFAULT true — a non-reader needs the voice to play solo; a parent can mute
+  // it at the Grown-up gate. Optional on disk: old saves without it load fine (back-compat).
+  voiceEnabled: boolean;
 };
 
 export type PlayerProfile = {
@@ -59,6 +62,8 @@ function defaultSettings(): ProfileSettings {
     musicVolume: 0.35,
     sfxVolume: 0.7,
     audioMuted: false,
+    // A non-reader cannot play without it, so it greets every first run on (parents can mute it).
+    voiceEnabled: true,
   };
 }
 

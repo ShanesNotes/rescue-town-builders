@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { recyclingItems, recyclingItemTextureKey, reuseBlueprints, reusePartKindLabels } from '../data/recyclingItems';
-import { getSaveSystem, getSfx } from '../systems/GameServices';
+import { getSaveSystem, getSfx, getVoice } from '../systems/GameServices';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
@@ -108,7 +108,10 @@ export class RecyclingRunScene extends Phaser.Scene {
     this.renderWorkshop();
 
     const panel = missionRegistry.get('recycling-run')?.introPanels[0];
-    if (panel) playMissionIntro(this, { ...panel, characterId: 'rivet' }, () => undefined);
+    // A "build" mission — speak its mission-start line when the intro veil lifts (P4-02).
+    const speakStart = (): void => getVoice().speak('mission-start-build');
+    if (panel) playMissionIntro(this, { ...panel, characterId: 'rivet' }, speakStart);
+    else speakStart();
   }
 
   private paintWorld(): void {

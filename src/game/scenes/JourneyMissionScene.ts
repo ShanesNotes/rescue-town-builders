@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { journeyMissions, type JourneyWaypoint } from '../data/journeyMissions';
-import { getSfx } from '../systems/GameServices';
+import { getSfx, getVoice } from '../systems/GameServices';
+import { missionStartVoiceKey } from '../data/voiceLines';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
@@ -125,8 +126,12 @@ export class JourneyMissionScene extends Phaser.Scene {
 
     this.render();
 
-    const panel = missionRegistry.get(this.missionId)?.introPanels[0];
-    if (panel) playMissionIntro(this, panel, () => undefined);
+    const mission = missionRegistry.get(this.missionId);
+    const panel = mission?.introPanels[0];
+    // The warm archetype mission-start line is spoken when the intro veil lifts (P4-02).
+    const speakStart = (): void => getVoice().speak(missionStartVoiceKey(mission?.archetype));
+    if (panel) playMissionIntro(this, panel, speakStart);
+    else speakStart();
   }
 
   private buildPips(total: number): void {

@@ -7,7 +7,7 @@ import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
 import { isOverlayOpen, lockOverlay } from '../systems/overlayLock';
-import { getSfx } from '../systems/GameServices';
+import { getSfx, getVoice } from '../systems/GameServices';
 import { createSecretsForProfile, addSecretHotspot } from '../systems/secretHotspot';
 import {
   createHouseBuilderState,
@@ -128,7 +128,10 @@ export class HouseBuilderScene extends Phaser.Scene {
     this.render();
 
     const panel = missionRegistry.get('house-builder')?.introPanels[0];
-    if (panel) playMissionIntro(this, { ...panel, characterId: 'brick' }, () => undefined);
+    // A "build" mission — speak its mission-start line when the intro veil lifts (P4-02).
+    const speakStart = (): void => getVoice().speak('mission-start-build');
+    if (panel) playMissionIntro(this, { ...panel, characterId: 'brick' }, speakStart);
+    else speakStart();
   }
 
   private paintWorld(): void {

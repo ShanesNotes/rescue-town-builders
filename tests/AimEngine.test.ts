@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { act, aimHits, coneAngles, createAimState, getAimResult, moveAimer, type AimTarget } from '../src/game/systems/AimEngine';
+import { act, aimHits, coneAngles, createAimState, directHit, getAimResult, moveAimer, type AimTarget } from '../src/game/systems/AimEngine';
 
 // Two targets near the start, reachable by aiming right.
 const TARGETS: AimTarget[] = [
@@ -104,6 +104,44 @@ describe('AimEngine', () => {
     const out = act(state);
     expect(out.hit).toBe(true);
     expect(out.state.targets[0]?.health).toBe(0);
+  });
+
+  it('P4-03 directHit: a tapped live target is cleared with the same engine truth as an Act', () => {
+    // A far target no single Act could reach in-cone from the start — a direct TAP clears it anyway.
+    let state = createAimState([{ id: 'far', x: 820, y: 380, health: 1, maxHealth: 1 }]);
+    const out = directHit(state, 'far');
+    expect(out.hit).toBe(true);
+    expect(out.completed).toBe(true);
+    expect(out.state.targets.find((t) => t.id === 'far')?.health).toBe(0);
+    // Auto-aim turned the hero toward the tapped target (so the drawn cone stays coherent).
+    expect(out.state.aim.x).toBe(1);
+    expect(out.state.aim.y).toBe(1);
+  });
+
+  it('P4-03 directHit on a multi-health target chips one point and completes only when all are out', () => {
+    let state = createAimState([
+      { id: 'a', x: 400, y: 260, health: 2, maxHealth: 2 },
+      { id: 'b', x: 500, y: 260, health: 1, maxHealth: 1 },
+    ]);
+    const first = directHit(state, 'a');
+    expect(first.hit).toBe(true);
+    expect(first.completed).toBe(false);
+    expect(first.state.targets.find((t) => t.id === 'a')?.health).toBe(1);
+    const second = directHit(first.state, 'a');
+    expect(second.state.targets.find((t) => t.id === 'a')?.health).toBe(0);
+    expect(second.completed).toBe(false); // 'b' still live
+    const third = directHit(second.state, 'b');
+    expect(third.completed).toBe(true);
+  });
+
+  it('P4-03 directHit is a harmless no-op on a dead or unknown target (No-Fail)', () => {
+    let state = createAimState([{ id: 'a', x: 400, y: 260, health: 1, maxHealth: 1 }]);
+    state = directHit(state, 'a').state; // now dead + mission complete
+    const onDead = directHit(state, 'a');
+    expect(onDead.hit).toBe(false);
+    const onUnknown = directHit(state, 'nope');
+    expect(onUnknown.hit).toBe(false);
+    expect(onUnknown.state).toBe(state); // no mutation
   });
 
   it('scores stars and unlocks the sticker only on completion', () => {

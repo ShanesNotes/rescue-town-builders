@@ -79,6 +79,8 @@ call, which stays Shane's reserved nudge.
 
 | 9 | Living diorama (P4-01): the Town Map grows from dark-and-sparse to warm-and-bustling — deterministic per-mission life (rescued helper, chimney smoke, tree, flower box, flickering lamp, picnic blanket, birds), persists across visits, strictly behind interactive layers, motion-gated, one-shot reveal on celebrate-return; + CF-11 honest secret copy + CF-12 audio status/synth fallback; +9 tests | 3 | typecheck✓ test✓(142) build✓ e2e✓(6) | (this commit) |
 
-**Next:** Wave 10 — Voice & touch: P4-02 Grok-scripted spoken VO (Web Speech, parent-toggle) + P4-03 aim direct-touch. Then CF-8 pointerup hardening + the final summary + merge-to-`main` ship decision for Shane.
+| 10 | Voice & touch: P4-02 spoken VO — new VoiceSystem (Web Speech, Grok's warm script in voiceLines.ts, deterministic variant rotation, default-on `voiceEnabled` parent toggle, guaranteed No-Fail no-op when speech is unavailable) wired into ~11 moments so a non-reader plays solo; P4-03 aim direct-touch (tap a target → AimEngine.directHit via the hardened press model, same engine truth); +9 tests | 2 | typecheck✓ test✓(151) build✓ e2e✓(6) | (this commit) |
+
+**Next:** Wave 11 — final hardening (CF-8 raw-pointerup → hardened press model), then the final summary + merge-to-`main` ship decision for Shane.
 
 **Multi-model engagement (per wave):** Codex (workspace-write, `/home/ark/rtb-codex`) → asset payoffs Waves 6+ (invention sprites, helper drone, house accents, diorama props) + independent re-audit. Grok (`/home/ark/rtb-grok`) → onboarding microcopy (Wave 3) + VO script (Wave 8). Claude owns all scene/system mechanics.

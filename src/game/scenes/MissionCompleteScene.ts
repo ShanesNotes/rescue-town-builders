@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import type { MissionResult } from '../types';
 import { createCelebrationPlan } from '../systems/Celebration';
-import { getSaveSystem, missionRegistry, getSfx } from '../systems/GameServices';
+import { getSaveSystem, missionRegistry, getSfx, getVoice } from '../systems/GameServices';
 import { bindIntents } from '../systems/bindIntents';
 import { returnToTownMap, startStickerBook } from '../systems/SceneNavigation';
 import { registerE2EButton } from '../systems/E2EBridge';
@@ -122,6 +122,8 @@ export class MissionCompleteScene extends Phaser.Scene {
 
     this.confettiShower(celebration.confettiBursts * 4 + 12);
     getSfx().play('fanfare');
+    // The warm "a window glows for you" line, spoken over the celebration (P4-02).
+    getVoice().speak('mission-complete');
     if (motionAllowed()) {
       this.cameras.main.setZoom(1.05);
       this.cameras.main.zoomTo(1, 360, 'Sine.easeOut');
@@ -205,6 +207,8 @@ export class MissionCompleteScene extends Phaser.Scene {
     const id = stickerIds[0];
     if (!id) return null;
     const def = STICKER_DEFINITIONS.find((s) => s.id === id);
+    // "Here is your sticker" — spoken once when a new sticker is earned (P4-02).
+    getVoice().speak('sticker');
     const delay = 260 + starCount * 240 + 220;
     // Show the ACTUAL sticker just earned (frame + its real icon), so the payoff has its subject.
     const frame = this.add.image(x, y, 'hl.ui.stickerFrame').setDisplaySize(110, 110).setDepth(16);

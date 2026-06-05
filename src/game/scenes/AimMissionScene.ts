@@ -1,13 +1,14 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { aimMissions } from '../data/aimMissions';
-import { getSfx } from '../systems/GameServices';
+import { getSfx, getVoice } from '../systems/GameServices';
+import { missionStartVoiceKey } from '../data/voiceLines';
 import { bindIntents } from '../systems/bindIntents';
 import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
 import { isOverlayOpen } from '../systems/overlayLock';
-import { act, aimHits, coneAngles, createAimState, getAimResult, moveAimer, type AimState, type AimVec } from '../systems/AimEngine';
+import { act, aimHits, coneAngles, createAimState, directHit, getAimResult, moveAimer, type AimState, type AimVec } from '../systems/AimEngine';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
@@ -72,7 +73,11 @@ export class AimMissionScene extends Phaser.Scene {
     for (const t of this.state.targets) {
       // A pulsing ring marks any LIVE target currently inside the aim cone (P3-05) — under the sprite.
       this.targetRings.set(t.id, this.add.circle(t.x, t.y, 46, 0x000000, 0).setStrokeStyle(6, this.coneColor, 0.95).setDepth(11).setVisible(false));
-      this.targetSprites.set(t.id, this.add.image(t.x, t.y, hasTexture(this, cfg.targetKey) ? cfg.targetKey : 'hl.prop.star').setDepth(12));
+      const sprite = this.add.image(t.x, t.y, hasTexture(this, cfg.targetKey) ? cfg.targetKey : 'hl.prop.star').setDepth(12);
+      this.targetSprites.set(t.id, sprite);
+      // P4-03 direct-touch: TAP a target to act on it directly (auto-aim + clear it with the same
+      // engine truth, SFX, and juice as a normal hit). The move + Act-button flow still works.
+      this.bindTargetPress(sprite, t.id);
     }
 
     // Bold opaque aim cone (P3-05) — a mission-themed fan from the hero so the child can SEE where
@@ -101,8 +106,12 @@ export class AimMissionScene extends Phaser.Scene {
     this.renderTargets();
     this.placeHero(false);
 
-    const panel = missionRegistry.get(this.missionId)?.introPanels[0];
-    if (panel) playMissionIntro(this, panel, () => undefined);
+    const mission = missionRegistry.get(this.missionId);
+    const panel = mission?.introPanels[0];
+    // The warm archetype mission-start line is spoken when the intro veil lifts (P4-02).
+    const speakStart = (): void => getVoice().speak(missionStartVoiceKey(mission?.archetype));
+    if (panel) playMissionIntro(this, panel, speakStart);
+    else speakStart();
   }
 
   private buildPips(total: number): void {
@@ -202,10 +211,16 @@ export class AimMissionScene extends Phaser.Scene {
     this.actVisual();
     if (outcome.hit) {
       getSfx().play('spray-hit');
-    } else if (!outcome.assisted) {
+      // Spoken "yes, that fits!" only when an act actually CLEARS a target, so the praise marks real
+      // progress instead of every tap (P4-02). Cancel-in-flight keeps it from stacking.
+      if (this.state.targets.some((t) => (prevHealth.get(t.id) ?? 0) > 0 && t.health === 0)) getVoice().speak('correct');
+    } else if (outcome.assisted) {
+      getVoice().speak('friend-helped'); // a friend stepped in (No-Fail mercy)
+    } else {
       // P1-12: a miss is NEVER silent — soft whiff + a puff at the cone tip + a nudge arrow toward
       // the nearest live target, so every press gives the child visible + audible feedback.
       getSfx().play('try-again');
+      getVoice().speak('try-again'); // a gentle, never-shaming nudge (P4-02)
       this.whiffFeedback();
     }
     for (const t of this.state.targets) {
@@ -218,6 +233,51 @@ export class AimMissionScene extends Phaser.Scene {
       this.placeHero(false);
     }
     if (outcome.assisted) this.helperAssist(prevPlayer);
+
+    this.message.setText(this.state.lastMessage);
+    this.renderTargets();
+
+    if (outcome.completed) {
+      this.done = true;
+      if (motionAllowed()) Juice.shake(this, 100, 0.003);
+      this.time.delayedCall(motionAllowed() ? 360 : 0, () => completeMission(this, getAimResult(this.state, this.missionId, this.cfg.stickerId)));
+    }
+  }
+
+  // P4-03 direct-touch: the hardened press model (down then up on the SAME target — not a raw
+  // pointerdown), so a stray drag never fires. A live target tap acts on THAT target directly.
+  private bindTargetPress(sprite: Phaser.GameObjects.Image, id: string): void {
+    sprite.setInteractive({ useHandCursor: true });
+    let armed = false;
+    sprite.on('pointerdown', () => (armed = true));
+    sprite.on('pointerout', () => (armed = false));
+    sprite.on('pointercancel', () => (armed = false));
+    sprite.on('pointerup', () => {
+      if (!armed) return;
+      armed = false;
+      this.tapTarget(id);
+    });
+  }
+
+  // Act directly on a tapped target via the engine's pure directHit, then play the EXACT same
+  // hit feedback as a normal in-cone Act (SFX/juice/cone update/completion) so the gesture collapses
+  // into the one every other mission uses. No-Fail: a tap on a dead/blocked target is a quiet no-op.
+  private tapTarget(id: string): void {
+    if (this.done || this.overlayBusy()) return;
+    const prevHealth = new Map(this.state.targets.map((t) => [t.id, t.health]));
+    const outcome = directHit(this.state, id);
+    if (!outcome.hit) return; // already cleared / unknown — harmless
+    this.state = outcome.state;
+
+    this.placeHero(true); // auto-aim turned the hero toward the tapped target
+    this.actVisual();
+    getSfx().play('spray-hit');
+    const sprite = this.targetSprites.get(id);
+    if (sprite) Juice.punch(this, sprite, 1.16, 160);
+    const cleared = (prevHealth.get(id) ?? 0) > 0 && this.state.targets.find((t) => t.id === id)?.health === 0;
+    const target = this.state.targets.find((t) => t.id === id);
+    if (target) Juice.burst(this, target.x, target.y - 16, { color: 0x9fe3ee, count: 7, radius: 30 });
+    if (cleared) getVoice().speak('correct');
 
     this.message.setText(this.state.lastMessage);
     this.renderTargets();
@@ -365,6 +425,10 @@ export class AimMissionScene extends Phaser.Scene {
   }
 
   private requestExit(): void {
-    confirmMissionExit(this, () => returnToTownMap(this));
+    // A warm spoken goodbye on the way back to town — no guilt, no streak pressure (P4-02).
+    confirmMissionExit(this, () => {
+      getVoice().speak('goodbye');
+      returnToTownMap(this);
+    });
   }
 }

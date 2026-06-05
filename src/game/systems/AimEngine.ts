@@ -106,6 +106,30 @@ export function act(state: AimState): AimOutcome {
   return { state: next, hit: true, completed: next.completed, assisted: false, autoPanned: false };
 }
 
+// Direct-touch (P4-03): the child TAPS a live target to act on it directly. Auto-aims the hero at
+// that target and clears one health point — the SAME engine truth a normal in-cone hit uses, so a
+// tapped target shrinks/clears with identical SFX/juice. A tap on a dead/unknown target (or an
+// already-complete mission) is a harmless no-op (No-Fail). Pure + immutable, like act().
+export function directHit(state: AimState, targetId: string): AimOutcome {
+  if (state.completed) return { state, hit: false, completed: true, assisted: false, autoPanned: false };
+  const index = state.targets.findIndex((t) => t.id === targetId && t.health > 0);
+  if (index < 0) return { state, hit: false, completed: state.completed, assisted: false, autoPanned: false };
+
+  const target = state.targets[index]!;
+  // Auto-aim the hero at the tapped target so the drawn cone/arrow stays coherent with the result.
+  const aim: AimVec = { x: stepSign(target.x - state.player.x), y: stepSign(target.y - state.player.y) };
+  const targets = state.targets.map((t, i) => (i === index ? { ...t, health: Math.max(0, t.health - 1) } : t));
+  const next = withCompletion({
+    ...state,
+    aim: aim.x === 0 && aim.y === 0 ? state.aim : aim,
+    targets,
+    acts: state.acts + 1,
+    hits: state.hits + 1,
+    lastMessage: targets[index]?.health === 0 ? 'Done — nicely helped!' : 'Almost — once more.',
+  });
+  return { state: next, hit: true, completed: next.completed, assisted: false, autoPanned: false };
+}
+
 // Step the hero one cell toward the nearest live target and aim at it, so a missed act never leaves
 // the child stranded with no path forward. Returns whether the player actually moved.
 function autoPan(state: AimState): { state: AimState; moved: boolean } {
