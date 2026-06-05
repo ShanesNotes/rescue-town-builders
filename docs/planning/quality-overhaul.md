@@ -149,3 +149,21 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   sheet, water/fire FX) documented in `docs/design/herogame-art-manifest.md` — review + wire next
   cycle. (build-lot.png is 988KB — optimize later.)
 - Gates: GREEN — typecheck clean, **181/181** unit, build ok, **e2e 6/6**. Snake screenshot verified.
+
+### Cycle 5 — Hero Game #4: Cluckle's Dream Catch + art review
+- New `systems/DreamCatch.ts` (pure no-fail catch/miss/scoring; 6 unit tests) +
+  `data/dreamCatchLevels.ts` (catch 8 dreams) + `scenes/DreamCatchScene.ts` (**Arcade** physics).
+  The dreaming hen drops sun (day) + moon (night) dream-orbs; a pointer-follow basket catches them and
+  each sorts into its day/night bin (a soft echo of Inverse Dream's opposites). A missed dream just
+  drifts off and another falls — only catching counts (no-fail).
+- Integration: reuses `missionId: 'inverse-dream'` + sticker 'inverse-dream-starter'. **Restructured
+  `sceneKeyForMission`** so a bespoke `MISSION_SCENE_KEYS` override wins over the generic archetype
+  engine — `inverse-dream` → DreamCatchScene while its match siblings stay on MatchMissionScene.
+  Updated the SceneNavigation unit test + the screenshots e2e (inverse-dream now plays Dream Catch via
+  a deterministic `dream.catch`). No secret to carry (Match scenes host none).
+- **Art review:** viewed all 9 Codex candidates. Wired only build-lot (Cycle 4). **Skipped the rest**
+  (fire-picnic-lot = flat downgrade w/ floating boxes; smiley fire-frames risk the *cheesy* critique
+  Shane flagged; brick-sheet/water FX only marginal vs generated). Quality-first: better future art
+  wants a more careful pass or PixelLab characters, not flat drop-ins. Manifest kept for reference.
+- Screenshot verified (Cluckle dreaming, basket, sun/moon bins — on-theme + magical).
+- Gates: GREEN — typecheck clean, **187/187** unit, build ok, **e2e 6/6**.

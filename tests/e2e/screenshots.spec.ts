@@ -85,15 +85,9 @@ test('captures every screen and stays error-free across a full playthrough', asy
   await scene(page, 'TownMapScene');
   await shot(page, '09-townmap-roadmap');
   await tap(page, 'townmap.mission.inverse-dream');
-  await scene(page, 'MatchMissionScene');
+  await scene(page, 'DreamCatchScene');
   await shot(page, '10-inverse-dream');
-  await clearMission(page, 'MatchMissionScene', [
-    'inverse-dream.target.moon',
-    'inverse-dream.target.cold',
-    'inverse-dream.target.small',
-    'inverse-dream.target.night',
-    'inverse-dream.target.quiet',
-  ], 60);
+  await clearMission(page, 'DreamCatchScene', ['dream.catch'], 30);
   await tap(page, 'mission.complete.back-to-map');
   await scene(page, 'TownMapScene');
 

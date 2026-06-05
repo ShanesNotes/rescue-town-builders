@@ -15,6 +15,7 @@ export const SCENE_KEYS = {
   brickTower: 'BrickTowerScene',
   fireFix: 'FireFixScene',
   emberBrigade: 'EmberBrigadeScene',
+  dreamCatch: 'DreamCatchScene',
   matchMission: 'MatchMissionScene',
   aimMission: 'AimMissionScene',
   journeyMission: 'JourneyMissionScene',
@@ -48,6 +49,9 @@ export const MISSION_SCENE_KEYS: Partial<Record<MissionId, SceneKey>> = {
   'house-builder': SCENE_KEYS.brickTower,
   // Ember's Fire Brigade (Arcade water-arc) replaces Fire Fix; same missionId/node/sticker.
   'fire-fix': SCENE_KEYS.emberBrigade,
+  // Cluckle's Dream Catch (Arcade catcher) captures the Inverse Dream match mission (a bespoke
+  // override of the generic match engine — see sceneKeyForMission).
+  'inverse-dream': SCENE_KEYS.dreamCatch,
 };
 
 const ARCHETYPE_SCENE_KEYS: Record<MissionArchetype, SceneKey> = {
@@ -57,8 +61,13 @@ const ARCHETYPE_SCENE_KEYS: Record<MissionArchetype, SceneKey> = {
 };
 
 export function sceneKeyForMission(missionId: MissionId, archetype?: MissionArchetype): SceneKey {
+  // A bespoke scene override wins over the generic archetype engine, so a hero-game rebuild can
+  // capture a single roadmap mission (e.g. inverse-dream -> Dream Catch) while its siblings stay
+  // on the shared Match engine.
+  const bespoke = MISSION_SCENE_KEYS[missionId];
+  if (bespoke) return bespoke;
   if (archetype) return ARCHETYPE_SCENE_KEYS[archetype];
-  return MISSION_SCENE_KEYS[missionId] ?? SCENE_KEYS.placeholderMission;
+  return SCENE_KEYS.placeholderMission;
 }
 
 export function startScene(scene: Phaser.Scene, key: SceneKey, data?: object): void {

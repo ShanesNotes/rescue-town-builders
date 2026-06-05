@@ -26,7 +26,12 @@ describe('SceneNavigation', () => {
       'house-builder': SCENE_KEYS.brickTower,
       // The fire-fix mission now routes to Ember's Fire Brigade (the Arcade water-arc rebuild).
       'fire-fix': SCENE_KEYS.emberBrigade,
+      // The inverse-dream match mission now routes to Cluckle's Dream Catch (Arcade catcher).
+      'inverse-dream': SCENE_KEYS.dreamCatch,
     });
     expect(sceneKeyForMission('fire-fix')).toBe(SCENE_KEYS.emberBrigade);
+    // A bespoke override wins over the archetype engine; a sibling match mission still uses it.
+    expect(sceneKeyForMission('inverse-dream', 'match')).toBe(SCENE_KEYS.dreamCatch);
+    expect(sceneKeyForMission('dream-statues', 'match')).toBe(SCENE_KEYS.matchMission);
   });
 });
