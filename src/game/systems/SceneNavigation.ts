@@ -50,11 +50,16 @@ export const MISSION_SCENE_KEYS: Partial<Record<MissionId, SceneKey>> = {
   'house-builder': SCENE_KEYS.brickTower,
   // Ember's Fire Brigade (Arcade water-arc) replaces Fire Fix; same missionId/node/sticker.
   'fire-fix': SCENE_KEYS.emberBrigade,
-  // Cluckle's Dream Catch (Arcade catcher) captures the Inverse Dream match mission (a bespoke
-  // override of the generic match engine — see sceneKeyForMission).
+  // Cluckle's Dream Catch (Arcade catcher) captures the Inverse Dream + Dream Statues match missions
+  // (a bespoke override of the generic match engine — see sceneKeyForMission; the scene reads its
+  // missionId to pick the backdrop + sticker).
   'inverse-dream': SCENE_KEYS.dreamCatch,
+  'dream-statues': SCENE_KEYS.dreamCatch,
   // Town Ride (momentum ride) captures the Scooter Roundup journey mission.
   'scooter-roundup': SCENE_KEYS.townRide,
+  // Rivet's Recycle Snake also captures the Recycled Inventions match mission (same scene key as
+  // recycling-run; the scene reads its missionId to pick the backdrop + sticker).
+  'recycled-inventions': SCENE_KEYS.recyclingRun,
 };
 
 const ARCHETYPE_SCENE_KEYS: Record<MissionArchetype, SceneKey> = {

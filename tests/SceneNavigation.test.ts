@@ -26,15 +26,20 @@ describe('SceneNavigation', () => {
       'house-builder': SCENE_KEYS.brickTower,
       // The fire-fix mission now routes to Ember's Fire Brigade (the Arcade water-arc rebuild).
       'fire-fix': SCENE_KEYS.emberBrigade,
-      // The inverse-dream match mission now routes to Cluckle's Dream Catch (Arcade catcher).
+      // Dream Catch captures inverse-dream + dream-statues (Arcade catcher).
       'inverse-dream': SCENE_KEYS.dreamCatch,
-      // The scooter-roundup journey mission now routes to Town Ride (momentum ride).
+      'dream-statues': SCENE_KEYS.dreamCatch,
+      // Town Ride captures the scooter-roundup journey mission.
       'scooter-roundup': SCENE_KEYS.townRide,
+      // Recycle Snake also captures recycled-inventions (same scene key as recycling-run).
+      'recycled-inventions': SCENE_KEYS.recyclingRun,
     });
     expect(sceneKeyForMission('fire-fix')).toBe(SCENE_KEYS.emberBrigade);
-    // A bespoke override wins over the archetype engine; a sibling mission still uses it.
+    // A bespoke override wins over the archetype engine; an un-captured sibling still uses it.
     expect(sceneKeyForMission('inverse-dream', 'match')).toBe(SCENE_KEYS.dreamCatch);
-    expect(sceneKeyForMission('dream-statues', 'match')).toBe(SCENE_KEYS.matchMission);
+    expect(sceneKeyForMission('dream-statues', 'match')).toBe(SCENE_KEYS.dreamCatch);
+    expect(sceneKeyForMission('recycled-inventions', 'match')).toBe(SCENE_KEYS.recyclingRun);
+    expect(sceneKeyForMission('bread-rush', 'match')).toBe(SCENE_KEYS.matchMission);
     expect(sceneKeyForMission('scooter-roundup', 'journey')).toBe(SCENE_KEYS.townRide);
     expect(sceneKeyForMission('bike-explorer', 'journey')).toBe(SCENE_KEYS.journeyMission);
   });

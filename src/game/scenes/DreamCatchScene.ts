@@ -18,13 +18,21 @@ import {
 } from '../systems/DreamCatch';
 import { addIconButton } from '../ui/Button';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
+import type { MissionId } from '../types';
 
 // Cluckle's Dream Catch — a no-fail Arcade catcher (replaces drag-to-match Inverse Dream). The
 // dreaming hen drops sun (day) and moon (night) dream-orbs; slide the basket to catch them and each
 // sorts into its day/night bin. A missed dream just drifts off and another falls — only catching
-// counts. Keeps missionId 'inverse-dream' (DreamCatch.ts) but is its own scene (DreamCatchScene).
+// counts. Serves the dream missions (inverse-dream + the captured dream-statues) — it reads its
+// launching missionId to pick the backdrop + sticker.
 
 type Drop = Phaser.Physics.Arcade.Image;
+
+// Per-mission backdrop (the captured dream missions each keep their own town location).
+const DREAM_BACKDROP: Partial<Record<MissionId, string>> = {
+  'inverse-dream': 'hl.bg.inverseDream',
+  'dream-statues': 'hl.bg.dreamStatues',
+};
 
 const BASKET_Y = 470;
 const BASKET_HALF = 58;
@@ -44,10 +52,15 @@ export class DreamCatchScene extends Phaser.Scene {
   private roundIndex = 0;
   private fallSpeed = dreamFallSpeeds[0]!;
   private pointerX: number | null = null;
+  private missionId: MissionId = 'inverse-dream';
   private done = false;
 
   constructor() {
     super({ key: 'DreamCatchScene', physics: { default: 'arcade', arcade: { gravity: { x: 0, y: 240 } } } });
+  }
+
+  init(data: { missionId?: MissionId }): void {
+    this.missionId = data.missionId ?? 'inverse-dream';
   }
 
   create(): void {
@@ -74,7 +87,7 @@ export class DreamCatchScene extends Phaser.Scene {
 
     this.basket = this.add.image(480, BASKET_Y, hasTexture(this, 'hl.prop.rescueBasket') ? 'hl.prop.rescueBasket' : '__basket').setDisplaySize(116, 80).setDepth(20);
 
-    addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => this.requestExit(), testId: 'inverse-dream.back-to-map' }).setDepth(40);
+    addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => this.requestExit(), testId: `${this.missionId}.back-to-map` }).setDepth(40);
 
     registerE2EButton({ testId: 'dream.catch', label: 'catch dream', sceneKey: this.scene.key, press: () => this.e2eCatch() });
 
@@ -116,7 +129,8 @@ export class DreamCatchScene extends Phaser.Scene {
   }
 
   private paintWorld(): void {
-    this.add.image(480, 270, hasTexture(this, 'hl.bg.inverseDream') ? 'hl.bg.inverseDream' : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
+    const bg = DREAM_BACKDROP[this.missionId] ?? 'hl.bg.inverseDream';
+    this.add.image(480, 270, hasTexture(this, bg) ? bg : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
     this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.12).setDepth(1);
   }
 
@@ -290,7 +304,7 @@ export class DreamCatchScene extends Phaser.Scene {
     Juice.confetti(this, 28);
     if (motionAllowed()) Juice.punch(this, this.cluckle, 1.18, 220);
     getVoice().speak('mission-complete');
-    this.time.delayedCall(motionAllowed() ? 520 : 0, () => completeMission(this, getDreamCatchResult(this.state)));
+    this.time.delayedCall(motionAllowed() ? 520 : 0, () => completeMission(this, getDreamCatchResult(this.state, this.missionId)));
   }
 
   private overlayBusy(): boolean {

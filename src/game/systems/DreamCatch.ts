@@ -1,4 +1,4 @@
-import type { MissionResult } from '../types';
+import type { MissionId, MissionResult } from '../types';
 import { clampStars } from './StarScoring';
 
 // Pure, Phaser-free logic for Cluckle's Dream Catch — the no-fail Arcade catcher that replaces the
@@ -44,15 +44,17 @@ export function dreamCatchProgress(state: DreamCatchState): number {
   return Math.max(0, Math.min(1, state.caught / state.goal));
 }
 
-export function getDreamCatchResult(state: DreamCatchState): MissionResult {
+// Parameterized by the launching missionId so one scene can serve several dream missions (e.g.
+// inverse-dream + dream-statues), each unlocking its own '<missionId>-starter' sticker.
+export function getDreamCatchResult(state: DreamCatchState, missionId: MissionId = 'inverse-dream'): MissionResult {
   // No-fail and gentle: a tidy catch is three stars; lots of misses still earns at least one.
   const stars = clampStars(3 - Math.floor(state.missed / 4));
   return {
-    missionId: 'inverse-dream',
+    missionId,
     completed: state.completed,
     stars,
     score: state.completed ? Math.max(100, 1000 - state.missed * 50) : 0,
-    stickersUnlocked: state.completed ? ['inverse-dream-starter'] : [],
+    stickersUnlocked: state.completed ? [`${missionId}-starter`] : [],
     stats: { caught: state.caught, missed: state.missed, goal: state.goal },
   };
 }

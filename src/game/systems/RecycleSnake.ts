@@ -1,4 +1,4 @@
-import type { MissionResult } from '../types';
+import type { MissionId, MissionResult } from '../types';
 import { clampStars } from './StarScoring';
 
 // Pure, Phaser-free logic for Rivet's Recycle Snake — the no-fail Snake-like that replaces the old
@@ -119,14 +119,16 @@ export function collectItemById(state: RecycleSnakeState, itemId: string): Recyc
   };
 }
 
-export function getRecycleSnakeResult(state: RecycleSnakeState): MissionResult {
+// Parameterized by the launching missionId so one scene can serve several recycling missions (e.g.
+// recycling-run + recycled-inventions), each unlocking its own '<missionId>-starter' sticker.
+export function getRecycleSnakeResult(state: RecycleSnakeState, missionId: MissionId = 'recycling-run'): MissionResult {
   return {
-    missionId: 'recycling-run',
+    missionId,
     completed: state.completed,
     // A gentle no-fail collect-a-thon: every finish is a proud three stars.
     stars: clampStars(3),
     score: state.completed ? Math.max(100, 1000 - state.steps * 4) : 0,
-    stickersUnlocked: state.completed ? ['recycling-run-starter'] : [],
+    stickersUnlocked: state.completed ? [`${missionId}-starter`] : [],
     stats: { collected: state.collected.length, total: state.total, steps: state.steps },
   };
 }

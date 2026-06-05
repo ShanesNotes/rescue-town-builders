@@ -250,3 +250,17 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   goo-cleanup, bike-explorer, safety-lights, treasure-boat) into the hero games — needs the bespoke
   scenes to read their launching `missionId` (check how TownMapScene starts a mission; MatchMissionScene
   uses `init({missionId})`) so one scene can serve several missions as themed rounds/skins.
+
+### Cycle 12 — Consolidation: capture dream-statues + recycled-inventions into hero games
+- **Launch mechanics confirmed:** `TownMapScene` always passes `{ missionId }` to the scene it starts
+  (line 352), so a bespoke hero scene only needs `init(data)` to know which mission launched it.
+- **Captured `dream-statues` → DreamCatchScene** and **`recycled-inventions` → RecycleSnakeScene** via
+  `MISSION_SCENE_KEYS` overrides. Each scene now reads `init({missionId})` and picks its backdrop
+  (per-mission map) + sticker accordingly; `getDreamCatchResult`/`getRecycleSnakeResult` are
+  parameterized by missionId (default keeps the original), so each captured mission unlocks its own
+  `<missionId>-starter` sticker. Match scenes host no secrets (nothing to carry).
+- Updated the SceneNavigation unit test. No e2e spec changes needed (those two weren't e2e-played; the
+  hearthlight-assets e2e already proves both new backdrops load). Hero games now serve **8 of 13
+  missions**. Still on the shared engines: bread-rush (Match); frog-flight/goo-cleanup/asteroid-blaster
+  (Aim); bike-explorer/safety-lights/treasure-boat (Journey) — capture next.
+- Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.

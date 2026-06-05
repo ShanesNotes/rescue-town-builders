@@ -19,6 +19,7 @@ import {
 } from '../systems/RecycleSnake';
 import { addIconButton } from '../ui/Button';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
+import type { MissionId } from '../types';
 
 // Rivet's Recycle Snake — a no-fail Snake-like (replaces the drag-to-sort Recycling Run). Point where
 // Rivet should drive; his cart heads there on a grid, scooping up recyclables and growing a trailing
@@ -54,6 +55,11 @@ const CATEGORY_BIN: Record<string, string> = {
   plastic: 'hl.prop.binPlastic',
   metal: 'hl.prop.binMetal',
 };
+// Per-mission backdrop (the captured recycling missions each keep their own town location).
+const SNAKE_BACKDROP: Partial<Record<MissionId, string>> = {
+  'recycling-run': 'hl.bg.recycle',
+  'recycled-inventions': 'hl.bg.recycledInventions',
+};
 
 export class RecycleSnakeScene extends Phaser.Scene {
   private state!: RecycleSnakeState;
@@ -63,11 +69,16 @@ export class RecycleSnakeScene extends Phaser.Scene {
   private pips: Phaser.GameObjects.Arc[] = [];
   private roundDots: Phaser.GameObjects.Arc[] = [];
   private roundIndex = 0;
+  private missionId: MissionId = 'recycling-run';
   private pointer: { x: number; y: number } | null = null;
   private done = false;
 
   constructor() {
     super('RecyclingRunScene');
+  }
+
+  init(data: { missionId?: MissionId }): void {
+    this.missionId = data.missionId ?? 'recycling-run';
   }
 
   private cx(gx: number): number {
@@ -121,7 +132,8 @@ export class RecycleSnakeScene extends Phaser.Scene {
   }
 
   private paintWorld(): void {
-    this.add.image(480, 270, hasTexture(this, 'hl.bg.recycle') ? 'hl.bg.recycle' : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
+    const bg = SNAKE_BACKDROP[this.missionId] ?? 'hl.bg.recycle';
+    this.add.image(480, 270, hasTexture(this, bg) ? bg : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
     this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.12).setDepth(1);
     // A soft play-field panel so the grid reads as "drive here".
     this.add.rectangle(GX0 + (COLS * CELL) / 2, GY0 + (ROWS * CELL) / 2, COLS * CELL + 18, ROWS * CELL + 18, 0x0e1a2e, 0.28).setDepth(2);
@@ -320,7 +332,7 @@ export class RecycleSnakeScene extends Phaser.Scene {
     Juice.confetti(this, 30);
     if (motionAllowed()) Juice.punch(this, this.head, 1.3, 200);
     getVoice().speak('mission-complete');
-    this.time.delayedCall(motionAllowed() ? 520 : 0, () => completeMission(this, getRecycleSnakeResult(this.state)));
+    this.time.delayedCall(motionAllowed() ? 520 : 0, () => completeMission(this, getRecycleSnakeResult(this.state, this.missionId)));
   }
 
   private overlayBusy(): boolean {
