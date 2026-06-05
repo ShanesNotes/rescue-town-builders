@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { recycleSnakeLevels } from '../data/recycleSnakeLevels';
+import { recycleSnakeTuning, defaultRecycleSnakeYards } from '../data/recycleSnakeLevels';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
@@ -26,8 +26,8 @@ import type { MissionId } from '../types';
 // load. Collect them all to win. No death: walls wrap and the tail is harmless. Keeps the Phaser key
 // 'RecyclingRunScene' + the recycling.* testIds so the town map, sticker, and e2e all carry over.
 
-const COLS = recycleSnakeLevels[0]!.cols;
-const ROWS = recycleSnakeLevels[0]!.rows;
+const COLS = defaultRecycleSnakeYards[0]!.cols;
+const ROWS = defaultRecycleSnakeYards[0]!.rows;
 const CELL = 58;
 const GX0 = 130;
 const GY0 = 118;
@@ -70,6 +70,7 @@ export class RecycleSnakeScene extends Phaser.Scene {
   private roundDots: Phaser.GameObjects.Arc[] = [];
   private roundIndex = 0;
   private missionId: MissionId = 'recycling-run';
+  private yards = defaultRecycleSnakeYards;
   private pointer: { x: number; y: number } | null = null;
   private done = false;
 
@@ -91,7 +92,8 @@ export class RecycleSnakeScene extends Phaser.Scene {
   create(): void {
     fadeInScene(this);
     this.roundIndex = 0;
-    this.state = createRecycleSnakeState(recycleSnakeLevels[0]!);
+    this.yards = recycleSnakeTuning[this.missionId] ?? defaultRecycleSnakeYards;
+    this.state = createRecycleSnakeState(this.yards[0]!);
     this.tail = [];
     this.itemSprites = new Map();
     this.pips = [];
@@ -159,7 +161,7 @@ export class RecycleSnakeScene extends Phaser.Scene {
 
   // One dot per yard (top-right) — the child sees how many yards are left to tidy.
   private buildRoundDots(): void {
-    for (let i = 0; i < recycleSnakeLevels.length; i += 1) {
+    for (let i = 0; i < this.yards.length; i += 1) {
       this.roundDots.push(this.add.circle(812 + i * 24, 44, 8, 0x3a4a66).setStrokeStyle(2, 0x1b2a41).setDepth(30));
     }
     this.updateRoundDots();
@@ -297,7 +299,7 @@ export class RecycleSnakeScene extends Phaser.Scene {
     this.done = true;
     this.roundIndex += 1;
     this.updateRoundDots();
-    if (this.roundIndex < recycleSnakeLevels.length) {
+    if (this.roundIndex < this.yards.length) {
       if (isE2EEnabled()) {
         this.startYard();
         return;
@@ -313,7 +315,7 @@ export class RecycleSnakeScene extends Phaser.Scene {
   }
 
   private startYard(): void {
-    this.state = createRecycleSnakeState(recycleSnakeLevels[this.roundIndex]!);
+    this.state = createRecycleSnakeState(this.yards[this.roundIndex]!);
     this.clearItems();
     for (const t of this.tail) t.destroy();
     this.tail = [];

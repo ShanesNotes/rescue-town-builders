@@ -106,6 +106,11 @@ console errors**):
 asteroid-blaster (Aim) + bread-rush (Match). **The two remaining steps are human:** merge
 `continuous-refinement` → `main`, and **Willem's tablet playtest** (the true feel gate for the physics).
 
+> **As of Cycle 20 the overhaul is COMPLETE** — structural rebuild + consolidation + cleanup + docs +
+> asset optimization + per-mission-variety polish, all green (168 unit, e2e 8/8). Further loop cycles
+> are minor/optional polish; the loop is safe to stop. The two outstanding steps are human (merge +
+> Willem playtest).
+
 ## Cycle ledger (append-only — newest at bottom)
 
 ### Cycle 1 — foundation: music bug + juice kit
@@ -362,4 +367,15 @@ asteroid-blaster (Aim) + bread-rush (Match). **The two remaining steps are human
   - **Dream Catch (2):** inverse-dream (5/6/7, gentle) vs dream-statues (6/7/8, faster falls, moon-heavy).
 - Deterministic E2E totals stay under the loop counts (dream-statues 21, bike 18 < 30). Pure logic
   unchanged, so unit tests untouched.
+- Gates: GREEN — typecheck clean, **168/168** unit, build ok, **e2e 8/8**.
+
+### Cycle 20 — Polish: Recycle Snake per-mission yards + final QA; overhaul COMPLETE
+- Finished the per-mission-variety theme: `recycleSnakeTuning` per-missionId yard sets (grid kept
+  constant so the module COLS/ROWS consts stay valid). recycling-run = balanced all-category spread
+  (6/7/8); recycled-inventions = Reed's parts run, metal/plastic-biased with its own layouts (5/7/8).
+  Scene picks `tuning[missionId] ?? default` like Town Ride/Dream Catch. E2E totals < loop counts.
+- **All multi-mission hero games now play distinctly per mission** (Ember fire/goo by skin; Snake +
+  Dream Catch + Town Ride by tuning).
+- Final QA sweep: all gates GREEN (typecheck, **168** unit, build, **e2e 8/8**), clean working tree,
+  overhaul summary verified accurate. **The overhaul is complete; remaining steps are human.**
 - Gates: GREEN — typecheck clean, **168/168** unit, build ok, **e2e 8/8**.
