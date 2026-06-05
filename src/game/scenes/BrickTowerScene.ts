@@ -39,8 +39,12 @@ export class BrickTowerScene extends Phaser.Scene {
   private state!: BrickTowerState;
   private preview!: Phaser.GameObjects.Image;
   private active = new Set<MatterImg>();
+  private allBricks = new Set<MatterImg>(); // every spawned brick, so a round can clear its tower
   private pips: Phaser.GameObjects.Arc[] = [];
+  private roundDots: Phaser.GameObjects.Arc[] = [];
   private ribbon!: Phaser.GameObjects.Rectangle;
+  private ribbonMarker?: Phaser.GameObjects.Image;
+  private roundIndex = 0;
   private brickIndex = 0;
   private done = false;
   private dropArmed = true; // brief lock so one tap drops exactly one brick
@@ -57,10 +61,13 @@ export class BrickTowerScene extends Phaser.Scene {
 
   create(): void {
     fadeInScene(this);
+    this.roundIndex = 0;
     this.level = brickTowerLevels[0]!;
     this.state = createBrickTowerState(this.level);
     this.active = new Set();
+    this.allBricks = new Set();
     this.pips = [];
+    this.roundDots = [];
     this.brickIndex = 0;
     this.done = false;
     this.dropArmed = true;
@@ -69,6 +76,7 @@ export class BrickTowerScene extends Phaser.Scene {
     this.paintWorld();
     this.buildStaticBodies();
     this.buildPips();
+    this.buildRoundDots();
     this.buildPreview();
 
     // Brick watches, planted on the right (kept out of the column).
@@ -132,7 +140,7 @@ export class BrickTowerScene extends Phaser.Scene {
 
     // The target ribbon — the obvious "reach me" line.
     this.ribbon = this.add.rectangle((WALL_L + WALL_R) / 2, this.level.targetY, WALL_R - WALL_L + 30, 8, 0xffd98a, 0.9).setDepth(4);
-    this.add.image(WALL_R + 4, this.level.targetY, hasTexture(this, 'hl.prop.firefly') ? 'hl.prop.firefly' : '__brick3').setDisplaySize(20, 20).setDepth(5).setAlpha(0.9);
+    this.ribbonMarker = this.add.image(WALL_R + 4, this.level.targetY, hasTexture(this, 'hl.prop.firefly') ? 'hl.prop.firefly' : '__brick3').setDisplaySize(20, 20).setDepth(5).setAlpha(0.9);
     if (motionAllowed()) {
       this.tweens.add({ targets: this.ribbon, alpha: 0.5, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
@@ -152,6 +160,23 @@ export class BrickTowerScene extends Phaser.Scene {
     for (let i = 0; i < total; i += 1) {
       this.pips.push(this.add.circle(startX + i * gap, 40, 7, 0x3a4a66).setStrokeStyle(2, 0x1b2a41).setDepth(20));
     }
+  }
+
+  // Three little house icons (one per tower/round) up top-right — the child sees how many towers
+  // are left to build before the mission is done.
+  private buildRoundDots(): void {
+    const total = brickTowerLevels.length;
+    for (let i = 0; i < total; i += 1) {
+      this.roundDots.push(this.add.circle(812 + i * 24, 40, 8, 0x3a4a66).setStrokeStyle(2, 0x1b2a41).setDepth(20));
+    }
+    this.updateRoundDots();
+  }
+
+  private updateRoundDots(): void {
+    this.roundDots.forEach((dot, i) => {
+      const built = i < this.roundIndex;
+      dot.setFillStyle(built ? 0xffc857 : i === this.roundIndex ? 0x8a6a3c : 0x3a4a66);
+    });
   }
 
   private buildPreview(): void {
@@ -219,6 +244,7 @@ export class BrickTowerScene extends Phaser.Scene {
     brick.setVelocity(0, 4);
     brick.setDepth(15);
     this.active.add(brick);
+    this.allBricks.add(brick);
     getSfx().play('tap');
     // Refresh the held preview to the next colour.
     this.preview.setTexture(`__brick${this.brickIndex % BRICK_TINTS.length}`);
@@ -244,7 +270,50 @@ export class BrickTowerScene extends Phaser.Scene {
   private applySettle(topY: number): void {
     this.state = settleBrick(this.state, topY);
     this.updatePips();
-    if (this.state.completed && !this.done) this.win();
+    if (this.state.completed && !this.done) this.roundComplete();
+  }
+
+  // A tower finished. If more towers remain, clear it and raise the ribbon for the next round;
+  // otherwise cap it with a roof and complete the mission. `done` blocks settles during the swap.
+  private roundComplete(): void {
+    this.done = true;
+    for (const brick of [...this.active]) {
+      brick.setStatic(true);
+      this.active.delete(brick);
+    }
+    this.roundIndex += 1;
+    this.updateRoundDots();
+    if (this.roundIndex < brickTowerLevels.length) {
+      // E2E advances synchronously so the deterministic press budget is never eaten by the
+      // celebration delay (the harness can't see a between-rounds pause).
+      if (isE2EEnabled()) {
+        this.startRound();
+        return;
+      }
+      getSfx().play('correct');
+      Juice.hitStop(this, 80);
+      Juice.confetti(this, 16);
+      this.time.delayedCall(motionAllowed() ? 620 : 0, () => this.startRound());
+    } else {
+      this.finalWin();
+    }
+  }
+
+  private startRound(): void {
+    this.level = brickTowerLevels[this.roundIndex]!;
+    this.state = createBrickTowerState(this.level);
+    for (const brick of [...this.allBricks]) brick.destroy();
+    this.allBricks.clear();
+    this.active.clear();
+    // Raise the ribbon to the new, taller target.
+    this.tweens.killTweensOf(this.ribbon);
+    this.ribbon.setPosition((WALL_L + WALL_R) / 2, this.level.targetY).setAlpha(0.9);
+    this.ribbonMarker?.setY(this.level.targetY);
+    if (motionAllowed()) this.tweens.add({ targets: this.ribbon, alpha: 0.5, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.updatePips();
+    this.preview.setPosition(480, PREVIEW_Y);
+    this.done = false;
+    this.dropArmed = true;
   }
 
   private landFx(brick: MatterImg): void {
@@ -263,12 +332,8 @@ export class BrickTowerScene extends Phaser.Scene {
     });
   }
 
-  private win(): void {
+  private finalWin(): void {
     this.done = true;
-    for (const brick of [...this.active]) {
-      brick.setStatic(true);
-      this.active.delete(brick);
-    }
     getSfx().play('correct');
     Juice.hitStop(this, 90);
     Juice.shake(this, 140, 0.004);

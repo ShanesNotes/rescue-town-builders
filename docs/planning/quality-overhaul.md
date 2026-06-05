@@ -200,3 +200,17 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   dep for one asset. TODO: compress build-lot.png (988KB → <300KB) when a tool is on hand.
 - Cohesion: per-hero pip accent colours are intentional (each hero's theme) — left as-is.
 - Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.
+
+### Cycle 8 — Depth: Brick's Tower multi-round (3 progressive towers)
+- `data/brickTowerLevels.ts` is now **3 levels** (ribbon climbs 252 → 220 → 190; constant 6-brick
+  floor + brick size so pips/textures don't rebuild). The scene plays through all three towers, then
+  caps with the roof + completes — depth without ever a fail.
+- Scene: tracks `allBricks` (to clear a finished tower), `roundIndex`, and 3 **round dots** (top-right)
+  showing towers-to-go. `roundComplete()` freezes + clears the tower and raises the ribbon **in place**
+  (no `scene.restart` — per the render-in-place rule); `finalWin()` caps + completes.
+- **Lesson (important for the other hero games' multi-round work):** `motionAllowed()` is TRUE in
+  headless Playwright (no reduced-motion), so a celebration *delay* gated on it ate the deterministic
+  e2e's press budget (dozens of no-op presses during the 620ms pause → timeout). Fix: gate
+  between-rounds timing on **`isE2EEnabled()`** and advance rounds **synchronously** in E2E. Apply the
+  same pattern when adding rounds to Ember/Snake/Catch/Ride.
+- Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**. Round dots screenshot-verified.
