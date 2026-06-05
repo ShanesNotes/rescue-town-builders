@@ -113,8 +113,10 @@ export class BrickTowerScene extends Phaser.Scene {
   }
 
   private paintWorld(): void {
-    this.add.image(480, 270, hasTexture(this, 'hl.bg.build') ? 'hl.bg.build' : 'hl.bg.town').setDisplaySize(960, 540).setDepth(0);
-    this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.18).setDepth(1);
+    const bg = hasTexture(this, 'hl.bg.buildBright') ? 'hl.bg.buildBright' : hasTexture(this, 'hl.bg.build') ? 'hl.bg.build' : 'hl.bg.town';
+    this.add.image(480, 270, bg).setDisplaySize(960, 540).setDepth(0);
+    // The bright daytime lot needs almost no darkening (the old dusk art wanted 0.18).
+    this.add.rectangle(480, 270, 960, 540, 0x101b2e, 0.05).setDepth(1);
 
     // Visible guide rails so the column reads as "drop here".
     [WALL_L, WALL_R].forEach((x) => {

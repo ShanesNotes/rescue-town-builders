@@ -13,7 +13,7 @@ import { ParentSettingsScene } from './scenes/ParentSettingsScene';
 import { PlaceholderMissionScene } from './scenes/PlaceholderMissionScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { ProfileScene } from './scenes/ProfileScene';
-import { RecyclingRunScene } from './scenes/RecyclingRunScene';
+import { RecycleSnakeScene } from './scenes/RecycleSnakeScene';
 import { StartScene } from './scenes/StartScene';
 import { StickerBookScene } from './scenes/StickerBookScene';
 import { TownMapScene } from './scenes/TownMapScene';
@@ -46,7 +46,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     TownMapScene,
     ParentSettingsGateScene,
     ParentSettingsScene,
-    RecyclingRunScene,
+    RecycleSnakeScene,
     HouseBuilderScene,
     BrickTowerScene,
     FireFixScene,

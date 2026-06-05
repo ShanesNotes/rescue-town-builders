@@ -25,6 +25,8 @@ export const HEARTHLIGHT_IMAGE_ASSETS = [
   { key: 'hl.bg.trees', rel: 'bg/mid-trees.png', loadType: 'image' },
   { key: 'hl.bg.recycle', rel: 'bg/recycle-yard.png', loadType: 'image' },
   { key: 'hl.bg.build', rel: 'bg/construction-lot.png', loadType: 'image' },
+  // Arcade-bright daytime construction lot (Codex image_gen, codex/pro-assets) for Brick's Tower.
+  { key: 'hl.bg.buildBright', rel: 'v2/build-lot.png', loadType: 'image' },
   { key: 'hl.bg.fire', rel: 'bg/picnic-fire.png', loadType: 'image' },
   { key: 'hl.bg.frogFlight', rel: 'bg/frog-flight.png', loadType: 'image' },
   { key: 'hl.bg.scooterRoundup', rel: 'bg/scooter-roundup.png', loadType: 'image' },

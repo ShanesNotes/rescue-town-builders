@@ -131,3 +131,21 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   Zero console errors across the full e2e playthrough.
 - Gates: GREEN — typecheck clean, **173/173** unit, build ok, **e2e 6/6**.
 - Old FireFixScene now unreachable (kept in scene list; retire in cleanup cycle).
+
+### Cycle 4 — Hero Game #3: Rivet's Recycle Snake + first art harvest
+- New `systems/RecycleSnake.ts` (pure no-fail Snake logic — grid move, wall-wrap, pick-up-to-grow,
+  reverse-guard; 8 unit tests) + `data/recycleSnakeLevels.ts` (12×6 yard, 8 recyclables) +
+  `scenes/RecycleSnakeScene.ts`. **Chase-the-pointer steering** (point where Rivet should drive —
+  more intuitive for a 6-yo than swipes); cart grows a colour-coded tail of collected items; 4 bins
+  + real item sprites. **No death**: walls wrap, self-overlap harmless — collecting is the only goal.
+- Integration via **minimal churn**: the new scene KEEPS the Phaser key `RecyclingRunScene` + the
+  `recycling.*` testIds, so there are
+  zero changes to navigation, the SceneNavigation unit test, or the 3 e2e specs (browser-smoke,
+  no-fail-exit, screenshots all still pass unedited). Old RecyclingRunScene dropped from the scene
+  list (file kept; retire later). Deterministic E2E collect on the `recycling.choice.N` buttons.
+- **Art harvest (Codex `image_gen`, codex/pro-assets):** wired the brighter daytime **build-lot.png**
+  as `hl.bg.buildBright` → Brick's Tower (dropped its dark overlay 0.18→0.05). Screenshot-verified:
+  Brick's Tower now reads as a sunny arcade toy. Codex also staged 8 more candidates (fire lot, brick
+  sheet, water/fire FX) documented in `docs/design/herogame-art-manifest.md` — review + wire next
+  cycle. (build-lot.png is 988KB — optimize later.)
+- Gates: GREEN — typecheck clean, **181/181** unit, build ok, **e2e 6/6**. Snake screenshot verified.
