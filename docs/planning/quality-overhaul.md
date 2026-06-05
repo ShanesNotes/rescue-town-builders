@@ -214,3 +214,13 @@ Check `pixellab balance` before every paid batch; log spend here. Dry-run first,
   between-rounds timing on **`isE2EEnabled()`** and advance rounds **synchronously** in E2E. Apply the
   same pattern when adding rounds to Ember/Snake/Catch/Ride.
 - Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**. Round dots screenshot-verified.
+
+### Cycle 9 — Depth: Ember's Fire Brigade multi-wave (3 waves)
+- `data/fireBrigadeLevels.ts` → `fireBrigadeWaves`: 3 waves at the same 5 spots, hotter each time
+  (heat 2 → 3 → 4, total 45). The scene re-lights the next wave **in place** (no scene.restart);
+  added wave round-dots + a reusable `flicker()` helper. Fixed `renderFire` to reset the flame
+  texture on re-light (a re-lit fire was showing the doused-embers texture).
+- Applied the **Cycle-8 pattern**: `waveComplete()` advances synchronously under `isE2EEnabled()`
+  (else a celebration delay eats the deterministic spray budget); bumped the e2e fire loops 40 → 70
+  (browser-smoke + screenshots) since 3 waves total 45 deterministic presses.
+- Gates: GREEN — typecheck clean, **169/169** unit, build ok, **e2e 7/7**.

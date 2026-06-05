@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { fireBrigadeLevel } from '../data/fireBrigadeLevels';
+import { fireBrigadeWaves } from '../data/fireBrigadeLevels';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
@@ -42,9 +42,11 @@ export class EmberBrigadeScene extends Phaser.Scene {
   private fireSmoke = new Map<string, Phaser.GameObjects.Image>();
   private drops = new Set<Drop>();
   private pips: Phaser.GameObjects.Arc[] = [];
+  private roundDots: Phaser.GameObjects.Arc[] = [];
   private nozzle!: Phaser.GameObjects.Image;
   private lastSprayAt = 0;
   private hitsAtLastTick = 0;
+  private waveIndex = 0;
   private done = false;
 
   constructor() {
@@ -56,11 +58,13 @@ export class EmberBrigadeScene extends Phaser.Scene {
 
   create(): void {
     fadeInScene(this);
-    this.state = createFireBrigadeState(fireBrigadeLevel);
+    this.waveIndex = 0;
+    this.state = createFireBrigadeState(fireBrigadeWaves[0]!);
     this.fireSprites = new Map();
     this.fireSmoke = new Map();
     this.drops = new Set();
     this.pips = [];
+    this.roundDots = [];
     this.lastSprayAt = 0;
     this.hitsAtLastTick = 0;
     this.done = false;
@@ -68,6 +72,7 @@ export class EmberBrigadeScene extends Phaser.Scene {
     this.makeDropTexture();
     this.paintWorld();
     this.buildPips();
+    this.buildRoundDots();
     this.buildFires();
     this.buildEmber();
 
@@ -131,6 +136,26 @@ export class EmberBrigadeScene extends Phaser.Scene {
     }
   }
 
+  // One dot per wave (top-right) — the child sees how many waves of fires are left.
+  private buildRoundDots(): void {
+    for (let i = 0; i < fireBrigadeWaves.length; i += 1) {
+      this.roundDots.push(this.add.circle(812 + i * 24, 40, 8, 0x6b3a2a).setStrokeStyle(2, 0x1b2a41).setDepth(20));
+    }
+    this.updateRoundDots();
+  }
+
+  private updateRoundDots(): void {
+    this.roundDots.forEach((dot, i) => {
+      dot.setFillStyle(i < this.waveIndex ? 0x6fd3e0 : i === this.waveIndex ? 0x8a5a3c : 0x6b3a2a);
+    });
+  }
+
+  private flicker(flame: Phaser.GameObjects.Image): void {
+    if (!motionAllowed()) return;
+    this.tweens.killTweensOf(flame);
+    this.tweens.add({ targets: flame, scaleX: flame.scaleX * 1.08, scaleY: flame.scaleY * 0.94, duration: 220 + Math.random() * 120, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+  }
+
   private buildFires(): void {
     for (const fire of this.state.fires) {
       const smoke = this.add.image(fire.x, fire.y - 36, hasTexture(this, 'hl.prop.smokeWisp') ? 'hl.prop.smokeWisp' : '__drop').setDisplaySize(40, 48).setDepth(11).setAlpha(0.45);
@@ -158,6 +183,8 @@ export class EmberBrigadeScene extends Phaser.Scene {
     }
     const t = fire.heat / fire.maxHeat;
     const size = 50 + t * 58;
+    // Reset to the flame texture (a re-lit fire in a new wave may be showing the doused embers).
+    flame.setTexture(hasTexture(this, 'hl.prop.campfire') ? 'hl.prop.campfire' : flame.texture.key);
     flame.setDisplaySize(size, size).clearTint().setAlpha(1);
     flame.setTint(t > 0.6 ? 0xffb24a : 0xffd9a0);
   }
@@ -253,7 +280,7 @@ export class EmberBrigadeScene extends Phaser.Scene {
       // A satisfied steam puff when a fire finally rests.
       Juice.burst(this, x, y - 20, { color: 0xe6f7fb, count: 10, radius: 40 });
     }
-    if (this.state.completed && !this.done) this.win();
+    if (this.state.completed && !this.done) this.waveComplete();
   }
 
   private onSprayButton(): void {
@@ -266,7 +293,7 @@ export class EmberBrigadeScene extends Phaser.Scene {
       this.state = countSpray(this.state);
       for (const f of this.state.fires) this.renderFire(f.id);
       this.updatePips();
-      if (this.state.completed && !this.done) this.win();
+      if (this.state.completed && !this.done) this.waveComplete();
       return;
     }
     const target = nearestLiveFire(this.state, 480, 280);
@@ -295,7 +322,7 @@ export class EmberBrigadeScene extends Phaser.Scene {
         Juice.burst(this, target.x, target.y, { color: 0x9fe3ee, count: 10, radius: 36 });
         getSfx().play('place');
         this.tweens.add({ targets: helper, x: 1000, y: 90, duration: 560, delay: 200, ease: 'Sine.easeIn', onComplete: () => helper.destroy() });
-        if (this.state.completed && !this.done) this.win();
+        if (this.state.completed && !this.done) this.waveComplete();
       },
     });
   }
@@ -309,9 +336,42 @@ export class EmberBrigadeScene extends Phaser.Scene {
     });
   }
 
-  private win(): void {
+  // A wave of fires is all out. If more waves remain, re-light the next (hotter) wave in place;
+  // otherwise complete the mission. `done` blocks sprays during the swap.
+  private waveComplete(): void {
     this.done = true;
     for (const drop of [...this.drops]) this.popDrop(drop);
+    this.waveIndex += 1;
+    this.updateRoundDots();
+    if (this.waveIndex < fireBrigadeWaves.length) {
+      // E2E advances synchronously so the deterministic spray budget isn't eaten by the pause.
+      if (isE2EEnabled()) {
+        this.startWave();
+        return;
+      }
+      getSfx().play('correct');
+      Juice.hitStop(this, 80);
+      Juice.confetti(this, 16);
+      this.time.delayedCall(motionAllowed() ? 700 : 0, () => this.startWave());
+    } else {
+      this.finalWin();
+    }
+  }
+
+  private startWave(): void {
+    this.state = createFireBrigadeState(fireBrigadeWaves[this.waveIndex]!);
+    for (const fire of this.state.fires) {
+      this.renderFire(fire.id);
+      const flame = this.fireSprites.get(fire.id);
+      if (flame) this.flicker(flame);
+    }
+    this.updatePips();
+    this.hitsAtLastTick = this.state.hits;
+    this.done = false;
+  }
+
+  private finalWin(): void {
+    this.done = true;
     getSfx().play('correct');
     Juice.hitStop(this, 90);
     Juice.shake(this, 130, 0.0035);

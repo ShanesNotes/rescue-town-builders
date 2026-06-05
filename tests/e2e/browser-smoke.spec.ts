@@ -52,8 +52,9 @@ async function completeHouseBuilder(page: Page): Promise<void> {
 
 async function completeFireFix(page: Page): Promise<void> {
   // Ember's Fire Brigade (Arcade water-arc): each spray press deterministically cools the weakest
-  // fire in E2E, so the round always converges without depending on physics timing.
-  for (let i = 0; i < 40; i += 1) {
+  // fire in E2E, so the round always converges without depending on physics timing. 3 waves of
+  // increasing heat (total ~45), so loop generously above that.
+  for (let i = 0; i < 70; i += 1) {
     const scene = await page.evaluate(() => window.__RTB_E2E__?.currentSceneKey);
     if (scene !== 'EmberBrigadeScene') break;
     await page.evaluate(() => window.__RTB_E2E__?.pressButton('fire.spray'));
