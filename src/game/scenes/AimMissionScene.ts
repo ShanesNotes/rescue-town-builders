@@ -33,8 +33,11 @@ export class AimMissionScene extends Phaser.Scene {
   private message!: Phaser.GameObjects.Text;
   private done = false;
 
-  // Mirrors AimEngine.inCone so the bold cone + target rings exactly match what an Act will hit.
-  private readonly CONE_RANGE = 190;
+  // The visual cone range is derived from the engine's config (P3-11) so the cone + target rings
+  // exactly match what an Act will hit even if a mission overrides AimConfig.range.
+  private get coneRange(): number {
+    return this.state.config.range;
+  }
 
   constructor() {
     super('AimMissionScene');
@@ -128,7 +131,7 @@ export class AimMissionScene extends Phaser.Scene {
   // A bold filled cone (P3-05) from the hero in the aim direction — the child's clear "aim here".
   private drawCone(ox: number, oy: number, angle: number): void {
     const half = Math.PI / 5; // ~36° half-spread, generous so it reads from across the room
-    const r = this.CONE_RANGE;
+    const r = this.coneRange;
     const ax = ox + Math.cos(angle - half) * r;
     const ay = oy + Math.sin(angle - half) * r;
     const bx = ox + Math.cos(angle + half) * r;
@@ -149,7 +152,7 @@ export class AimMissionScene extends Phaser.Scene {
     if (t.health <= 0) return false;
     const dx = t.x - this.state.player.x;
     const dy = t.y - this.state.player.y;
-    if (Math.hypot(dx, dy) > this.CONE_RANGE) return false;
+    if (Math.hypot(dx, dy) > this.coneRange) return false;
     const a = this.state.aim;
     const hOk = a.x === 0 || Math.sign(dx) === a.x;
     const vOk = a.y === 0 || Math.sign(dy) === a.y;

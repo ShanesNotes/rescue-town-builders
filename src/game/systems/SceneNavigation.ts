@@ -1,5 +1,6 @@
 import type { MissionArchetype, MissionId, MissionResult } from '../types';
 import type Phaser from 'phaser';
+import { fadeOutAndStart } from './SceneTransitions';
 
 export const SCENE_KEYS = {
   boot: 'BootScene',
@@ -60,26 +61,33 @@ export function startScene(scene: Phaser.Scene, key: SceneKey, data?: object): v
   scene.scene.start(key, data);
 }
 
+// The hub navigations (title↔profile↔townmap↔mission↔complete) route through this so leaving a
+// scene is a soft fade-out to warm cream, not an instant hard cut (P2-03). fadeOutAndStart is a
+// no-op fade (starts immediately) under e2e / reduced motion, so specs never slow and nothing waits.
+export function softStartScene(scene: Phaser.Scene, key: SceneKey, data?: object): void {
+  fadeOutAndStart(scene, () => scene.scene.start(key, data));
+}
+
 export function startParentSettingsGate(scene: Phaser.Scene, returnScene: ParentSettingsReturnScene): void {
-  startScene(scene, SCENE_KEYS.parentSettingsGate, { returnScene });
+  softStartScene(scene, SCENE_KEYS.parentSettingsGate, { returnScene });
 }
 
 // Optionally open the map on a specific node (e.g. the mission just finished), selected and lit,
 // so the child lands on the star they earned. Defaults to page 0 / index 0 (back-compat).
 export function returnToTownMap(scene: Phaser.Scene, focus?: { page: number; selectedIndex: number }): void {
-  startScene(scene, SCENE_KEYS.townMap, focus ? { ...focus, celebrate: true } : undefined);
+  softStartScene(scene, SCENE_KEYS.townMap, focus ? { ...focus, celebrate: true } : undefined);
 }
 
 // Optionally open straight to a single sticker's reading page (the just-earned one), so the
 // celebration leads right into reading its little story (P2-02). Omit for the grid.
 export function startStickerBook(scene: Phaser.Scene, readingId?: string): void {
-  startScene(scene, SCENE_KEYS.stickerBook, readingId ? { readingId } : undefined);
+  softStartScene(scene, SCENE_KEYS.stickerBook, readingId ? { readingId } : undefined);
 }
 
 export function returnToParentScene(scene: Phaser.Scene, returnScene: ParentSettingsReturnScene): void {
-  startScene(scene, returnScene);
+  softStartScene(scene, returnScene);
 }
 
 export function completeMission(scene: Phaser.Scene, result: MissionResult): void {
-  startScene(scene, SCENE_KEYS.missionComplete, { result });
+  softStartScene(scene, SCENE_KEYS.missionComplete, { result });
 }

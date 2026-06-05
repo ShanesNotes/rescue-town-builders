@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { SCENE_KEYS, startParentSettingsGate, startScene } from '../systems/SceneNavigation';
+import { SCENE_KEYS, softStartScene, startParentSettingsGate } from '../systems/SceneNavigation';
 import { bindIntents } from '../systems/bindIntents';
 import { getSaveSystem, getSfx } from '../systems/GameServices';
 import { registerE2EButton } from '../systems/E2EBridge';
@@ -17,6 +17,12 @@ const AVATARS = ['rivet', 'brick', 'ember'];
 export class ProfileScene extends Phaser.Scene {
   private selectedIndex = 0;
   private actions: ProfileAction[] = [];
+  // Each navigable slot's centre, so the selection highlight can be moved IN-PLACE on arrow nav
+  // instead of restarting the whole scene per keypress (P2-07).
+  private slots: Array<{ x: number; y: number; size: number }> = [];
+  private selectRing!: Phaser.GameObjects.Ellipse;
+  private selectGlow!: Phaser.GameObjects.Arc;
+  private selectGlowTween?: Phaser.Tweens.Tween;
 
   constructor() {
     super('ProfileScene');
@@ -27,6 +33,7 @@ export class ProfileScene extends Phaser.Scene {
     const saves = getSaveSystem();
     const profiles = saves.getProfiles();
     this.actions = [];
+    this.slots = [];
 
     this.paintWorld();
     this.paintHeader('CHOOSE A HELPER');
@@ -38,17 +45,25 @@ export class ProfileScene extends Phaser.Scene {
     const startX = 480 - ((slotCount - 1) * spacing) / 2;
     const rowY = 250;
 
+    // A movable gold selection ring + pulse glow, drawn UNDER the coins, repositioned in-place on
+    // arrow nav (P2-07). Hidden until placed by applySelection().
+    this.selectGlow = this.add.circle(0, 0, 70, 0xffc857, 0.18).setDepth(18).setVisible(false);
+    this.selectRing = this.add.ellipse(0, 0, 120, 120, 0xffd98a, 0).setStrokeStyle(5, 0xffd98a, 0.9).setDepth(19).setVisible(false);
+
     profiles.forEach((profile, index) => {
       const actionIndex = this.actions.length;
       this.actions.push({ type: 'select', profileId: profile.id });
-      this.profileCoin(profile, startX + index * spacing, rowY, actionIndex === this.selectedIndex);
+      this.slots.push({ x: startX + index * spacing, y: rowY, size: 110 });
+      this.profileCoin(profile, startX + index * spacing, rowY);
     });
 
     if (canAdd) {
-      const actionIndex = this.actions.length;
       this.actions.push({ type: 'create' });
-      this.addCoin(startX + profiles.length * spacing, rowY, actionIndex === this.selectedIndex);
+      this.slots.push({ x: startX + profiles.length * spacing, y: rowY, size: 110 });
+      this.addCoin(startX + profiles.length * spacing, rowY);
     }
+
+    this.applySelection();
 
     // First run (no profiles yet): the three helpers wait on the cobbles, each a tappable create
     // button ("pick me!") so a non-reader makes their first profile by choosing a friend — not by
@@ -70,7 +85,6 @@ export class ProfileScene extends Phaser.Scene {
     profile: { id: string; name: string; avatarId: string; progress: { totalStars: number } },
     x: number,
     y: number,
-    selected: boolean,
   ): void {
     const avatar = AVATARS.includes(profile.avatarId) ? profile.avatarId : 'rivet';
     const faceKey = `hl.ui.face${avatar.charAt(0).toUpperCase()}${avatar.slice(1)}`;
@@ -82,12 +96,11 @@ export class ProfileScene extends Phaser.Scene {
       caption: profile.name,
       onPress: () => this.choose({ type: 'select', profileId: profile.id }),
       testId: `profile.select.${profile.id}`,
-      pulse: selected,
     }).setDepth(20);
     this.starTag(x, y + 92, profile.progress.totalStars);
   }
 
-  private addCoin(x: number, y: number, selected: boolean): void {
+  private addCoin(x: number, y: number): void {
     const coin = addIconButton(this, {
       x,
       y,
@@ -96,7 +109,6 @@ export class ProfileScene extends Phaser.Scene {
       caption: 'New',
       onPress: () => this.choose({ type: 'create' }),
       testId: 'profile.add',
-      pulse: selected,
     });
     coin.setDepth(20);
     coin.add(
@@ -179,8 +191,27 @@ export class ProfileScene extends Phaser.Scene {
 
   private moveSelection(delta: number): void {
     if (delta === 0 || this.actions.length === 0) return;
+    // P2-07: re-render the highlight IN-PLACE (move the ring + pulse glow). No scene.restart — the
+    // page never changes here, so a per-keypress rebuild + white-fade strobe is wasted teardown.
     this.selectedIndex = Math.max(0, Math.min(this.actions.length - 1, this.selectedIndex + delta));
-    this.scene.restart();
+    this.applySelection();
+  }
+
+  // Move the managed selection ring + pulse glow onto the current slot (P2-07).
+  private applySelection(): void {
+    const slot = this.slots[this.selectedIndex];
+    if (!slot) {
+      this.selectRing.setVisible(false);
+      this.selectGlow.setVisible(false);
+      return;
+    }
+    this.selectRing.setPosition(slot.x, slot.y).setSize(slot.size + 10, slot.size + 10).setVisible(true);
+    this.selectGlow.setPosition(slot.x, slot.y).setVisible(true);
+    this.selectGlowTween?.remove();
+    if (motionAllowed()) {
+      this.selectGlow.setScale(1).setAlpha(0.18);
+      this.selectGlowTween = this.tweens.add({ targets: this.selectGlow, scale: 1.25, alpha: 0.05, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
   }
 
   private choose(action: ProfileAction | { type: 'settings' } | { type: 'back' } | undefined): void {
@@ -188,20 +219,20 @@ export class ProfileScene extends Phaser.Scene {
     const saves = getSaveSystem();
     if (action.type === 'select') {
       saves.selectProfile(action.profileId);
-      startScene(this, SCENE_KEYS.townMap);
+      softStartScene(this, SCENE_KEYS.townMap);
       return;
     }
     if (action.type === 'create') {
       const nextNumber = saves.getProfiles().length + 1;
       const avatarId = action.avatarId ?? AVATARS[(nextNumber - 1) % AVATARS.length] ?? 'rivet';
       saves.createProfile({ name: `Player ${nextNumber}`, avatarId });
-      startScene(this, SCENE_KEYS.townMap);
+      softStartScene(this, SCENE_KEYS.townMap);
       return;
     }
     if (action.type === 'settings') {
       startParentSettingsGate(this, SCENE_KEYS.profile);
       return;
     }
-    startScene(this, SCENE_KEYS.start);
+    softStartScene(this, SCENE_KEYS.start);
   }
 }

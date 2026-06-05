@@ -49,10 +49,20 @@ describe('SfxSystem', () => {
   });
 
   it('has a sound recipe for every cue so no action can request an unplayable sound', () => {
-    const cues: SfxCue[] = ['correct', 'place', 'spray-hit', 'fanfare', 'secret'];
+    const cues: SfxCue[] = ['correct', 'place', 'spray-hit', 'fanfare', 'secret', 'sticker'];
     for (const cue of cues) {
       expect(SFX_RECIPES[cue].notes.length).toBeGreaterThan(0);
       expect(SFX_RECIPES[cue].noteDuration).toBeGreaterThan(0);
     }
+  });
+
+  it('enriches the victory fanfare and gives the sticker its own warm cue, distinct from the secret shimmer (P3-01)', () => {
+    // Fanfare is fuller: a chord pad + sparkle layer + a sustained ringing tail (~as long as confetti).
+    expect(SFX_RECIPES.fanfare.chord?.length).toBeGreaterThan(0);
+    expect(SFX_RECIPES.fanfare.sparkle?.length).toBeGreaterThan(0);
+    expect(SFX_RECIPES.fanfare.sustain ?? 0).toBeGreaterThan(1);
+    // The sticker cue is its own recipe, not a reuse of the secret shimmer.
+    expect(SFX_RECIPES.sticker).not.toEqual(SFX_RECIPES.secret);
+    expect(SFX_RECIPES.sticker.notes).not.toEqual(SFX_RECIPES.secret.notes);
   });
 });

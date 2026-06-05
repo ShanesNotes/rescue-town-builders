@@ -44,8 +44,9 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - **Wave 4 — No-Fail floors & Aim clarity** ✅ DONE: P1-09, P1-12, P3-05, P3-04, P1-08.
 - **Wave 5 — Reward loop** ✅ DONE: P2-01, P2-02, P1-10, P1-07, P2-08, P3-08.
 - **Wave 6 — Variety & payoffs** ✅ DONE (procedural + existing art): P1-05, P1-04, P2-10, P3-07, P3-06, P3-03.
-- **Wave 7 — Polish & transitions**: P2-03, P2-07, P3-01, + review follow-ups P2-11, P3-10, P3-11.
-- **Wave 8+ — Wow factor** (Codex art + Grok copy): P4-01 living diorama, P4-02 spoken VO, P4-03 aim direct-touch.
+- **Wave 7 — Polish & transitions** ✅ DONE: P2-03, P2-07, P3-01, P2-11, P3-10, P3-11.
+- **Wave 8 — Input parity & truthfulness** (Codex final-QA): CF-1 overlay input-lock, CF-2 House focus sync, CF-3 truthful Aim cone, CF-4 Match alpha-reset, CF-5 Match focus ring, CF-7 reward keyboard nav, CF-9 parent-gate hold-key, CF-10 water-bottle asset.
+- **Wave 9 — Wow factor** (Grok VO script ready at rtb-grok/docs/design/voice-and-copy.md): P4-01 living diorama, P4-02 spoken VO, P4-03 aim direct-touch; + CF-8/CF-11/CF-12 cleanup.
 
 ---
 
@@ -75,18 +76,18 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 
 - [x] **P2-01 (S)** Returning from a finished mission resets to page 0 — child can't see the star they earned. *Fix:* thread completed mission's page+index through `returnToTownMap`. `SceneNavigation.ts`, `MissionCompleteScene.ts`, `TownMapScene.ts`
 - [x] **P2-02 (S)** No path from celebration to the just-earned sticker. *Fix:* make the popped sticker interactive → open its reading page (pass `readingId`). `MissionCompleteScene.ts`, `StickerBookScene.ts`
-- [ ] **P2-03 (M)** Instant hard-cut to white between every scene (no fade-out). *Fix:* `fadeOutAndStart` (~140–160ms), warm cream not pure white, gated on `motionAllowed`. `SceneTransitions.ts`, `SceneNavigation.ts`
+- [x] **P2-03 (M)** Instant hard-cut to white between every scene (no fade-out). *Fix:* `fadeOutAndStart` (~140–160ms), warm cream not pure white, gated on `motionAllowed`. `SceneTransitions.ts`, `SceneNavigation.ts`
 - [x] **P2-04 (S)** Match wrong-tap gives a non-reader nothing actionable (springHome HOME→HOME, no panel reaction). *Fix:* shake/dim wrong panel + pulse correct target bigger; read the engine's dead `lastHint`. `MatchMissionScene.ts`
 - [x] **P2-05 (S)** Journey: tapping a passed stop plays the wrong-answer bonk; keyboard confirm auto-skips the whole mission. *Fix:* `disableInteractive` visited waypoints; bind `onMove` to a highlighted waypoint cursor, confirm visits the highlighted one. `JourneyMissionScene.ts`
 - [x] **P2-06 (S)** Profile keyboard nav can land on Settings/Back with zero highlight → opens parent gate by accident. *Fix:* exclude corner utilities from the navigable array (or bind their pulse). `ProfileScene.ts`
-- [ ] **P2-07 (M)** TownMap/Profile keyboard+page nav uses `scene.restart()` per arrow press → white-fade strobe + teardown cost. *Fix:* re-render selection highlight in-place; restart only on real page change. `TownMapScene.ts`, `ProfileScene.ts`
+- [x] **P2-07 (M)** TownMap/Profile keyboard+page nav uses `scene.restart()` per arrow press → white-fade strobe + teardown cost. *Fix:* re-render selection highlight in-place; restart only on real page change. `TownMapScene.ts`, `ProfileScene.ts`
 - [x] **P2-08 (S)** Pre-threshold secret taps give ZERO feedback — child thinks the spot is dead. *Fix:* ascending tick + inner-glow pulse per tap so each visibly 'charges'. `secretHotspot.ts`
 - [x] **P2-09 (S)** Mission-exit modal is text-only + warns about losing a 'sticker' — unreadable anxiety. *Fix:* picture-first choices (green ▶ keep coin + hero face; map icon to leave); soften subtitle; `FONTS.display`. `confirmMissionExit.ts`
 - [x] **P2-10 (S)** Bread Rush trains tap-position memory, not the recipe (fixed positions + identical icons). *Fix:* keep recipe ORDER but shuffle TARGET positions; add a filling-bowl→loaf payoff. `matchMissions.ts`, `MatchMissionScene.ts`
 
 ## P3 — missing delight
 
-- [ ] **P3-01 (S→M)** Fanfare is thin and the sticker cue == secret chime. *Fix:* richer celebratory fanfare (chord pad + sparkle + a ringing note as long as the confetti) + a dedicated warm 'sticker' cue; reserve the shimmer for true secret discoveries. *(audio — Claude lane)*
+- [x] **P3-01 (S→M)** Fanfare is thin and the sticker cue == secret chime. *Fix:* richer celebratory fanfare (chord pad + sparkle + a ringing note as long as the confetti) + a dedicated warm 'sticker' cue; reserve the shimmer for true secret discoveries. *(audio — Claude lane)*
 - [x] **P3-02 (S)** Secret reveal + exit modal render in Arial, not the pixel storybook font. *Fix:* `FONTS.display`/`FONTS.label`. `secretHotspot.ts`, `confirmMissionExit.ts` — *(exit modal ✅ Wave 2; secret reveal ✅ Wave 3)*
 - [x] **P3-03 (M)** House Builder + Match variants feel identical (no title shown, same orderedParts). *Fix:* 1.5s title card + preview silhouette + distinct accent color per house; fold Match into the P1-03 intro. `HouseBuilderScene.ts`, `houseBlueprints.ts`
 - [x] **P3-04 (M)** Aim/Fire assist is an invisible teal dot flying the wrong way — a No-Fail mercy reads as nothing. *Fix:* real helper sprite flies TO the assisted target, sprays it, waves, warm chime. `AimMissionScene.ts`, `FireFixScene.ts`
@@ -106,9 +107,9 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 
 Small, non-blocking items surfaced by adversarial review of shipped waves — slotted into Wave 7.
 
-- [ ] **P2-11 (S)** Fire Fix still has the silent-dead-zone assist shape (`sprays>=5 && remaining>=5`) that P1-12 removed from Aim. Bring `FireFix.maybeAssist` + the scene's miss feedback in line with the Aim fix. `FireFix.ts`, `FireFixScene.ts` *(Wave 4 review)*
-- [ ] **P3-10 (S)** Journey auto-resolve lacks the `busy` input-lock Match got — a fast tapper can skip an auto-resolve animation (not a No-Fail issue). Mirror Match's lock. `JourneyMissionScene.ts` *(Wave 4 review)*
-- [ ] **P3-11 (S)** Aim cone visual hardcodes `CONE_RANGE=190` instead of reading `state.config.range`; safe today, would diverge if a mission overrides range. Derive from config. `AimMissionScene.ts` *(Wave 4 review)*
+- [x] **P2-11 (S)** Fire Fix still has the silent-dead-zone assist shape (`sprays>=5 && remaining>=5`) that P1-12 removed from Aim. Bring `FireFix.maybeAssist` + the scene's miss feedback in line with the Aim fix. `FireFix.ts`, `FireFixScene.ts` *(Wave 4 review)*
+- [x] **P3-10 (S)** Journey auto-resolve lacks the `busy` input-lock Match got — a fast tapper can skip an auto-resolve animation (not a No-Fail issue). Mirror Match's lock. `JourneyMissionScene.ts` *(Wave 4 review)*
+- [x] **P3-11 (S)** Aim cone visual hardcodes `CONE_RANGE=190` instead of reading `state.config.range`; safe today, would diverge if a mission overrides range. Derive from config. `AimMissionScene.ts` *(Wave 4 review)*
 
 ## Codex independent audit — corroboration
 

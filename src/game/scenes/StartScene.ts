@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { SCENE_KEYS, startScene } from '../systems/SceneNavigation';
+import { SCENE_KEYS, softStartScene } from '../systems/SceneNavigation';
 import { bindIntents } from '../systems/bindIntents';
 import { getMusic } from '../systems/GameServices';
 import { addIconButton } from '../ui/Button';
@@ -115,6 +115,6 @@ export class StartScene extends Phaser.Scene {
 
   private begin(): void {
     getMusic().start();
-    startScene(this, SCENE_KEYS.profile);
+    softStartScene(this, SCENE_KEYS.profile);
   }
 }

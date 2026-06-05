@@ -69,8 +69,12 @@ call, which stays Shane's reserved nudge.
 | 5 | Reward loop: P2-01 land on the freshly-lit house + one-shot pulse, P2-02 tap the new sticker → reading page, P1-10 locked-sticker wiggle, P1-07 secrets persist across reloads (back-compat save), P2-08 pre-threshold charge, P3-08 +4 journey secrets; +4 tests (+ merge-authority fixes: guarded redundant secret writes, sticker-grid overflow) | 6 | typecheck✓ test✓(124) build✓ e2e✓(6) | f374723 |
 | 6 | Variety & payoffs: P1-05 deterministic recycling shuffle + P1-04 rain-flute (2 distinct inventions) — **last two P1s**; P2-10 bread target shuffle + filling bowl→loaf; P3-07 per-mission match transformation (statue pops/gadget whirrs/bowl rises); P3-06 journey destination climax; P3-03 house title cards + accent colors; +4 tests | 6 | typecheck✓ test✓(128) build✓ e2e✓(6) | (this commit) |
 
-**🎉 Milestone: ALL P0 + ALL P1 cleared.** Remaining: P2/P3 polish + P4 wow-factor.
+| 7 | Polish & transitions: P2-03 soft fade-out (warm cream, e2e-instant) + fade-race guard, P2-07 in-place selection (no restart strobe), P3-01 richer fanfare + dedicated sticker cue, P2-11 FireFix assist parity, P3-10 journey input-lock, P3-11 aim cone-range; +1 test | 6 | typecheck✓ test✓(129) build✓ e2e✓(6) | (this commit) |
 
-**Next:** diverse-model pass — Codex independent final-QA audit (read-only) + Grok copy/voice polish — then Wave 7 (P2-03 transitions, P2-07 restart-strobe, P3-01 fanfare, + follow-ups P2-11/P3-10/P3-11, + Codex/Grok findings) and Wave 8 (P4-01 living diorama, P4-02 Grok-scripted VO, P4-03 aim direct-touch). Then surface the merge-to-`main` ship decision for Shane.
+**🎉 Milestone: ALL P0 + ALL P1 cleared** (through Wave 6). Waves 7+ are P2/P3 polish, the diverse-model findings, and P4 wow-factor.
+
+**Diverse-model pass done (concurrent with Wave 7):** Codex independent final-QA (read-only, `/tmp/codex-finalqa.md`) — *no new P0; touch-only is ship-ready; flags a keyboard/gamepad focus/input-lock parity cluster (5 P1s) + a truthful-aim-cone fix before "final" with non-touch input.* Grok produced the spoken-VO script + copy polish (`/home/ark/rtb-grok/docs/design/voice-and-copy.md`).
+
+**Next:** Wave 8 — Input parity & truthfulness (Codex CF-1..CF-10): overlay input-lock, House/Match keyboard focus, truthful Aim cone, Match alpha-reset, reward keyboard nav, parent-gate hold-key, water-bottle asset. Then Wave 9 — Wow-factor (P4-01 living diorama, P4-02 Grok-scripted VO, P4-03 aim direct-touch) + CF cleanup. Then surface the merge-to-`main` ship decision for Shane.
 
 **Multi-model engagement (per wave):** Codex (workspace-write, `/home/ark/rtb-codex`) → asset payoffs Waves 6+ (invention sprites, helper drone, house accents, diorama props) + independent re-audit. Grok (`/home/ark/rtb-grok`) → onboarding microcopy (Wave 3) + VO script (Wave 8). Claude owns all scene/system mechanics.

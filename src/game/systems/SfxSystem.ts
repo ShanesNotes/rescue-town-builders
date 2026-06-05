@@ -7,13 +7,19 @@
 // tests). Real CC0 samples can later be swapped in behind the same SfxCue
 // interface without touching any caller.
 
-export type SfxCue = 'tap' | 'try-again' | 'correct' | 'place' | 'spray-hit' | 'fanfare' | 'secret';
+export type SfxCue = 'tap' | 'try-again' | 'correct' | 'place' | 'spray-hit' | 'fanfare' | 'secret' | 'sticker';
 
 export type SfxRecipe = {
   /** Note frequencies in Hz, played in order. Ascending reads as "good / up". */
   notes: number[];
   /** Seconds per note. */
   noteDuration: number;
+  /** Optional chord pad held UNDER the melody for a fuller, warmer body (Hz). */
+  chord?: number[];
+  /** Optional sparkle layer: high shimmer notes sprinkled over the melody. */
+  sparkle?: number[];
+  /** The final melody note rings on for this many extra seconds (a sustained celebratory tail). */
+  sustain?: number;
 };
 
 export const SFX_RECIPES: Record<SfxCue, SfxRecipe> = {
@@ -22,8 +28,19 @@ export const SFX_RECIPES: Record<SfxCue, SfxRecipe> = {
   correct: { notes: [523.25, 659.25], noteDuration: 0.09 }, // C5 -> E5, a happy blip
   place: { notes: [440, 587.33], noteDuration: 0.08 }, // A4 -> D5, a satisfying click-up
   'spray-hit': { notes: [392], noteDuration: 0.05 }, // short G4 tick
-  fanfare: { notes: [523.25, 659.25, 783.99, 1046.5], noteDuration: 0.12 }, // C-E-G-C victory
-  secret: { notes: [783.99, 987.77, 1318.51], noteDuration: 0.16 }, // shimmering reveal
+  // A fuller victory (P3-01): a rising C-E-G-C melody over a held C-major chord pad, a high sparkle
+  // layer, and a final C6 that RINGS on so the tail lasts roughly as long as the confetti settles.
+  fanfare: {
+    notes: [523.25, 659.25, 783.99, 1046.5],
+    noteDuration: 0.13,
+    chord: [261.63, 329.63, 392.0], // C3-E3-G3 warm pad
+    sparkle: [1567.98, 2093.0], // G6 + C7 twinkle
+    sustain: 1.4, // the ringing 'we did it' note
+  },
+  secret: { notes: [783.99, 987.77, 1318.51], noteDuration: 0.16 }, // shimmering reveal (reserved for TRUE secrets)
+  // A dedicated warm 'new sticker' cue (P3-01) — a soft major arpeggio with a gentle held chord,
+  // distinct from the secret's bright shimmer so the album reward has its own voice.
+  sticker: { notes: [587.33, 739.99, 880.0], noteDuration: 0.12, chord: [293.66, 369.99], sustain: 0.5 },
 };
 
 export interface SfxSink {
@@ -65,20 +82,42 @@ export function createWebAudioSfxSink(): SfxSink {
           window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
         if (!Ctor) return;
         ctx ??= new Ctor();
-        let start = ctx.currentTime;
         const peak = Math.max(0.0002, 0.18 * gain); // capped so it stays gentle
-        for (const frequency of recipe.notes) {
-          const osc = ctx.createOscillator();
-          const amp = ctx.createGain();
-          osc.type = 'sine';
+        const begin = ctx.currentTime;
+
+        // One soft note with an attack/decay envelope. `hold` extends the ring (the celebratory tail).
+        const tone = (frequency: number, at: number, duration: number, level: number, type: OscillatorType = 'sine'): void => {
+          const osc = ctx!.createOscillator();
+          const amp = ctx!.createGain();
+          osc.type = type;
           osc.frequency.value = frequency;
-          amp.gain.setValueAtTime(0.0001, start);
-          amp.gain.exponentialRampToValueAtTime(peak, start + 0.012);
-          amp.gain.exponentialRampToValueAtTime(0.0001, start + recipe.noteDuration);
-          osc.connect(amp).connect(ctx.destination);
-          osc.start(start);
-          osc.stop(start + recipe.noteDuration + 0.02);
+          amp.gain.setValueAtTime(0.0001, at);
+          amp.gain.exponentialRampToValueAtTime(Math.max(0.0002, level), at + 0.012);
+          amp.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+          osc.connect(amp).connect(ctx!.destination);
+          osc.start(at);
+          osc.stop(at + duration + 0.02);
+        };
+
+        // Melody notes in sequence; the last note rings on for `sustain` (P3-01 fanfare tail).
+        let start = begin;
+        recipe.notes.forEach((frequency, i) => {
+          const last = i === recipe.notes.length - 1;
+          const duration = recipe.noteDuration + (last && recipe.sustain ? recipe.sustain : 0);
+          tone(frequency, start, duration, peak);
           start += recipe.noteDuration;
+        });
+        const totalDuration = start - begin + (recipe.sustain ?? 0);
+
+        // A warm chord pad held softly under the whole melody — gives the cue body without harshness.
+        if (recipe.chord) {
+          for (const frequency of recipe.chord) tone(frequency, begin, totalDuration, peak * 0.5, 'triangle');
+        }
+        // A sprinkled high sparkle layer over the back half of the melody.
+        if (recipe.sparkle) {
+          recipe.sparkle.forEach((frequency, i) => {
+            tone(frequency, begin + totalDuration * (0.4 + i * 0.18), 0.14, peak * 0.4);
+          });
         }
       } catch {
         // No-Fail: a sound error must never interrupt the child's play.

@@ -198,7 +198,7 @@ export class MissionCompleteScene extends Phaser.Scene {
     ];
     items.forEach(({ o, base }, i) => {
       o.setScale(0);
-      this.tweens.add({ targets: o, scale: base, ease: 'Back.easeOut', duration: 420, delay, onStart: i === 0 ? () => getSfx().play('secret') : undefined });
+      this.tweens.add({ targets: o, scale: base, ease: 'Back.easeOut', duration: 420, delay, onStart: i === 0 ? () => getSfx().play('sticker') : undefined });
     });
     this.tweens.add({ targets: [frame, ...(icon ? [icon] : [])], angle: { from: -5, to: 5 }, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: delay + 420 });
   }

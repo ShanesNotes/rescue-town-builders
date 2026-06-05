@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
 import { getSaveSystem, missionRegistry } from '../systems/GameServices';
 import { bindIntents } from '../systems/bindIntents';
-import { SCENE_KEYS, sceneKeyForMission, startParentSettingsGate, startScene, startStickerBook } from '../systems/SceneNavigation';
+import { SCENE_KEYS, sceneKeyForMission, softStartScene, startParentSettingsGate, startScene, startStickerBook } from '../systems/SceneNavigation';
 import { projectTownMapNodes, type TownMapNode } from '../systems/TownMapProgress';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
@@ -23,6 +23,12 @@ export class TownMapScene extends Phaser.Scene {
   private page = 0;
   private celebrate = false;
   private pageNodes: TownMapNode[] = [];
+  // Per-node coin centres + a single movable selection highlight, so an in-page arrow press moves
+  // the highlight IN-PLACE instead of restarting the scene every keypress (P2-07).
+  private nodeX: number[] = [];
+  private selectEllipse!: Phaser.GameObjects.Ellipse;
+  private coinPulse!: Phaser.GameObjects.Arc;
+  private coinPulseTween?: Phaser.Tweens.Tween;
 
   constructor() {
     super('TownMapScene');
@@ -52,10 +58,17 @@ export class TownMapScene extends Phaser.Scene {
     this.paintWorld(nodes.filter((n) => n.completed).length, nodes.length);
     this.paintHeader();
 
+    // The movable selection highlight (a warm gold ellipse under the selected house + a pulse glow
+    // behind its coin), repositioned in-place by applySelection() — no per-keypress restart (P2-07).
+    this.nodeX = [];
+    this.selectEllipse = this.add.ellipse(0, 0, 188, 50, 0xffd98a, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(4).setVisible(false);
+    this.coinPulse = this.add.circle(0, 206, 56, 0xffc857, 0.18).setDepth(19).setVisible(false);
+
     this.pageNodes.forEach((node, index) => this.buildNode(node, index));
     this.buildPager(pageCount);
+    this.applySelection();
 
-    this.cornerCoin(52, 46, 'hl.ui.back', () => startScene(this, SCENE_KEYS.profile), 'townmap.profiles');
+    this.cornerCoin(52, 46, 'hl.ui.back', () => softStartScene(this, SCENE_KEYS.profile), 'townmap.profiles');
     this.cornerCoin(908, 46, 'hl.ui.stickers', () => startStickerBook(this), 'townmap.sticker-book');
     this.cornerCoin(908, 498, 'hl.ui.settings', () => startParentSettingsGate(this, SCENE_KEYS.townMap), 'townmap.parent-settings');
 
@@ -87,10 +100,8 @@ export class TownMapScene extends Phaser.Scene {
     const x = NODE_X[index] ?? 160 + index * 200;
     const selected = index === this.selectedIndex;
     const houseY = 392;
+    this.nodeX[index] = x;
 
-    if (selected) {
-      this.add.ellipse(x, houseY + 4, 188, 50, 0xffd98a, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(4);
-    }
     if (node.completed) {
       const glow = this.add.circle(x, houseY - 52, 84, 0xffc14a, 0.2).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
       if (motionAllowed()) this.tweens.add({ targets: glow, scale: 1.14, alpha: 0.1, duration: 1900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
@@ -119,8 +130,25 @@ export class TownMapScene extends Phaser.Scene {
       key: coinKey,
       onPress: () => this.startMission(node),
       testId: `townmap.mission.${node.missionId}`,
-      pulse: selected,
     }).setDepth(20);
+  }
+
+  // Move the gold selection ellipse under the selected house + the pulse glow behind its coin, in
+  // place (P2-07). Reserved for the SAME page; an actual page change still restarts (goPage).
+  private applySelection(): void {
+    const x = this.nodeX[this.selectedIndex];
+    if (x === undefined) {
+      this.selectEllipse.setVisible(false);
+      this.coinPulse.setVisible(false);
+      return;
+    }
+    this.selectEllipse.setPosition(x, 396).setVisible(true);
+    this.coinPulse.setPosition(x, 206).setVisible(true);
+    this.coinPulseTween?.remove();
+    if (motionAllowed()) {
+      this.coinPulse.setScale(1).setAlpha(0.18);
+      this.coinPulseTween = this.tweens.add({ targets: this.coinPulse, scale: 1.25, alpha: 0.05, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
   }
 
   // A one-shot warm pulse + sparkle on the house just lit by finishing its mission. Gated on
@@ -173,7 +201,7 @@ export class TownMapScene extends Phaser.Scene {
         const node = this.pageNodes[this.selectedIndex];
         if (node) this.startMission(node);
       },
-      onBack: () => startScene(this, SCENE_KEYS.profile),
+      onBack: () => softStartScene(this, SCENE_KEYS.profile),
     });
   }
 
@@ -188,11 +216,12 @@ export class TownMapScene extends Phaser.Scene {
       this.scene.restart({ page: this.page + 1, selectedIndex: 0 });
       return;
     }
+    // Same page: move the highlight IN-PLACE (P2-07). Only a real PAGE change (above) restarts.
     this.selectedIndex = Math.max(0, Math.min(this.pageNodes.length - 1, next));
-    this.scene.restart({ page: this.page, selectedIndex: this.selectedIndex });
+    this.applySelection();
   }
 
   private startMission(node: TownMapNode): void {
-    startScene(this, sceneKeyForMission(node.missionId, node.archetype), { missionId: node.missionId });
+    softStartScene(this, sceneKeyForMission(node.missionId, node.archetype), { missionId: node.missionId });
   }
 }

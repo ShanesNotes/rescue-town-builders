@@ -3,7 +3,7 @@ import { fadeInScene } from '../systems/SceneTransitions';
 import { journeyMissions, type JourneyWaypoint } from '../data/journeyMissions';
 import { getSfx } from '../systems/GameServices';
 import { bindIntents } from '../systems/bindIntents';
-import { registerE2EButton } from '../systems/E2EBridge';
+import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
@@ -42,6 +42,7 @@ export class JourneyMissionScene extends Phaser.Scene {
   private pips: Phaser.GameObjects.Arc[] = [];
   private hint!: Phaser.GameObjects.Text;
   private done = false;
+  private busy = false; // input lock while the hero auto-walks/travels (no mid-anim skip — P3-10)
   private cursor!: Phaser.GameObjects.Arc;
   private highlightIndex = 0;
   private finalGlow: Phaser.GameObjects.Arc | null = null;
@@ -67,6 +68,7 @@ export class JourneyMissionScene extends Phaser.Scene {
     this.glows = new Map();
     this.pips = [];
     this.done = false;
+    this.busy = false;
     this.finalGlow = null;
 
     const targets: MatchTarget[] = cfg.waypoints.map((w) => ({ id: w.id, label: w.label, icon: cfg.waypointKey }));
@@ -160,7 +162,9 @@ export class JourneyMissionScene extends Phaser.Scene {
   }
 
   private visit(waypointId: string): void {
-    if (!waypointId || this.done) return;
+    // P3-10: while the hero is auto-walking/travelling, ignore taps so a fast tapper can't skip the
+    // animation (mirrors MatchMissionScene's busy lock). Not a No-Fail issue — just animation safety.
+    if (!waypointId || this.done || this.busy) return;
     const outcome = chooseMatch(this.state, waypointId);
     this.state = outcome.state;
 
@@ -175,6 +179,8 @@ export class JourneyMissionScene extends Phaser.Scene {
     // No-Fail floor (P1-09): the hero auto-walks to the correct next stop, placing it for the child.
     getSfx().play(outcome.autoResolved ? 'place' : 'correct');
     this.hint.setText('');
+    // Lock input for the duration of the travel animation (released when it lands / on completion).
+    this.busy = true;
     // The just-resolved stop is the prompt before the new currentIndex (auto-resolve advances state).
     const resolvedId = this.state.prompts[this.state.currentIndex - 1]?.correctTargetId ?? waypointId;
     const wp = this.waypoints.find((w) => w.id === resolvedId);
@@ -186,7 +192,18 @@ export class JourneyMissionScene extends Phaser.Scene {
       this.time.delayedCall(motionAllowed() ? 900 : 0, () => completeMission(this, getMatchResult(this.state, this.missionId, this.stickerId)));
       return;
     }
-    this.render();
+    // Hold the lock through the walk tween (travelTo animates ~420ms), then re-open input + redraw.
+    // INSTANT under e2e (and reduced motion): release immediately so specs/tappers never wait (P3-10).
+    const lockMs = isE2EEnabled() || !motionAllowed() ? 0 : 420;
+    if (lockMs === 0) {
+      this.busy = false;
+      this.render();
+    } else {
+      this.time.delayedCall(lockMs, () => {
+        this.busy = false;
+        this.render();
+      });
+    }
   }
 
   // Escalated telegraph (P1-09): brighten the next stop and dim the rest so a stuck child sees it.

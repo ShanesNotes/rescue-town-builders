@@ -32,6 +32,11 @@ export type SprayOutcome = {
 const START = { x: 260, y: 260 };
 const STEP = 80;
 const SPRAY_RANGE = 190;
+// No-Fail assist thresholds, mirrored from AimEngine (P2-11): fire one early helper pass once a
+// child has sprayed a couple of times with no fire reachable (the old sprays>=5 && pressure>=5 gate
+// left a silent dead-zone), then help on EVERY subsequent miss so a spray-only run always converges.
+const ASSIST_EARLY_AT = 2;
+const ASSIST_FLOOR_AT = 3;
 
 export function createFireFixState(fires: FireObject[]): FireFixState {
   if (fires.length === 0) {
@@ -120,15 +125,11 @@ export function getFireFixResult(state: FireFixState): MissionResult {
 function maybeAssist(state: FireFixState): FireFixState {
   const remainingPressure = state.fires.reduce((total, fire) => total + fire.health, 0);
   if (remainingPressure === 0) return state;
-  // Early nudge: one drone pass once a child has sprayed a while with heavy fire left.
-  if (state.sprays >= 5 && remainingPressure >= 5 && state.helperAssists === 0) {
-    return applyHelperDrone(state);
-  }
-  // No-Fail floor: after enough missed sprays with ANY fire left, the drone helps on
-  // every miss until the mission can finish — a spray-only child is never stranded.
-  if (state.sprays >= 8) {
-    return applyHelperDrone(state);
-  }
+  // Mirrors AimEngine.maybeAssist (P2-11): only ever called on a miss (no fire reachable). Fire one
+  // early drone pass once a child has sprayed a couple of times (no pressure gate — that left a
+  // silent dead-zone), then help on every subsequent miss so a spray-only run always converges.
+  if (state.sprays >= ASSIST_EARLY_AT && state.helperAssists === 0) return applyHelperDrone(state);
+  if (state.sprays >= ASSIST_FLOOR_AT) return applyHelperDrone(state);
   return state;
 }
 

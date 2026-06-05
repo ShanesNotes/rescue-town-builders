@@ -149,9 +149,15 @@ export class FireFixScene extends Phaser.Scene {
     this.state = outcome.state;
 
     this.sprayVisual();
-    if (outcome.hit) getSfx().play('spray-hit');
-
     const assisted = this.state.helperAssists > prevAssists;
+    if (outcome.hit) {
+      getSfx().play('spray-hit');
+    } else if (!assisted) {
+      // A plain miss is NEVER silent (P2-11, mirrors Aim's whiff): a soft try-again chime + a puff at
+      // the spray-cone tip, so every press gives the child audible + visible feedback.
+      getSfx().play('try-again');
+      this.whiffFeedback();
+    }
     // Splash + steam on any fire that just dropped from the PLAYER'S spray; the helper's own
     // splash is rendered by helperAssist so it lands on the fire it flew to.
     for (const fire of this.state.fires) {
@@ -169,6 +175,16 @@ export class FireFixScene extends Phaser.Scene {
       if (motionAllowed()) Juice.shake(this, 100, 0.003);
       this.time.delayedCall(motionAllowed() ? 360 : 0, () => completeMission(this, getFireFixResult(this.state)));
     }
+  }
+
+  // P2-11: a miss is never a silent dead tap — a small cool-teal puff at the spray-cone tip so the
+  // child always sees their press land somewhere (mirrors Aim's whiff feedback).
+  private whiffFeedback(): void {
+    const { x, y } = this.state.player;
+    const a = this.state.aim;
+    const tipX = x + a.x * 120;
+    const tipY = y - 30 + a.y * 120;
+    Juice.burst(this, tipX, tipY, { color: 0x9fe3ee, count: 6, radius: 26 });
   }
 
   private sprayVisual(): void {
