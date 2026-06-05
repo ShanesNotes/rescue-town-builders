@@ -27,6 +27,30 @@ describe('HouseBuilder', () => {
     expect(outcome.state.completed).toBe(false);
   });
 
+  it('CF-2: repeated confirm on the part at currentPartIndex advances cleanly through every part', () => {
+    // Mirrors the scene confirm intent (HouseBuilderScene places ORDER[currentPartIndex]). Each
+    // confirm must be correct and advance the index, never stick on a stale wrong part.
+    const ORDER: ReadonlyArray<'foundation' | 'walls' | 'roof' | 'door' | 'decoration'> = [
+      'foundation',
+      'walls',
+      'roof',
+      'door',
+      'decoration',
+    ];
+    let state = createHouseBuilderState(houseBlueprints);
+    let confirms = 0;
+    while (!state.completed && confirms < 100) {
+      const required = ORDER[state.currentPartIndex];
+      expect(required).toBeDefined();
+      const outcome = placeHousePart(state, required!); // confirm on the glowing required part
+      expect(outcome.correct).toBe(true); // never a stale/wrong pick
+      state = outcome.state;
+      confirms += 1;
+    }
+    expect(state.completed).toBe(true);
+    expect(confirms).toBe(houseBlueprints.length * ORDER.length); // exactly parts-per-house * houses
+  });
+
   it('builds three houses and unlocks a sticker', () => {
     let state = createHouseBuilderState(houseBlueprints);
 

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { isE2EEnabled } from '../systems/E2EBridge';
+import { lockOverlay } from '../systems/overlayLock';
 import { addHelperAvatar, motionAllowed, type HelperCharacterId } from './Sprite';
 import { FONTS } from './typography';
 
@@ -77,10 +78,14 @@ export function playMissionIntro(scene: Phaser.Scene, content: MissionIntroConte
     objects.push(hero);
   }
 
+  // CF-1: while this veil is up, keyboard/gamepad confirm/back must not act on the mission behind it.
+  const releaseLock = lockOverlay(scene);
+
   let dismissed = false;
   const finish = (): void => {
     if (dismissed) return;
     dismissed = true;
+    releaseLock();
     scrim.disableInteractive();
     if (!motionAllowed()) {
       objects.forEach((object) => object.destroy());

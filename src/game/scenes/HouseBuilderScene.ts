@@ -6,6 +6,7 @@ import { registerE2EButton, isE2EEnabled } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
+import { isOverlayOpen, lockOverlay } from '../systems/overlayLock';
 import { getSfx } from '../systems/GameServices';
 import { createSecretsForProfile, addSecretHotspot } from '../systems/secretHotspot';
 import {
@@ -117,9 +118,11 @@ export class HouseBuilderScene extends Phaser.Scene {
     addSecretHotspot(this, secrets, 'hidden-light', 888, 268);
 
     bindIntents(this, {
-      onMove: (x, y) => this.moveSelection(x || y),
-      onConfirm: () => !isMissionExitOpen(this) && this.placePart(ORDER[this.selected]),
-      onBack: () => this.requestExit(),
+      onMove: (x, y) => !this.overlayBusy() && this.moveSelection(x || y),
+      // CF-2: confirm always places the GLOWING required part (engine currentPartIndex), never a
+      // stale browsed index — so keyboard/gamepad can't keep picking the wrong, dimmed piece.
+      onConfirm: () => !this.overlayBusy() && this.placePart(ORDER[this.state.currentPartIndex]),
+      onBack: () => !isOverlayOpen(this) && this.requestExit(),
     });
 
     this.render();
@@ -293,6 +296,8 @@ export class HouseBuilderScene extends Phaser.Scene {
   // the Wave-3 intro pattern (scrim + big title + helper). Never blocks logic; e2e skips it.
   private showHouseTitleCard(house: HouseBlueprint): void {
     if (isE2EEnabled()) return;
+    // CF-1: lock keyboard/gamepad confirm/back while the title card covers the build behind it.
+    const releaseLock = lockOverlay(this);
     const depth = 800;
     const objects: Phaser.GameObjects.GameObject[] = [];
     objects.push(this.add.rectangle(480, 270, 960, 540, 0x10243a, 0.6).setDepth(depth).setInteractive());
@@ -322,6 +327,7 @@ export class HouseBuilderScene extends Phaser.Scene {
     if (motionAllowed()) this.tweens.add({ targets: brick, y: brick.y - 12, duration: 480, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
     const dismiss = (): void => {
+      releaseLock();
       if (!motionAllowed()) {
         objects.forEach((o) => o.destroy());
         return;
@@ -334,6 +340,9 @@ export class HouseBuilderScene extends Phaser.Scene {
   // Slots show built parts solid; not-yet-built parts sleep faint + cool. The next part glows.
   private render(): void {
     const placed = this.state.currentPartIndex;
+    // CF-2: keep the keyboard/gamepad focus pinned to the glowing required part after every
+    // placement, so confirm advances cleanly through the parts instead of sticking on a stale pick.
+    this.selected = placed;
     const accent = this.state.currentHouse?.accent;
     ORDER.forEach((id, i) => {
       const slot = this.slots.get(id);
@@ -370,6 +379,12 @@ export class HouseBuilderScene extends Phaser.Scene {
   private moveSelection(delta: number): void {
     if (!delta || this.done) return;
     this.selected = Math.max(0, Math.min(ORDER.length - 1, this.selected + delta));
+  }
+
+  // CF-1: ignore confirm/move intents while a pointer-only overlay (intro veil / title card) covers
+  // the build, OR while the exit-confirm modal is up — never mutate the mission the child can't see.
+  private overlayBusy(): boolean {
+    return isMissionExitOpen(this) || isOverlayOpen(this);
   }
 
   private requestExit(): void {

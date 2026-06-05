@@ -45,7 +45,7 @@ gap from "complete" to **unbelievable & professional** for the actual non-readin
 - **Wave 5 — Reward loop** ✅ DONE: P2-01, P2-02, P1-10, P1-07, P2-08, P3-08.
 - **Wave 6 — Variety & payoffs** ✅ DONE (procedural + existing art): P1-05, P1-04, P2-10, P3-07, P3-06, P3-03.
 - **Wave 7 — Polish & transitions** ✅ DONE: P2-03, P2-07, P3-01, P2-11, P3-10, P3-11.
-- **Wave 8 — Input parity & truthfulness** (Codex final-QA): CF-1 overlay input-lock, CF-2 House focus sync, CF-3 truthful Aim cone, CF-4 Match alpha-reset, CF-5 Match focus ring, CF-7 reward keyboard nav, CF-9 parent-gate hold-key, CF-10 water-bottle asset.
+- **Wave 8 — Input parity & truthfulness** (Codex final-QA) ✅ DONE: CF-1 overlay input-lock, CF-2 House focus sync, CF-3 truthful Aim cone, CF-4 Match alpha-reset, CF-5 Match focus ring, CF-7 reward keyboard nav, CF-9 parent-gate hold-key, CF-10 water-bottle asset.
 - **Wave 9 — Wow factor** (Grok VO script ready at rtb-grok/docs/design/voice-and-copy.md): P4-01 living diorama, P4-02 spoken VO, P4-03 aim direct-touch; + CF-8/CF-11/CF-12 cleanup.
 
 ---

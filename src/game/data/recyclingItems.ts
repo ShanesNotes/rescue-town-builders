@@ -29,7 +29,9 @@ export const recyclingItems: RecyclingItem[] = [
   { id: 'apple-core', label: 'Apple core', icon: '🍎', category: 'compost', partKind: 'grow', partLabel: 'seed snack', reuseVerb: 'flower fuel' },
   { id: 'newspaper', label: 'Newspaper', icon: '📰', category: 'paper', partKind: 'sheet', partLabel: 'foldy sheet', reuseVerb: 'a kite fin' },
   { id: 'cardboard-box', label: 'Cardboard box', icon: '📦', category: 'paper', partKind: 'sheet', partLabel: 'sturdy panel', reuseVerb: 'a ramp wall' },
-  { id: 'water-bottle', label: 'Water bottle', icon: '🧴', category: 'plastic', partKind: 'tube', partLabel: 'bubble tube', reuseVerb: 'a sprinkler tank' },
+  // id aligns to the real loaded art (props/item-glass-bottle.png → hl.prop.itemGlassBottle); the
+  // old 'water-bottle' id resolved to a missing hl.prop.itemWaterBottle key and drifted to fallback (CF-10).
+  { id: 'glass-bottle', label: 'Glass bottle', icon: '🍾', category: 'plastic', partKind: 'tube', partLabel: 'bubble tube', reuseVerb: 'a sprinkler tank' },
   { id: 'yogurt-cup', label: 'Yogurt cup', icon: '🥛', category: 'plastic', partKind: 'tube', partLabel: 'scoop cup', reuseVerb: 'a tiny bucket' },
   { id: 'soup-can', label: 'Soup can', icon: '🥫', category: 'metal', partKind: 'shiny', partLabel: 'shiny drum', reuseVerb: 'a bright wheel' },
   { id: 'foil-ball', label: 'Foil ball', icon: '⚪', category: 'metal', partKind: 'shiny', partLabel: 'moon mirror', reuseVerb: 'a sparkle reflector' },
@@ -38,6 +40,17 @@ export const recyclingItems: RecyclingItem[] = [
   { id: 'paper-bag', label: 'Paper bag', icon: '🛍️', category: 'paper', partKind: 'sheet', partLabel: 'rustle sheet', reuseVerb: 'a wind sail' },
   { id: 'plastic-lid', label: 'Plastic lid', icon: '🔵', category: 'plastic', partKind: 'tube', partLabel: 'round cap', reuseVerb: 'a spinny nozzle' },
 ];
+
+// The Hearthlight texture key a recycling item's art loads from, derived from its id
+// (kebab-case → PascalCase). ONE source of truth shared by the scene's itemKeyFor and the
+// data-integrity test, so an id can never drift away from its real loaded texture again (CF-10).
+export function recyclingItemTextureKey(id: string): string {
+  const pascal = id
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+  return `hl.prop.item${pascal}`;
+}
 
 export const reuseBlueprints: ReuseBlueprint[] = [
   {

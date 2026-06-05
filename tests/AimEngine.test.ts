@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { act, createAimState, getAimResult, moveAimer, type AimTarget } from '../src/game/systems/AimEngine';
+import { act, aimHits, coneAngles, createAimState, getAimResult, moveAimer, type AimTarget } from '../src/game/systems/AimEngine';
 
 // Two targets near the start, reachable by aiming right.
 const TARGETS: AimTarget[] = [
@@ -67,6 +67,43 @@ describe('AimEngine', () => {
     expect(completed).toBe(true);
     expect(state.targets.reduce((s, t) => s + t.health, 0)).toBe(0);
     expect(sawAssist).toBe(true); // the No-Fail helper visibly stepped in at least once
+  });
+
+  it('CF-3: the drawn cone is the real hit area — what coneAngles SHOWS is exactly what aimHits HITS', () => {
+    // The scene fills coneAngles(aim) ± half clipped to range, and lights a ring / hits a target via
+    // aimHits. They must agree for EVERY direction so the child never aims by a cone that lies: a
+    // point the sector visually contains must be hittable, and one it excludes must not.
+    const range = 190;
+    for (const aim of [
+      { x: 1, y: 0 },
+      { x: -1, y: 0 },
+      { x: 0, y: 1 },
+      { x: 0, y: -1 },
+      { x: 1, y: 1 },
+      { x: -1, y: 1 },
+    ] as const) {
+      const { center, half } = coneAngles(aim);
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 24) {
+        const dx = Math.cos(a) * 120; // safely within range
+        const dy = Math.sin(a) * 120;
+        let d = a - center;
+        while (d > Math.PI) d -= Math.PI * 2;
+        while (d < -Math.PI) d += Math.PI * 2;
+        const shownInCone = Math.abs(d) < half - 1e-6; // strictly inside avoids boundary float noise
+        const shownOutOfCone = Math.abs(d) > half + 1e-6;
+        if (shownInCone) expect(aimHits(aim, dx, dy, range), `aim ${aim.x},${aim.y} shown in-cone must hit`).toBe(true);
+        if (shownOutOfCone) expect(aimHits(aim, dx, dy, range), `aim ${aim.x},${aim.y} shown out-of-cone must miss`).toBe(false);
+      }
+    }
+  });
+
+  it('CF-3: a target the cone shows in front is cleared by a single act', () => {
+    // From the start (aiming right), a target placed inside the shown sector + range is hit at once.
+    let state = createAimState([{ id: 't', x: 360, y: 260, health: 1, maxHealth: 1 }]); // dead-ahead, in range
+    expect(aimHits(state.aim, 100, 0, state.config.range)).toBe(true);
+    const out = act(state);
+    expect(out.hit).toBe(true);
+    expect(out.state.targets[0]?.health).toBe(0);
   });
 
   it('scores stars and unlocks the sticker only on completion', () => {

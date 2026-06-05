@@ -58,18 +58,25 @@ export function createHoldGate(options: HoldGateOptions): HoldGateHandle {
   hit.on('pointerup', cancel);
   hit.on('pointerout', cancel);
 
-  // Keyboard: any key DOWN starts (the gate is single-purpose), key UP cancels. keyup is what the
-  // old code already relied on; key-down to start makes keyboard a true sustained hold too.
+  // Keyboard: only the CONFIRM keys (Enter / Space) start the hold; key UP cancels (CF-9). Escape is
+  // a back intent, NOT a hold-start — it must never arm the gate. keyup is unconditional so releasing
+  // the confirm key always cancels even if another key was pressed meanwhile.
+  const isHoldKey = (key: string): boolean => key === 'Enter' || key === ' ' || key === 'Spacebar';
   const onKeyDown = (event: KeyboardEvent): void => {
     if (event.repeat) return; // auto-repeat must not re-arm; the original down already started it
+    if (!isHoldKey(event.key)) return; // Escape/arrows/etc. don't start the hold
     start();
   };
   const onKeyUp = (): void => cancel();
   scene.input.keyboard?.on('keydown', onKeyDown);
   scene.input.keyboard?.on('keyup', onKeyUp);
 
-  // Gamepad: button DOWN starts, button UP cancels (THE bypass fix — there was no up before).
-  const onPadDown = (): void => start();
+  // Gamepad: only A (button 0) starts the hold; B (button 1) is back and must NOT start it, and the
+  // d-pad must not either (CF-9). button UP cancels (the original bypass fix — there was no up before).
+  const onPadDown = (_pad: unknown, button: { index: number }): void => {
+    if (button.index !== 0) return; // only A arms the gate
+    start();
+  };
   const onPadUp = (): void => cancel();
   scene.input.gamepad?.on('down', onPadDown);
   scene.input.gamepad?.on('up', onPadUp);

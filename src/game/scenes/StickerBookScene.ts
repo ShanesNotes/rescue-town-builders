@@ -12,8 +12,14 @@ import { hasTexture, motionAllowed } from '../ui/Sprite';
 // A calm reward album. A child opens a sticker they found and a parent reads its little story
 // aloud — "read it again" is the whole point. Locked stickers sleep as gentle silhouettes,
 // never a lock-out (No-Fail). Grid + single-sticker reading page.
+type GridCell = { x: number; y: number; open: () => void };
+
 export class StickerBookScene extends Phaser.Scene {
   private readingId: string | null = null;
+  private cells: GridCell[] = []; // CF-7: keyboard/gamepad grid navigation targets
+  private gridCols = 7;
+  private gridFocus = 0;
+  private focusRing!: Phaser.GameObjects.Rectangle;
 
   constructor() {
     super('StickerBookScene');
@@ -44,12 +50,20 @@ export class StickerBookScene extends Phaser.Scene {
       testId: this.readingId ? 'stickerbook.back-to-book' : 'stickerbook.back-to-map',
     }).setDepth(40);
 
-    bindIntents(this, { onBack: () => (this.readingId ? this.scene.restart({}) : returnToTownMap(this)) });
+    const back = (): void => {
+      if (this.readingId) this.scene.restart({});
+      else returnToTownMap(this);
+    };
+    // CF-7: on the grid, keyboard/gamepad can move a visible focus ring across cells and confirm to
+    // read; the reading page has no grid, so only Back is bound there.
+    if (this.readingId) bindIntents(this, { onBack: back });
+    else bindIntents(this, { onMove: (x, y) => this.moveGridFocus(x, y), onConfirm: () => this.openFocusedCell(), onBack: back });
   }
 
   private renderGrid(owned: readonly string[], playerName: string): void {
     const stickers = getAllStickers();
     const found = stickers.filter((s) => isStickerUnlocked(s.id, owned)).length;
+    this.cells = [];
 
     this.add.rectangle(480, 296, 800, 392, 0x16243a, 0.82).setStrokeStyle(4, 0xffc857, 0.85).setDepth(2);
     this.add
@@ -70,15 +84,21 @@ export class StickerBookScene extends Phaser.Scene {
     const cellH = 116;
     const gridX = 480 - ((cols - 1) * cellW) / 2;
     const gridY = 196;
+    this.gridCols = cols;
     stickers.forEach((sticker, index) => {
       const unlocked = isStickerUnlocked(sticker.id, owned);
       const x = gridX + (index % cols) * cellW;
       const y = gridY + Math.floor(index / cols) * cellH;
-      this.stickerCell(sticker.id, sticker.icon, sticker.title, x, y, unlocked, owned);
+      const open = this.stickerCell(sticker.id, sticker.icon, sticker.title, x, y, unlocked, owned);
+      this.cells.push({ x, y, open });
     });
+
+    // CF-7: a visible focus ring for keyboard/gamepad grid navigation, hidden until the child moves.
+    this.focusRing = this.add.rectangle(0, 0, 102, 102, 0x000000, 0).setStrokeStyle(5, 0xffe27a, 1).setDepth(8).setVisible(false);
+    this.gridFocus = 0;
   }
 
-  private stickerCell(id: string, icon: string, title: string, x: number, y: number, unlocked: boolean, owned: readonly string[]): void {
+  private stickerCell(id: string, icon: string, title: string, x: number, y: number, unlocked: boolean, owned: readonly string[]): () => void {
     let frame: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle;
     if (hasTexture(this, 'hl.ui.stickerFrame')) {
       const img = this.add.image(x, y, 'hl.ui.stickerFrame').setDisplaySize(90, 90).setDepth(6);
@@ -101,6 +121,29 @@ export class StickerBookScene extends Phaser.Scene {
     // Drop the hand cursor when locked so a sleeping sticker doesn't promise a page it can't open.
     frame.setInteractive({ useHandCursor: unlocked }).on('pointerup', open);
     registerE2EButton({ testId: `stickerbook.sticker.${id}`, label: title, sceneKey: this.scene.key, press: open });
+    return open;
+  }
+
+  // CF-7: move the grid focus ring; horizontal steps within a row, vertical steps a whole row, both
+  // clamped to the catalog so the ring never leaves the grid.
+  private moveGridFocus(dx: -1 | 0 | 1, dy: -1 | 0 | 1): void {
+    if (this.cells.length === 0) return;
+    const next = this.gridFocus + dx + dy * this.gridCols;
+    if (next < 0 || next >= this.cells.length) return;
+    this.gridFocus = next;
+    this.paintGridFocus();
+  }
+
+  private paintGridFocus(): void {
+    const cell = this.cells[this.gridFocus];
+    if (!cell) return;
+    this.tweens.killTweensOf(this.focusRing);
+    this.focusRing.setPosition(cell.x, cell.y).setScale(1).setVisible(true);
+    if (motionAllowed()) this.tweens.add({ targets: this.focusRing, scale: 1.05, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+  }
+
+  private openFocusedCell(): void {
+    this.cells[this.gridFocus]?.open();
   }
 
   // A locked-cell tap is never dead (No-Fail): the sleeping question-mark gives a gentle

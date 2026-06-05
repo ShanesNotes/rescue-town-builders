@@ -75,6 +75,8 @@ call, which stays Shane's reserved nudge.
 
 **Diverse-model pass done (concurrent with Wave 7):** Codex independent final-QA (read-only, `/tmp/codex-finalqa.md`) — *no new P0; touch-only is ship-ready; flags a keyboard/gamepad focus/input-lock parity cluster (5 P1s) + a truthful-aim-cone fix before "final" with non-touch input.* Grok produced the spoken-VO script + copy polish (`/home/ark/rtb-grok/docs/design/voice-and-copy.md`).
 
-**Next:** Wave 8 — Input parity & truthfulness (Codex CF-1..CF-10): overlay input-lock, House/Match keyboard focus, truthful Aim cone, Match alpha-reset, reward keyboard nav, parent-gate hold-key, water-bottle asset. Then Wave 9 — Wow-factor (P4-01 living diorama, P4-02 Grok-scripted VO, P4-03 aim direct-touch) + CF cleanup. Then surface the merge-to-`main` ship decision for Shane.
+| 8 | Input parity & truthfulness (Codex final-QA CF-1..10): overlay input-lock, House confirm-glowing-part, **truthful Aim cone** (engine+view one source of truth, shown===hittable), Match alpha-reset + focus ring, reward keyboard nav, parent-gate hold-key (Enter/Space/A only), water-bottle→glass-bottle asset fix; +3 tests | 8 | typecheck✓ test✓(133) build✓ e2e✓(6) | (this commit) |
+
+**Next:** Wave 9 — Wow-factor: P4-01 living-diorama town growth (the single biggest swing) + CF-11 secret copy + CF-12 audio status. Then Wave 10 — P4-02 Grok-scripted spoken VO (Web Speech, parent-toggle) + P4-03 aim direct-touch + CF-8 pointerup hardening. Then the final summary + merge-to-`main` ship decision for Shane.
 
 **Multi-model engagement (per wave):** Codex (workspace-write, `/home/ark/rtb-codex`) → asset payoffs Waves 6+ (invention sprites, helper drone, house accents, diorama props) + independent re-audit. Grok (`/home/ark/rtb-grok`) → onboarding microcopy (Wave 3) + VO script (Wave 8). Claude owns all scene/system mechanics.

@@ -7,6 +7,7 @@ import { registerE2EButton } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
+import { isOverlayOpen } from '../systems/overlayLock';
 import { chooseMatch, createMatchState, getMatchResult, type MatchState } from '../systems/MatchEngine';
 import type { MatchPayoff } from '../data/matchMissions';
 import { addIconButton } from '../ui/Button';
@@ -41,6 +42,7 @@ export class MatchMissionScene extends Phaser.Scene {
   private prompt!: Phaser.GameObjects.Image;
   private promptBase = 1;
   private targets: TargetView[] = [];
+  private focusRing!: Phaser.GameObjects.Rectangle; // CF-5: visible keyboard/gamepad selection
   private pips: Phaser.GameObjects.Arc[] = [];
   private hint!: Phaser.GameObjects.Text;
   private selected = 0;
@@ -93,6 +95,9 @@ export class MatchMissionScene extends Phaser.Scene {
       : null;
 
     this.buildTargets(cfg.targets, cfg.shuffleTargets ?? false);
+    // CF-5: a visible focus ring so a keyboard/gamepad child sees which target is selected. Hidden
+    // until they actually move with arrows/d-pad (pointer/touch never needs it).
+    this.focusRing = this.add.rectangle(0, 446, 182, 172, 0x000000, 0).setStrokeStyle(6, 0xffe27a, 1).setDepth(12).setVisible(false);
     this.payoff = cfg.payoff ?? null;
     if (cfg.recipeBowl) this.buildRecipeBowl(cfg.prompts.length);
 
@@ -110,9 +115,9 @@ export class MatchMissionScene extends Phaser.Scene {
     addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => this.requestExit(), testId: `${this.missionId}.back-to-map` }).setDepth(40);
 
     bindIntents(this, {
-      onMove: (x, y) => this.moveSelection(x || y),
-      onConfirm: () => !isMissionExitOpen(this) && this.attempt(this.targets[this.selected]?.id),
-      onBack: () => this.requestExit(),
+      onMove: (x, y) => !this.overlayBusy() && this.moveSelection(x || y),
+      onConfirm: () => !this.overlayBusy() && this.attempt(this.targets[this.selected]?.id),
+      onBack: () => !isOverlayOpen(this) && this.requestExit(),
     });
 
     this.loadPrompt();
@@ -284,6 +289,7 @@ export class MatchMissionScene extends Phaser.Scene {
 
     getSfx().play(outcome.autoResolved ? 'place' : 'correct');
     this.hint.setText('');
+    this.resetPanels(); // CF-4: a successful resolve restores any escalation-dimmed valid choices
     this.updatePips();
     // The just-resolved prompt's correct target is the one BEFORE the new currentIndex.
     const resolvedTargetId = this.state.prompts[this.state.currentIndex - 1]?.correctTargetId;
@@ -348,7 +354,7 @@ export class MatchMissionScene extends Phaser.Scene {
   // sparkle, then the helper waves home — the child sees a friend solve it for them, never a fail.
   private helperAssist(target: TargetView | undefined, completed: boolean): void {
     this.busy = true; // lock input until the answer is fully placed
-    this.targets.forEach((t) => t.panel.setAlpha(1)); // undo any escalation dimming
+    this.resetPanels(); // CF-4: undo any escalation dimming on panels AND icons
     if (this.payoff?.kind === 'pour') this.fillRecipeBowl(); // keep the recipe bowl rising even on a No-Fail assist
     const finish = (): void => {
       this.busy = false;
@@ -417,6 +423,7 @@ export class MatchMissionScene extends Phaser.Scene {
       completeMission(this, getMatchResult(this.state, this.missionId, this.stickerId));
       return;
     }
+    this.resetPanels(); // CF-4: every new prompt starts with all valid choices at full brightness
     this.prompt.setTexture(current.icon).setDisplaySize(104, 104).setPosition(HOME.x, HOME.y).setAngle(0).setDepth(30).setVisible(true);
     this.promptBase = this.prompt.scale;
     this.telegraph(current.correctTargetId);
@@ -432,6 +439,20 @@ export class MatchMissionScene extends Phaser.Scene {
       t.glow.setAlpha(0);
       if (t.id === targetId && motionAllowed()) this.tweens.add({ targets: t.glow, alpha: 0.22, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
       else if (t.id === targetId) t.glow.setAlpha(0.18);
+    });
+  }
+
+  // CF-4: the assist-escalation dims wrong panels/icons; a resolve or the next prompt must restore
+  // EVERY panel + icon to full so a valid choice is never left stranded dim. Kills any lingering dim
+  // tween first so it can't fade a panel back down after we've reset it.
+  private resetPanels(): void {
+    this.targets.forEach((t) => {
+      this.tweens.killTweensOf(t.panel);
+      t.panel.setAlpha(1);
+      if (t.icon) {
+        this.tweens.killTweensOf(t.icon);
+        t.icon.setAlpha(1);
+      }
     });
   }
 
@@ -454,6 +475,26 @@ export class MatchMissionScene extends Phaser.Scene {
   private moveSelection(delta: number): void {
     if (!delta || this.done) return;
     this.selected = Math.max(0, Math.min(this.targets.length - 1, this.selected + delta));
+    this.paintFocus();
+  }
+
+  // CF-5: ring the currently-selected target (mirrors the shared ChoiceModal focus-ring pattern) so
+  // keyboard/gamepad selection is never invisible. Pulses gently when motion is allowed.
+  private paintFocus(): void {
+    const target = this.targets[this.selected];
+    if (!target) {
+      this.focusRing.setVisible(false);
+      return;
+    }
+    this.tweens.killTweensOf(this.focusRing);
+    this.focusRing.setPosition(target.x, 446).setScale(1).setVisible(true);
+    if (motionAllowed()) this.tweens.add({ targets: this.focusRing, scale: 1.05, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+  }
+
+  // CF-1: ignore confirm/move while the intro veil covers the board or the exit modal is up — a
+  // keyboard/gamepad press must never resolve a match the child can't see.
+  private overlayBusy(): boolean {
+    return isMissionExitOpen(this) || isOverlayOpen(this);
   }
 
   private requestExit(): void {

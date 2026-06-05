@@ -6,7 +6,8 @@ import { bindIntents } from '../systems/bindIntents';
 import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
-import { act, createAimState, getAimResult, moveAimer, type AimState, type AimVec } from '../systems/AimEngine';
+import { isOverlayOpen } from '../systems/overlayLock';
+import { act, aimHits, coneAngles, createAimState, getAimResult, moveAimer, type AimState, type AimVec } from '../systems/AimEngine';
 import { addIconButton } from '../ui/Button';
 import { FONTS } from '../ui/typography';
 import { hasTexture, motionAllowed } from '../ui/Sprite';
@@ -92,9 +93,9 @@ export class AimMissionScene extends Phaser.Scene {
     this.buildControls();
 
     bindIntents(this, {
-      onMove: (x, y) => this.move({ x, y }),
-      onConfirm: () => !isMissionExitOpen(this) && this.doAct(),
-      onBack: () => this.requestExit(),
+      onMove: (x, y) => !this.overlayBusy() && this.move({ x, y }),
+      onConfirm: () => !this.overlayBusy() && this.doAct(),
+      onBack: () => !isOverlayOpen(this) && this.requestExit(),
     });
 
     this.renderTargets();
@@ -117,7 +118,8 @@ export class AimMissionScene extends Phaser.Scene {
     const angle = Math.atan2(this.state.aim.y, this.state.aim.x);
     this.beam.setPosition(x, y - 30).setRotation(angle);
     this.groundArrow.setPosition(x + this.state.aim.x * 30, y + 30 + this.state.aim.y * 14).setRotation(angle + Math.PI / 2);
-    this.drawCone(x, y - 30, angle);
+    // Apex at the engine's measure-from point (state.player) so the drawn sector === the hit area.
+    this.drawCone(x, y);
     this.updateTargetRings();
     if (animate && motionAllowed()) {
       this.tweens.add({ targets: this.hero, x, y: y + 34, duration: 200, ease: 'Quad.easeOut' });
@@ -128,35 +130,24 @@ export class AimMissionScene extends Phaser.Scene {
     }
   }
 
-  // A bold filled cone (P3-05) from the hero in the aim direction — the child's clear "aim here".
-  private drawCone(ox: number, oy: number, angle: number): void {
-    const half = Math.PI / 5; // ~36° half-spread, generous so it reads from across the room
+  // The bold filled cone (P3-05, CF-3): the EXACT hittable sector from AimEngine.coneAngles, clipped
+  // to range. A horizontal aim fills a 180° half-disc, a diagonal a 90° quadrant — so the child sees
+  // precisely the area an Act will clear, never a narrow wedge that lies.
+  private drawCone(ox: number, oy: number): void {
+    const { center, half } = coneAngles(this.state.aim);
     const r = this.coneRange;
-    const ax = ox + Math.cos(angle - half) * r;
-    const ay = oy + Math.sin(angle - half) * r;
-    const bx = ox + Math.cos(angle + half) * r;
-    const by = oy + Math.sin(angle + half) * r;
     this.cone.clear();
     this.cone.fillStyle(this.coneColor, 0.6).lineStyle(3, this.coneColor, 0.85);
-    this.cone.beginPath();
-    this.cone.moveTo(ox, oy);
-    this.cone.lineTo(ax, ay);
-    this.cone.lineTo(bx, by);
-    this.cone.closePath();
+    this.cone.slice(ox, oy, r, center - half, center + half, false);
     this.cone.fillPath();
     this.cone.strokePath();
   }
 
-  // Mirror of AimEngine.inCone: live + within range + aim sign matches. Drives the pulsing rings.
+  // Drives the pulsing rings off the engine's ONE source of truth (CF-3): a ring lights exactly when
+  // an Act would hit that live target.
   private inConeView(t: { x: number; y: number; health: number }): boolean {
     if (t.health <= 0) return false;
-    const dx = t.x - this.state.player.x;
-    const dy = t.y - this.state.player.y;
-    if (Math.hypot(dx, dy) > this.coneRange) return false;
-    const a = this.state.aim;
-    const hOk = a.x === 0 || Math.sign(dx) === a.x;
-    const vOk = a.y === 0 || Math.sign(dy) === a.y;
-    return hOk && vOk;
+    return aimHits(this.state.aim, t.x - this.state.player.x, t.y - this.state.player.y, this.coneRange);
   }
 
   private updateTargetRings(): void {
@@ -366,6 +357,11 @@ export class AimMissionScene extends Phaser.Scene {
     const coin = addIconButton(this, { x, y, size: 56, key: '__arrow__', onPress: () => !isMissionExitOpen(this) && this.move(dir), testId });
     coin.add(this.add.text(0, 0, glyph, { fontFamily: FONTS.display, fontSize: '34px', color: '#2A1606', fontStyle: 'bold' }).setOrigin(0.5));
     coin.setDepth(40);
+  }
+
+  // CF-1: ignore confirm/move intents while the intro veil covers the field or the exit modal is up.
+  private overlayBusy(): boolean {
+    return isMissionExitOpen(this) || isOverlayOpen(this);
   }
 
   private requestExit(): void {

@@ -176,12 +176,29 @@ function maybeAssist(state: AimState): AimState {
 }
 
 function inCone(state: AimState, target: AimTarget): boolean {
-  const dx = target.x - state.player.x;
-  const dy = target.y - state.player.y;
-  if (Math.hypot(dx, dy) > state.config.range) return false;
-  const horizontalOk = state.aim.x === 0 || Math.sign(dx) === state.aim.x;
-  const verticalOk = state.aim.y === 0 || Math.sign(dy) === state.aim.y;
+  return aimHits(state.aim, target.x - state.player.x, target.y - state.player.y, state.config.range);
+}
+
+// ONE source of truth for "what an Act hits" (P1 CF-3). A target is hit when it is live + within
+// range + on the aim side of each constrained axis (the half-plane the aim sign selects). The drawn
+// cone/ring in AimMissionScene call THIS + coneAngles below, so what the child SEES is exactly what
+// HITS — never a cone that lies.
+export function aimHits(aim: AimVec, dx: number, dy: number, range: number): boolean {
+  if (Math.hypot(dx, dy) > range) return false;
+  const horizontalOk = aim.x === 0 || Math.sign(dx) === aim.x;
+  const verticalOk = aim.y === 0 || Math.sign(dy) === aim.y;
   return horizontalOk && verticalOk;
+}
+
+// The angular sector (start..end radians, sweeping the SHORT way) the aim sign-logic admits — the
+// exact arc the visual cone must fill so it matches aimHits. Horizontal-only aim → a 180° half-disc
+// on that side; a diagonal → the 90° quadrant; etc. Always the bisector ± half the spread.
+export function coneAngles(aim: AimVec): { center: number; half: number } {
+  const center = Math.atan2(aim.y, aim.x);
+  // One constrained axis → half-plane (±90°); both axes constrained → quadrant (±45°).
+  const constrained = (aim.x !== 0 ? 1 : 0) + (aim.y !== 0 ? 1 : 0);
+  const half = constrained >= 2 ? Math.PI / 4 : Math.PI / 2;
+  return { center, half };
 }
 
 function withCompletion(state: AimState): AimState {

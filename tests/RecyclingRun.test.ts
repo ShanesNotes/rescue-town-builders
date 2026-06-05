@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { recyclingItems, reuseBlueprints } from '../src/game/data/recyclingItems';
+import { recyclingItems, recyclingItemTextureKey, reuseBlueprints } from '../src/game/data/recyclingItems';
+import { HEARTHLIGHT_IMAGE_ASSETS } from '../src/game/data/hearthlightAssets';
 import {
   chooseRecyclingItems,
   chooseReuseBlueprints,
@@ -22,6 +23,14 @@ describe('RecyclingRun reuse workshop', () => {
       new Set(['soft', 'sheet', 'tube', 'shiny', 'grow']),
     );
     expect(recyclingItems.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('CF-10: every recycling item resolves to a real loaded Hearthlight texture (no fallback drift)', () => {
+    const loadedKeys = new Set<string>(HEARTHLIGHT_IMAGE_ASSETS.map((asset) => asset.key));
+    for (const item of recyclingItems) {
+      const key = recyclingItemTextureKey(item.id);
+      expect(loadedKeys.has(key), `${item.id} → ${key} must be a loaded texture, not a fallback`).toBe(true);
+    }
   });
 
   it('selects invention part kinds by child-friendly difficulty', () => {

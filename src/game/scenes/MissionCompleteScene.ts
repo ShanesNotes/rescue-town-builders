@@ -97,8 +97,9 @@ export class MissionCompleteScene extends Phaser.Scene {
     // The rescued hero, bounding in happy (left of centre).
     if (mission) this.heroEntrance(`hl.char.${mission.characterId}`, 352, 408);
 
-    // The new sticker pops after the stars (right of centre).
-    this.stickerReveal(this.result.stickersUnlocked, celebration.starCount, 666, 318);
+    // The new sticker pops after the stars (right of centre). Returns the open-reading callback when
+    // there's a sticker to read, so the keyboard/gamepad focus model can offer it (CF-7).
+    const openReading = this.stickerReveal(this.result.stickersUnlocked, celebration.starCount, 666, 318);
 
     // Warm celebration line (No-Fail: every finish is full joy).
     this.add
@@ -126,7 +127,33 @@ export class MissionCompleteScene extends Phaser.Scene {
       this.cameras.main.zoomTo(1, 360, 'Sine.easeOut');
     }
 
-    bindIntents(this, { onConfirm: goHome, onBack: goHome });
+    // CF-7: a keyboard/gamepad two-choice model — Read Sticker (when one was earned) / Town — with a
+    // visible focus ring + confirm. Back always goes to Town. Pointer/touch is unchanged.
+    type CompleteChoice = { x: number; y: number; w: number; h: number; act: () => void };
+    const choices: CompleteChoice[] = [];
+    if (openReading) choices.push({ x: 666, y: 318, w: 132, h: 200, act: openReading });
+    choices.push({ x: 850, y: 500, w: 96, h: 116, act: goHome });
+
+    const ring = this.add.rectangle(0, 0, 10, 10, 0x000000, 0).setStrokeStyle(6, 0xffe27a, 1).setDepth(31).setVisible(false);
+    let choiceFocus = 0; // default focus: read the new sticker if present, else Town
+    const paintFocus = (): void => {
+      const c = choices[choiceFocus];
+      if (!c) return;
+      this.tweens.killTweensOf(ring);
+      ring.setPosition(c.x, c.y).setSize(c.w, c.h).setScale(1).setVisible(true);
+      if (motionAllowed()) this.tweens.add({ targets: ring, scale: 1.05, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    };
+    const moveFocus = (delta: number): void => {
+      if (!delta || choices.length < 2) return;
+      choiceFocus = (choiceFocus + delta + choices.length) % choices.length;
+      paintFocus();
+    };
+
+    bindIntents(this, {
+      onMove: (x, y) => moveFocus(x || y),
+      onConfirm: () => choices[choiceFocus]?.act(),
+      onBack: goHome,
+    });
   }
 
   private paintWorld(bgKey: string): void {
@@ -172,9 +199,11 @@ export class MissionCompleteScene extends Phaser.Scene {
     }
   }
 
-  private stickerReveal(stickerIds: string[], starCount: number, x: number, y: number): void {
+  // Returns the open-reading callback so the keyboard/gamepad focus model can offer "Read Sticker",
+  // or null when no sticker was earned (CF-7).
+  private stickerReveal(stickerIds: string[], starCount: number, x: number, y: number): (() => void) | null {
     const id = stickerIds[0];
-    if (!id) return;
+    if (!id) return null;
     const def = STICKER_DEFINITIONS.find((s) => s.id === id);
     const delay = 260 + starCount * 240 + 220;
     // Show the ACTUAL sticker just earned (frame + its real icon), so the payoff has its subject.
@@ -189,7 +218,7 @@ export class MissionCompleteScene extends Phaser.Scene {
     const openReading = (): void => startStickerBook(this, id);
     frame.setInteractive({ useHandCursor: true }).on('pointerup', openReading);
     registerE2EButton({ testId: 'mission.complete.read-sticker', label: def?.title ?? 'New sticker', sceneKey: this.scene.key, press: openReading });
-    if (!motionAllowed()) return;
+    if (!motionAllowed()) return openReading;
     // Pop each in to its OWN base display-scale (images keep their setDisplaySize size).
     const items: Array<{ o: Phaser.GameObjects.Image | Phaser.GameObjects.Text; base: number }> = [
       { o: frame, base: frame.scale },
@@ -201,6 +230,7 @@ export class MissionCompleteScene extends Phaser.Scene {
       this.tweens.add({ targets: o, scale: base, ease: 'Back.easeOut', duration: 420, delay, onStart: i === 0 ? () => getSfx().play('sticker') : undefined });
     });
     this.tweens.add({ targets: [frame, ...(icon ? [icon] : [])], angle: { from: -5, to: 5 }, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: delay + 420 });
+    return openReading;
   }
 
   private sparkle(x: number, y: number): void {

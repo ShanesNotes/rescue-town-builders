@@ -1,12 +1,13 @@
 import Phaser from 'phaser';
 import { fadeInScene } from '../systems/SceneTransitions';
-import { recyclingItems, reuseBlueprints, reusePartKindLabels } from '../data/recyclingItems';
+import { recyclingItems, recyclingItemTextureKey, reuseBlueprints, reusePartKindLabels } from '../data/recyclingItems';
 import { getSaveSystem, getSfx } from '../systems/GameServices';
 import { bindIntents } from '../systems/bindIntents';
 import { registerE2EButton } from '../systems/E2EBridge';
 import { Juice } from '../systems/Juice';
 import { completeMission, returnToTownMap } from '../systems/SceneNavigation';
 import { confirmMissionExit, isMissionExitOpen } from '../systems/confirmMissionExit';
+import { isOverlayOpen } from '../systems/overlayLock';
 import {
   chooseRecyclingItems,
   chooseReuseBlueprints,
@@ -99,9 +100,9 @@ export class RecyclingRunScene extends Phaser.Scene {
     addIconButton(this, { x: 52, y: 46, size: 56, key: 'hl.ui.back', onPress: () => this.requestExit(), testId: 'recycling.back-to-map' }).setDepth(60);
 
     bindIntents(this, {
-      onMove: (x, y) => this.moveSelection(x || y),
-      onConfirm: () => !isMissionExitOpen(this) && this.attemptChoice(this.state.choices[this.selected]?.id),
-      onBack: () => this.requestExit(),
+      onMove: (x, y) => !this.overlayBusy() && this.moveSelection(x || y),
+      onConfirm: () => !this.overlayBusy() && this.attemptChoice(this.state.choices[this.selected]?.id),
+      onBack: () => !isOverlayOpen(this) && this.requestExit(),
     });
 
     this.renderWorkshop();
@@ -305,8 +306,7 @@ export class RecyclingRunScene extends Phaser.Scene {
   }
 
   private itemKeyFor(item: { id: string; category: RecyclingItem['category'] }): string {
-    const pascal = item.id.split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
-    const hl = `hl.prop.item${pascal}`;
+    const hl = recyclingItemTextureKey(item.id);
     return hasTexture(this, hl) ? hl : FALLBACK_ITEM_KEY[item.category];
   }
 
@@ -314,6 +314,11 @@ export class RecyclingRunScene extends Phaser.Scene {
     if (!delta || this.done) return;
     this.selected = Math.max(0, Math.min(this.state.choices.length - 1, this.selected + delta));
     this.renderChoiceCards();
+  }
+
+  // CF-1: ignore confirm/move intents while the intro veil covers the workshop or the exit modal is up.
+  private overlayBusy(): boolean {
+    return isMissionExitOpen(this) || isOverlayOpen(this);
   }
 
   private requestExit(): void {
