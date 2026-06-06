@@ -22,3 +22,6 @@ playwright-report/
 
 # OMX runtime metrics
 .omx/metrics.json
+
+# Claude Code runtime lock
+.claude/scheduled_tasks.lock
